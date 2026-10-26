@@ -49,3 +49,14 @@ test('close button closes the tray and removes c', async ({ page }) => {
   await expect(page).not.toHaveURL(/c=/);
   await expect(page).toHaveURL(/q=all/);
 });
+
+test('the compare tray shows plain labels, no checklist codes', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 }); await page.goto('/');
+  await expect(page.getByTestId('contractors')).toHaveAttribute('data-hydrated', '');
+  await page.getByRole('button', compare('JV-ECH (Port T1)')).click();
+  await page.getByRole('button', compare('PPCO')).click();
+  const tray = page.getByTestId('compare-tray');
+  await expect(tray.getByTestId('compare-column')).toHaveCount(2);
+  await expect(tray.getByTestId('compare-repeat').first()).toBeVisible();
+  expect(await tray.textContent()).not.toMatch(/\b[ABC]\d+(\.\d+)?\b/);
+});

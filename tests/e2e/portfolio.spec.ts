@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { highRiskCount, regionComparison, systemicRepeats } from '../../lib/analytics';
+import { filterAudits, highRiskCount, regionComparison, systemicRepeats } from '../../lib/analytics';
 
 const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
 import { pct } from '../../lib/format';
@@ -94,37 +94,48 @@ test('the high-risk tile opens Documents with the filter', async ({ page }) => {
   await expect(page.getByTestId('carousel')).toBeVisible();
 });
 
-test('repeats card: questions repeating at ≥5 contractors, with a dot row per top issue', async ({ page }) => {
+test('repeats card: questions repeating at ≥5 contractors, with a stacked bar of how widespread', async ({ page }) => {
   const rows = systemicRepeats(getRepo(), ALL);
   expect(rows).toHaveLength(28);
+  const reaches = [...new Set(rows.map((r) => r.contractorCount))].sort((a, b) => b - a);
   await page.goto('/');
   const card = page.getByTestId('kpi-repeats');
   await expect(card.getByTestId('repeats-count')).toHaveText('28');
   await expect(card).toContainText('questions repeating');
   await expect(card.getByTestId('repeat-row')).toHaveCount(0);
-  await expect(card.getByRole('img', { name: /^Top 5 repeating issues across contractors/ })).toBeVisible();
-  const dotRows = card.getByTestId('repeats-dot-row');
-  await expect(dotRows).toHaveCount(5);
-  for (const [i, r] of rows.slice(0, 5).entries()) {
-    await expect(dotRows.nth(i).locator('span')).toHaveCount(r.eligibleContractors);
-    await expect(dotRows.nth(i).locator('span[data-filled]')).toHaveCount(r.contractorCount);
+  const segs = card.getByTestId('repeats-segment');
+  await expect(segs).toHaveCount(reaches.length);
+  const labels = card.getByTestId('repeats-segment-label');
+  let total = 0;
+  for (const [k, reach] of reaches.entries()) {
+    const n = rows.filter((r) => r.contractorCount === reach).length;
+    total += n;
+    await expect(segs.nth(k)).toHaveAttribute('data-reach', String(reach));
+    await expect(segs.nth(k)).toHaveAttribute('data-questions', String(n));
+    await expect(labels.nth(k)).toHaveText(`${n} · ${reach === 7 ? 'all 7' : `${reach} of 7`}`);
   }
+  expect(total).toBe(28);
   // no earlier quarter: "—" and no infographic
   await page.goto('/?q=Q4-2025&r=SR1,SR2');
   await expect(card.getByTestId('repeats-count')).toHaveText('—');
-  await expect(card.getByTestId('repeats-dots')).toHaveCount(0);
+  await expect(card.getByTestId('repeats-spread')).toHaveCount(0);
 });
 
-test('high-risk card: number, label and a Q4 vs Q1 two-bar, no caption sentence', async ({ page }) => {
+test('high-risk card: total, label and per-audit bars (one bar for a single quarter)', async ({ page }) => {
+  const repo = getRepo();
+  const rate = (quarter: 'Q4-2025' | 'Q1-2026') => (highRiskCount(repo, { ...ALL, quarter }) / filterAudits(repo, { ...ALL, quarter }).length).toFixed(1);
   await page.goto('/');
   const card = page.getByTestId('kpi-highrisk');
+  await expect(card).toContainText(String(highRiskCount(repo, ALL)));
   await expect(card).toContainText('high-risk findings');
   await expect(card).not.toContainText(/Permits, lifting/);
   await expect(card.getByTestId('highrisk-bar')).toHaveCount(2);
-  const q = (quarter: 'Q4-2025' | 'Q1-2026') => highRiskCount(getRepo(), { ...ALL, quarter });
-  await expect(card.getByTestId('highrisk-bars')).toHaveAttribute('aria-label', `Q4 2025: ${q('Q4-2025')}, Q1 2026: ${q('Q1-2026')}`);
-  await expect(card.getByTestId('highrisk-bars')).toContainText('Q4');
-  await expect(card.getByTestId('highrisk-bars')).toContainText('Q1');
+  await expect(card.getByTestId('highrisk-rate')).toHaveText([rate('Q4-2025'), rate('Q1-2026')]);
+  await expect(card).toContainText('per audit');
+  await expect(card.getByTestId('highrisk-bars')).toHaveAttribute('aria-label', `Findings per audit: Q4 2025 ${rate('Q4-2025')}, Q1 2026 ${rate('Q1-2026')}`);
+  await page.goto('/?q=Q1-2026&r=SR1,SR2');
+  await expect(card.getByTestId('highrisk-bar')).toHaveCount(1);
+  await expect(card.getByTestId('highrisk-rate')).toHaveText([rate('Q1-2026')]);
 });
 
 test('main problem reads "score lost" beside the %', async ({ page }) => {

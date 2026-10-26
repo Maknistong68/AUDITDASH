@@ -378,6 +378,15 @@ export interface SystemicRepeat {
  * contractorCount desc, then topIssues-style impact (hits x (1 - mean subsection score)), then code.
  */
 export function systemicRepeats(repo: Repo, filter: Filter, minContractors = 5): SystemicRepeat[] {
+  return rankedSystemicRepeats(repo, filter, minContractors).map((r) => {
+    const { impact, ...out } = r;
+    void impact;
+    return out;
+  });
+}
+
+/** systemicRepeats with each row's ranking impact (audits noted × mean score lost); exported for tests. */
+export function rankedSystemicRepeats(repo: Repo, filter: Filter, minContractors = 5): (SystemicRepeat & { impact: number })[] {
   const repeats = repeatFindings(repo, filter);
   if (!repeats.length) return [];
   const pool = select(repo, filter, 'all');
@@ -408,11 +417,7 @@ export function systemicRepeats(repo: Repo, filter: Filter, minContractors = 5):
     });
   }
   rows.sort((a, b) => b.contractorCount - a.contractorCount || b.impact - a.impact || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
-  return rows.map((r) => {
-    const { impact, ...out } = r;
-    void impact;
-    return out;
-  });
+  return rows;
 }
 
 /** High-risk (B4/B5 items, keyword site findings) non-positive observations over filtered audits, N/A subsections excluded. */

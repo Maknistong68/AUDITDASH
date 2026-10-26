@@ -214,7 +214,7 @@ test('a Q4 contractor row opens the contractor on that Q4 audit (same score)', a
 test('the Q4 main-problem tile opens its category on Q4 with the same gap and item anchors', async ({ page }) => {
   await page.goto('/?q=Q4-2025&r=SR1%2CSR2');
   const link = page.getByTestId('main-problem').getByRole('link');
-  const gap = /gap (\d+)%/.exec((await link.getAttribute('aria-label'))!)![1];
+  const gap = /(\d+)% score lost/.exec((await link.getAttribute('aria-label'))!)![1];
   await link.click();
   await expect(page).toHaveURL(/\/category\/[a-z]+\?q=Q4-2025/);
   await ready(page);

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { getRepo } from '@/lib/data/repo';
-import { systemicRepeats } from '@/lib/analytics';
+import { rankedSystemicRepeats, systemicRepeats } from '@/lib/analytics';
 import type { Filter } from '@/lib/types';
 
 const repo = getRepo();
@@ -24,8 +24,17 @@ describe('systemicRepeats', () => {
     for (const r of rows) expect(r.eligibleContractors).toBe(7);
   });
 
-  test('sorted by contractorCount desc and contractors by name', () => {
-    for (let i = 1; i < rows.length; i++) expect(rows[i - 1].contractorCount).toBeGreaterThanOrEqual(rows[i].contractorCount);
+  test('sorted by contractorCount desc, then impact desc, then code (numeric); contractors by name', () => {
+    const ranked = rankedSystemicRepeats(repo, ALL);
+    expect(ranked.map((r) => r.itemCode)).toEqual(rows.map((r) => r.itemCode));
+    for (let i = 1; i < ranked.length; i++) {
+      const [a, b] = [ranked[i - 1], ranked[i]];
+      expect(a.contractorCount).toBeGreaterThanOrEqual(b.contractorCount);
+      if (a.contractorCount === b.contractorCount) expect(a.impact).toBeGreaterThanOrEqual(b.impact);
+      if (a.contractorCount === b.contractorCount && a.impact === b.impact) {
+        expect(a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true })).toBeLessThan(0);
+      }
+    }
     for (const r of rows) {
       const names = r.contractors.map((c) => c.name);
       expect(names).toEqual([...names].sort((a, b) => a.localeCompare(b)));
@@ -40,9 +49,14 @@ describe('systemicRepeats', () => {
 
   test('regions SR2 respected', () => {
     const sr2 = new Set(repo.contractors().filter((c) => c.subregion === 'SR2').map((c) => c.id));
-    const out = systemicRepeats(repo, { quarter: 'all', regions: ['SR2'] });
-    expect(out.length).toBeLessThanOrEqual(rows.length);
-    for (const r of out) for (const c of r.contractors) expect(sr2.has(c.id)).toBe(true);
+    // SR2 has only 3 contractors: the default (>= 5) can never match.
+    expect(systemicRepeats(repo, { quarter: 'all', regions: ['SR2'] })).toEqual([]);
+    const out = systemicRepeats(repo, { quarter: 'all', regions: ['SR2'] }, 2);
+    expect(out.length).toBeGreaterThan(0);
+    for (const r of out) {
+      for (const c of r.contractors) expect(sr2.has(c.id)).toBe(true);
+      expect(r.eligibleContractors).toBeLessThanOrEqual(3);
+    }
   });
 
   test('labels are non-empty and contain no codes', () => {

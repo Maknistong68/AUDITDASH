@@ -45,9 +45,16 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   const problem = empty ? null : mainProblem(repo, filter);
   // Questions repeating at ≥5 contractors; needs an earlier quarter (null → "—").
   const repeats = filter.quarter === 'Q4-2025' || empty ? null : systemicRepeats(repo, filter);
-  const topRepeats = (repeats ?? []).slice(0, 5).map((r) => ({ itemCode: r.itemCode, hit: r.contractorCount, of: r.eligibleContractors }));
+  // How widespread the repeats are: number of questions per reach (contractors hit), widest first.
+  const spread = [...new Set((repeats ?? []).map((r) => r.contractorCount))]
+    .sort((a, b) => b - a)
+    .map((reach) => ({ reach, of: repeats![0].eligibleContractors, questions: repeats!.filter((r) => r.contractorCount === reach).length }));
   const query = filterToQuery(filter);
-  const highRiskByQuarter = QUARTERS.map((q) => ({ quarter: q, count: empty ? 0 : highRiskCount(repo, { ...filter, quarter: q }) }));
+  // High-risk findings per audit, per quarter shown (one bar under a single-quarter filter).
+  const highRiskByQuarter = empty ? [] : (filter.quarter === 'all' ? QUARTERS : [filter.quarter]).map((q) => {
+    const audits = filterAudits(repo, { ...filter, quarter: q }).length;
+    return { quarter: q, count: highRiskCount(repo, { ...filter, quarter: q }), audits };
+  }).filter((q) => q.audits > 0);
   const byQuarter = QUARTERS.map((q) => ({ label: q.replace('-', ' '), value: portfolioSummary(repo, { ...filter, quarter: q }).avgScore }));
 
   return (
@@ -76,7 +83,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                     />
                   )}
                   <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} />
-                  <RepeatsCard repeats={repeats ? repeats.length : null} top={topRepeats} />
+                  <RepeatsCard repeats={repeats ? repeats.length : null} spread={spread} />
                   <HighRiskCard count={highRiskCount(repo, filter)} byQuarter={highRiskByQuarter} href={href('/category/documents', query)} />
                   <BandsCard bands={bandDistribution(repo, filter)} />
                   <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} />

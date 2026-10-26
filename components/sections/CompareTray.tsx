@@ -6,6 +6,7 @@ import { SectionBars } from '@/components/charts/SectionBars';
 import { CATEGORIES, categoryById } from '@/lib/categories';
 import { bestWorst, MAX_COMPARE } from '@/lib/compare';
 import { bandShort, bandTone, pct, prevQuarterShort } from '@/lib/format';
+import { itemLabel } from '@/lib/itemLabels';
 import type { ContractorCard as Card } from '@/lib/analytics';
 import type { CategoryId } from '@/lib/types';
 import { Delta } from '@/components/bento/ContractorsCard';
@@ -180,9 +181,8 @@ export function CompareTray({
                       {[0, 1, 2].map((k) => {
                         const r = e.topRepeats[k];
                         return r ? (
-                          <p key={k} className="flex min-w-0 items-baseline gap-2 py-[3px] text-[13px]" title={`${r.itemCode} · ${r.question}`}>
-                            <span className="num shrink-0 rounded-md bg-fill px-1.5 text-[12px] font-semibold text-muted">{r.itemCode}</span>
-                            <span className="truncate">{r.question}</span>
+                          <p key={k} data-testid="compare-repeat" className="flex min-w-0 items-baseline gap-2 py-[3px] text-[13px]" title={itemLabel(r.itemCode, r.question)}>
+                            <span className="truncate">{itemLabel(r.itemCode, r.question)}</span>
                           </p>
                         ) : (
                           <span key={k} />

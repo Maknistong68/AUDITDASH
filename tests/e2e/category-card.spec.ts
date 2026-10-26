@@ -47,7 +47,7 @@ test('clicking the dashboard Main problem card lands on its category, the active
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
   const link = page.getByTestId('main-problem').getByRole('link');
-  const gap = /gap (\d+)%/.exec((await link.getAttribute('aria-label'))!)![1];
+  const gap = /(\d+)% score lost/.exec((await link.getAttribute('aria-label'))!)![1];
   // count the shared-element transitions the click starts
   await page.evaluate(() => {
     const w = window as unknown as { handoffs: number };
@@ -67,7 +67,7 @@ test('clicking the dashboard Main problem card lands on its category, the active
   await expect(active(page)).toContainText('#1');
   await expect(active(page)).toContainText(nameOf(ORDER[0]));
   await expect(active(page).getByTestId('category-card-gap')).toHaveText(`${gap}%`);
-  await expect(active(page)).toHaveAccessibleName(`#1 ${nameOf(ORDER[0])}, ${gap}% gap`);
+  await expect(active(page)).toHaveAccessibleName(`#1 ${nameOf(ORDER[0])}, ${gap}% score lost`);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(nameOf(ORDER[0]));
   // the hand-off landed: no view transition left running, one card carries the shared name
   await expect.poll(() => page.evaluate(() => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement).length)).toBe(0);
@@ -101,7 +101,7 @@ test('the carousel: one same-size card per category, worst first, no counter, do
   for (let i = 0; i < 8; i++) {
     await expect(cards(page).nth(i)).toHaveAttribute('data-rank', String(i + 1));
     await expect(cards(page).nth(i)).toHaveAttribute('data-cat', ORDER[i]);
-    await expect(cards(page).nth(i)).toHaveAccessibleName(`#${i + 1} ${nameOf(ORDER[i])}, ${Math.round(RANKED[i].gapRate * 100)}% gap`);
+    await expect(cards(page).nth(i)).toHaveAccessibleName(`#${i + 1} ${nameOf(ORDER[i])}, ${Math.round(RANKED[i].gapRate * 100)}% score lost`);
   }
   const boxes = await cards(page).evaluateAll((els) => els.map((e) => e.getBoundingClientRect()).map((r) => [r.width, r.height]));
   for (const [w, h] of boxes) {
@@ -261,7 +261,7 @@ test('the dashboard Main problem card renders exactly as before the refactor', a
       'Subcontractor screening & evaluation\n11 of 11 audits\nSubcontractor pre-start safety check\n11 of 11 audits\n' +
       'Subcontractor past safety record\n11 of 11 audits',
   );
-  await expect(mp.getByRole('link')).toHaveAttribute('aria-label', 'Main problem Q1 2026: Subcontractor Control, gap 73%. Open details');
+  await expect(mp.getByRole('link')).toHaveAttribute('aria-label', 'Main problem Q1 2026: Subcontractor Control, 73% score lost. Open details');
   await expect(mp.getByRole('heading', { level: 2 })).toHaveText('Subcontractor Control');
   await expect(mp.getByRole('heading', { level: 2 })).toHaveAttribute('id', 'mp-title');
   await expect(mp).not.toContainText('#');

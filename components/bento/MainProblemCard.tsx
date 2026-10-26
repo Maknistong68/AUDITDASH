@@ -71,7 +71,7 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
       <Link
         href={url}
         onClick={onClick}
-        aria-label={`Main problem ${qLabel(problem.quarter)}: ${cat.name}, gap ${pct(problem.gapRate)}%. Open details`}
+        aria-label={`Main problem ${qLabel(problem.quarter)}: ${cat.name}, ${pct(problem.gapRate)}% score lost. Open details`}
         className="absolute inset-0 z-[2] rounded-[var(--radius-card)]"
       />
       <ProblemCardContent problem={problem} audits={audits} label="Main problem" />

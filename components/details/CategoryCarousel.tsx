@@ -248,7 +248,7 @@ function CompactCard({
       onClick={onClick}
       tabIndex={active ? 0 : -1}
       aria-current={active ? 'page' : undefined}
-      aria-label={`#${rank} ${name}, ${pct(card.gapRate)}% gap`}
+      aria-label={`#${rank} ${name}, ${pct(card.gapRate)}% score lost`}
       data-testid="category-card"
       data-cat={card.category}
       data-rank={rank}
