@@ -67,3 +67,8 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
 - The active card is full and prominent; the following cards peek behind it with a **fading gradient**; the deck is **swipeable** (drag/swipe, arrows, keys).
 - Each card holds that problem's full information (gap & trend, contractors worst-first, driving items, repeat findings, actions).
 - **Remove "Where it fails" from the main dashboard** — the ranking now lives in this deck.
+
+## 17. Findings cards (owner, 2026-10-26)
+- Split "Findings · open actions" into **three separate cards**: **Repeat findings**, **High-risk work**, **Open actions** (different things).
+- **Repeat findings absorbs "Recurring issues"** (they represent the same thing): remove the "Recurring issues" section from the bottom of the dashboard.
+- Clicking the Repeat findings card **pops up a panel** listing the recurring/repeat issues (the content formerly in "Recurring issues", plus the repeat list).
