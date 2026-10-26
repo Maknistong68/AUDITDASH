@@ -238,3 +238,15 @@ test('/audits under a non-H&S type, an empty filter or an empty band: calm empty
   await expect(page.getByTestId('audits-bands')).toBeVisible();
   await noPageScroll(page);
 });
+
+test('units and names: timeline scores in %, region changes in pts, Score/Bands/Region cards all "Open portfolio"', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/');
+  for (const id of ['kpi-score', 'kpi-bands', 'region-compare']) {
+    await expect(page.getByTestId(id).getByRole('link').first()).toHaveAttribute('aria-label', /\. Open portfolio$/);
+  }
+  for (const t of await page.getByTestId('region-row').allInnerTexts()) if (/[+−±]\d/.test(t)) expect(t).toMatch(/[+−±]\d+ pts?/);
+  await page.goto('/audits?q=all&r=SR1%2CSR2');
+  for (const t of (await page.getByTestId('audit-dot').allInnerTexts()).slice(0, 6)) expect(t.trim()).toMatch(/^\d+%$/);
+  for (const t of await page.getByTestId('region-filter').allInnerTexts()) if (/[+−±]\d/.test(t)) expect(t).toMatch(/[+−±]\d+ pts?/);
+});

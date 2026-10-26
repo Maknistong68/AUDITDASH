@@ -96,7 +96,7 @@ export function parseBand(v: string | null | undefined): Band | null {
 }
 
 /** Rows whose latest audit is in `band` (the band the dashboard counts them in); all rows when null. */
-export function rowsInBand(rows: TimelineRow[], band: Band | null): TimelineRow[] {
+export function rowsInBand<T extends Pick<TimelineRow, 'latestBand'>>(rows: T[], band: Band | null): T[] {
   return band ? rows.filter((r) => r.latestBand === band) : rows;
 }
 

@@ -1,4 +1,4 @@
-import { bandFor } from './scoring';
+import { BANDS, bandFor } from './scoring';
 import type { Repo } from './data/repo';
 import type { Audit, Band, CategoryId, ChecklistItem, Contractor, Filter, Observation, Quarter, Subregion } from './types';
 import { CATEGORIES } from './categories';
@@ -190,43 +190,10 @@ export function league(repo: Repo, filter: Filter): { contractor: Contractor; la
   return rows.sort((a, b) => b.latest - a.latest || a.contractor.name.localeCompare(b.contractor.name));
 }
 
-export function topIssues(repo: Repo, filter: Filter, n = 6): {
-  itemCode: string; question: string; category: CategoryId; auditsHit: number; auditsTotal: number; impact: number; byQuarter: Record<Quarter, number>;
-}[] {
-  const audits = select(repo, filter);
-  const quarterOf = new Map(audits.map((a) => [a.id, a.quarter]));
-  const hits = new Map<string, Set<string>>();
-  for (const o of itemNegatives(audits, obsByAudit(repo, audits), itemMap(repo))) {
-    const s = hits.get(o.itemCode!) ?? new Set<string>();
-    s.add(o.auditId);
-    hits.set(o.itemCode!, s);
-  }
-  const items = new Map(repo.checklist().map((i) => [i.code, i]));
-  const rows = [...hits.entries()].flatMap(([code, set]) => {
-    const item = items.get(code);
-    if (!item) return [];
-    const byQuarter: Record<Quarter, number> = { 'Q4-2025': 0, 'Q1-2026': 0 };
-    for (const id of set) byQuarter[quarterOf.get(id)!]++;
-    const ratios = audits.filter((a) => set.has(a.id)).map((a) => itemRatio(a, item)).filter((x): x is number => x !== null);
-    const impact = set.size * (1 - (mean(ratios) ?? 1));
-    return [{ itemCode: code, question: item.question, category: item.category, auditsHit: set.size, auditsTotal: audits.length, impact, byQuarter }];
-  });
-  rows.sort((a, b) => b.impact - a.impact || b.auditsHit - a.auditsHit || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
-  // at most one item per subsection key (highest impact wins; rows are already sorted)
-  const seen = new Set<string>();
-  const unique = rows.filter((r) => {
-    const key = items.get(r.itemCode)!.subsection ?? 'A';
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-  return unique.slice(0, n);
-}
-
 /**
  * Contractors ranked by score-based gap, and the category's driving items. An item's `hits` = audits with an
  * applicable note on it (auditors annotate compliant items too, so a note is not a failure); `severity` =
- * 1 − mean official subsection score over those audits; ranked by `impact` = hits × severity (as topIssues).
+ * 1 − mean official subsection score over those audits; ranked by `impact` = hits × severity.
  */
 export function categoryDetail(repo: Repo, filter: Filter, cat: CategoryId): {
   contractors: { contractor: Contractor; gapRate: number; findings: number }[];
@@ -318,8 +285,6 @@ export function contractorCards(repo: Repo, filter: Filter): ContractorCard[] {
   return cards;
 }
 
-const BANDS: Band[] = ['Excellent', 'Good', 'Partially Compliant', 'Minimally Compliant', 'Non-Compliant'];
-
 export function bandDistribution(repo: Repo, filter: Filter): Record<Band, number> {
   const out = Object.fromEntries(BANDS.map((b) => [b, 0])) as Record<Band, number>;
   for (const c of contractorCards(repo, filter)) out[c.band]++;
@@ -368,18 +333,32 @@ export function repeatFindings(repo: Repo, filter: Filter): {
 
 export interface SystemicRepeat {
   itemCode: string; label: string; category: CategoryId; contractors: Contractor[]; contractorCount: number;
-  eligibleContractors: number; q4Notes: number; q1Notes: number;
-  /** Audits (within the filter's regions) with an applicable note on this question, per quarter. */
+  eligibleContractors: number;
+  /** The reach a question needed to count (repeatThreshold of eligibleContractors, unless given). */
+  minContractors: number;
+  /**
+   * Audits of the eligible contractors (audited in both quarters, within the filter's regions) with an applicable note on
+   * this question, per quarter: over the same audits as repeatAudits, so a per-audit rate is not skewed by contractors
+   * audited in one quarter only.
+   */
   q4Audits: number; q1Audits: number;
   sectionScores: { contractorId: string; q4: number | null; q1: number | null }[];
 }
 
 /**
- * Questions repeated (repeatFindings) at >= minContractors contractors, i.e. noted in the contractor's latest audit and
- * an earlier quarter. Q4/Q1 notes count filtered contractors with an applicable negative note in that quarter. Sorted by
- * contractorCount desc, then topIssues-style impact (hits x (1 - mean subsection score)), then code.
+ * The reach a question needs to count as a systemic repeat: 5 of the 7 contractors audited in both quarters (the owner's
+ * rule), scaled to the contractors the filter leaves, never below 2: 7 → 5, 4 → 3, 3 → 3. Integer arithmetic.
  */
-export function systemicRepeats(repo: Repo, filter: Filter, minContractors = 5): SystemicRepeat[] {
+export function repeatThreshold(eligibleContractors: number): number {
+  return Math.max(2, Math.ceil((5 * eligibleContractors) / 7));
+}
+
+/**
+ * Questions repeated (repeatFindings) at >= minContractors contractors (default repeatThreshold of the eligible
+ * contractors), i.e. noted in the contractor's latest audit and an earlier quarter. Sorted by contractorCount desc, then
+ * impact (audits noted x (1 - mean subsection score)), then code.
+ */
+export function systemicRepeats(repo: Repo, filter: Filter, minContractors?: number): SystemicRepeat[] {
   return rankedSystemicRepeats(repo, filter, minContractors).map((r) => {
     const { impact, ...out } = r;
     void impact;
@@ -388,13 +367,16 @@ export function systemicRepeats(repo: Repo, filter: Filter, minContractors = 5):
 }
 
 /** systemicRepeats with each row's ranking impact (audits noted × mean score lost); exported for tests. */
-export function rankedSystemicRepeats(repo: Repo, filter: Filter, minContractors = 5): (SystemicRepeat & { impact: number })[] {
+export function rankedSystemicRepeats(repo: Repo, filter: Filter, minContractors?: number): (SystemicRepeat & { impact: number })[] {
   const repeats = repeatFindings(repo, filter);
   if (!repeats.length) return [];
   const pool = select(repo, filter, 'all');
   const items = itemMap(repo);
   const quarterOf = new Map(pool.map((a) => [a.id, a.quarter]));
-  const eligibleContractors = repeatContractors(repo, filter).length;
+  const contractorOf = new Map(pool.map((a) => [a.id, a.contractorId]));
+  const eligible = new Set(repeatContractors(repo, filter).map((c) => c.id));
+  const eligibleContractors = eligible.size;
+  const min = minContractors ?? repeatThreshold(eligibleContractors);
   const auditOf = (c: string, q: Quarter) => pool.filter((a) => a.contractorId === c && a.quarter === q).at(-1);
   const negs = itemNegatives(pool, obsByAudit(repo, pool), items);
   const byItem = new Map<string, Contractor[]>();
@@ -403,17 +385,16 @@ export function rankedSystemicRepeats(repo: Repo, filter: Filter, minContractors
   for (const [code, list] of byItem) {
     const contractors = [...new Map(list.map((c) => [c.id, c])).values()];
     const item = items.get(code);
-    if (!item || contractors.length < minContractors) continue;
+    if (!item || contractors.length < min) continue;
     contractors.sort((a, b) => a.name.localeCompare(b.name));
     const mine = negs.filter((o) => o.itemCode === code);
-    const notedBy = (q: Quarter) => new Set(mine.filter((o) => quarterOf.get(o.auditId) === q).map((o) => pool.find((a) => a.id === o.auditId)!.contractorId)).size;
     const hitIds = new Set(mine.map((o) => o.auditId));
-    const auditsIn = (q: Quarter) => [...hitIds].filter((id) => quarterOf.get(id) === q).length;
+    const auditsIn = (q: Quarter) => [...hitIds].filter((id) => quarterOf.get(id) === q && eligible.has(contractorOf.get(id)!)).length;
     const ratios = pool.filter((a) => hitIds.has(a.id)).map((a) => itemRatio(a, item)).filter((x): x is number => x !== null);
     const ratioIn = (c: string, q: Quarter) => { const a = auditOf(c, q); return a ? itemRatio(a, item) : null; };
     rows.push({
       itemCode: code, label: itemLabel(code, item.question), category: item.category, contractors, contractorCount: contractors.length,
-      eligibleContractors, q4Notes: notedBy('Q4-2025'), q1Notes: notedBy('Q1-2026'),
+      eligibleContractors, minContractors: min,
       q4Audits: auditsIn('Q4-2025'), q1Audits: auditsIn('Q1-2026'),
       sectionScores: contractors.map((c) => ({ contractorId: c.id, q4: ratioIn(c.id, 'Q4-2025'), q1: ratioIn(c.id, 'Q1-2026') })),
       impact: hitIds.size * (1 - (mean(ratios) ?? 1)),
@@ -428,6 +409,25 @@ export function repeatContractors(repo: Repo, filter: Filter): Contractor[] {
   const pool = select(repo, filter, 'all');
   const has = (c: string, q: Quarter) => pool.some((a) => a.contractorId === c && a.quarter === q);
   return repo.contractors().filter((c) => has(c.id, 'Q4-2025') && has(c.id, 'Q1-2026'));
+}
+
+/**
+ * Audits per quarter of the contractors a systemic repeat can reach (repeatContractors): the denominator of the /repeats
+ * "notes per audit" rate, over the same audits as SystemicRepeat.q4Audits / q1Audits.
+ */
+export function repeatAudits(repo: Repo, filter: Filter): { q4: number; q1: number } {
+  const eligible = new Set(repeatContractors(repo, filter).map((c) => c.id));
+  const pool = select(repo, filter, 'all').filter((a) => eligible.has(a.contractorId));
+  return { q4: pool.filter((a) => a.quarter === 'Q4-2025').length, q1: pool.filter((a) => a.quarter === 'Q1-2026').length };
+}
+
+/** Notes on the repeating questions per audit, per quarter (numerator and denominator over the eligible contractors' audits). */
+export function repeatNotesPerAudit(rows: SystemicRepeat[], audits: { q4: number; q1: number }): { q4: number | null; q1: number | null } {
+  const rate = (n: number, d: number) => (d > 0 ? n / d : null);
+  return {
+    q4: rate(rows.reduce((s, r) => s + r.q4Audits, 0), audits.q4),
+    q1: rate(rows.reduce((s, r) => s + r.q1Audits, 0), audits.q1),
+  };
 }
 
 /** How widespread systemic repeats are: questions per reach (contractors hit), widest first. */
@@ -658,7 +658,10 @@ export interface CategoryQuarter {
   items: { itemCode: string; question: string; hits: number; severity: number; impact: number }[];
 }
 
-/** One entry per quarter with audits in the filter's regions (quarter filter ignored), LATEST FIRST. */
+/**
+ * One entry per quarter with audits in the filter's regions (quarter filter ignored), LATEST FIRST. Items are sorted by
+ * audits noted desc, then impact.
+ */
 export function categoryQuarters(repo: Repo, filter: Filter, cat: CategoryId): CategoryQuarter[] {
   const out: CategoryQuarter[] = [];
   let prev: number | null = null;
@@ -666,8 +669,10 @@ export function categoryQuarters(repo: Repo, filter: Filter, cat: CategoryId): C
     const audits = select(repo, filter, quarter);
     if (!audits.length) continue;
     const gapRate = scoreGap(repo, audits, cat);
-    const detail = categoryDetail(repo, { ...filter, quarter }, cat);
-    out.push({ quarter, audits: audits.length, gapRate, prevGapRate: prev, ...detail });
+    const { contractors, items } = categoryDetail(repo, { ...filter, quarter }, cat);
+    // "Driven by" bars are audits noted: most noted first (then impact, then code), so the bars only ever get shorter.
+    const byNoted = [...items].sort((a, b) => b.hits - a.hits || b.impact - a.impact || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
+    out.push({ quarter, audits: audits.length, gapRate, prevGapRate: prev, contractors, items: byNoted });
     prev = gapRate;
   }
   return out.reverse();

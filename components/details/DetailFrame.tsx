@@ -6,8 +6,9 @@ import type { Filter } from '@/lib/types';
 /**
  * Shell of every details page: the top bar (filters stay), the breadcrumb, Esc → parent.
  * Children own their horizontal gutters (carousels run full-bleed so neighbours can peek).
- * `fit`: a one-screen view: main is exactly the viewport under the top bar (the page never scrolls) and the children
- * share what the breadcrumb leaves (flex column).
+ * `fit`: a one-screen view from 1200px wide (as the dashboard hero): main is exactly the viewport under the top bar's
+ * measured height (`--topbar-h`, set by TopBarHeight; `--topbar` before hydration) and the children share what the
+ * breadcrumb leaves (flex column); the page never scrolls. Narrower, the top bar wraps and the page scrolls as usual.
  */
 export function DetailFrame({ filter, crumbs, parent, fit = false, children }: {
   filter: Filter; crumbs: Crumb[]; parent: string; fit?: boolean; children: React.ReactNode;
@@ -20,7 +21,7 @@ export function DetailFrame({ filter, crumbs, parent, fit = false, children }: {
         data-testid="details"
         className={
           fit
-            ? 'flex h-[calc(100svh-var(--topbar))] flex-col overflow-hidden pb-[clamp(12px,2.2svh,30px)] pt-[clamp(8px,1.4svh,18px)]'
+            ? 'flex flex-col pb-[clamp(12px,2.2svh,30px)] pt-[clamp(8px,1.4svh,18px)] min-[1200px]:h-[calc(100svh-var(--topbar-h,var(--topbar)))] min-[1200px]:overflow-hidden'
             : 'flex flex-col pb-[clamp(28px,5svh,64px)] pt-[clamp(8px,1.4svh,18px)]'
         }
       >

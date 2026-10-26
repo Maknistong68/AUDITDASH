@@ -32,9 +32,12 @@
 
   --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
   --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
-  --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #ff8a1f;
-  /* /repeats dot tint by score lost (darker = more lost), RepeatsView */
-  --rp-0: #ffd0ae; --rp-1: #ff8a1f; --rp-2: #9e530f; --rp-3: #552a04;
+  /* --minimal-dot fills bars and dots (graphics): #d96c00 is 3.45:1 on white (WCAG 1.4.11 >= 3:1), same orange hue. */
+  --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #d96c00;
+  /* /repeats dot tint by score lost (darker = more lost), RepeatsView: every step >= 3:1 on the white card (3.4 to 12.2) */
+  --rp-0: #d4700f; --rp-1: #b35a0c; --rp-2: #8a430a; --rp-3: #552a04;
+  /* Outline of the washed segments of the repeats reach bar: the full orange, >= 3:1 on white. None in dark. */
+  --seg-edge: var(--minimal-dot);
   /* /high-risk hazard hues (HighRiskView), categorical; no green or red, which mean good/bad here */
   --hz-lifting: #0f9fb5; --hz-height: #eb6834; --hz-electrical: #2a78d6; --hz-excavation: #eda100; --hz-confined: #e87ba4; --hz-hotwork: #6250d6; --hz-permits: #5e6b7d; --hz-other: #aeaeb2;
   --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
@@ -97,7 +100,7 @@
   --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
   --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
   /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
-  --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18;
+  --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18; --seg-edge: transparent;
   /* /high-risk hazard hues, stepped for the dark card */
   --hz-lifting: #22a8bd; --hz-height: #d95926; --hz-electrical: #3987e5; --hz-excavation: #c98500; --hz-confined: #d55181; --hz-hotwork: #9085e9; --hz-permits: #8e9aab; --hz-other: #636366;
   --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
@@ -140,7 +143,7 @@
     --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
     --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
     /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
-    --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18;
+    --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18; --seg-edge: transparent;
     /* /high-risk hazard hues, stepped for the dark card */
     --hz-lifting: #22a8bd; --hz-height: #d95926; --hz-electrical: #3987e5; --hz-excavation: #c98500; --hz-confined: #d55181; --hz-hotwork: #9085e9; --hz-permits: #8e9aab; --hz-other: #636366;
     --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
@@ -301,7 +304,8 @@ html.js [data-countup]:not([data-ready]) {
  */
 [data-testid="category-deck"] {
   --cc-w: clamp(260px, 17.5vw, 340px);
-  --cc-h: clamp(150px, 10.2vw, 196px);
+  /* capped by the screen height too (22svh), so a short laptop screen (1280×600) keeps room for the slide below */
+  --cc-h: clamp(118px, min(max(150px, 10.2vw), 22svh), 196px);
   --cc-gap: clamp(12px, 1vw, 18px);
   --cc-fade: clamp(48px, 9vw, 180px);
 }
@@ -515,9 +519,9 @@ html.js [data-countup]:not([data-ready]) {
     --bar: #2f6fe0;
     --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
     --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
-    --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #ff8a1f;
+    --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #d96c00;
     /* /repeats dot tint by score lost (darker = more lost), RepeatsView */
-    --rp-0: #ffd0ae; --rp-1: #ff8a1f; --rp-2: #9e530f; --rp-3: #552a04;
+    --rp-0: #d4700f; --rp-1: #b35a0c; --rp-2: #8a430a; --rp-3: #552a04;
     /* /high-risk hazard hues (HighRiskView), categorical; no green or red, which mean good/bad here */
     --hz-lifting: #0f9fb5; --hz-height: #eb6834; --hz-electrical: #2a78d6; --hz-excavation: #eda100; --hz-confined: #e87ba4; --hz-hotwork: #6250d6; --hz-permits: #5e6b7d; --hz-other: #aeaeb2;
     --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;

@@ -145,7 +145,7 @@ export function AuditCarousel({
         {many ? `${index + 1} of ${n}: ${labels[index]}` : ''}
       </p>
 
-      <div className={fit ? 'min-h-0 flex-1 overflow-x-clip' : 'overflow-x-clip'}>
+      <div data-clip-x className={fit ? 'min-h-0 flex-1 overflow-x-clip' : 'overflow-x-clip'}>
         <motion.div
           ref={track}
           drag={many ? 'x' : false}

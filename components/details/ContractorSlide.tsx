@@ -51,13 +51,15 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
   const most = Math.max(1, ...d.observations.map((o) => o.count));
   const inCategory = (cat: CategoryId) => href(`/category/${cat}/${d.contractorId}`, d.query, { s: d.index });
   return (
-    // Cards are as tall as the tallest column's content, capped at the screen (flex-initial shrinks, never grows).
+    // Cards are as tall as the tallest column's content, capped at the screen (flex-initial shrinks, never grows). On a
+    // laptop-height screen (<= 900px) they fill to the bottom instead, so no empty band is left under them; the lists
+    // spread their rows and the score grows.
     <div className="flex h-full flex-col">
-    <div className="grid min-h-0 flex-initial grid-cols-1 gap-[var(--gap-grid)] min-[900px]:grid-cols-12 min-[900px]:grid-rows-[minmax(0,1fr)]">
+    <div className="grid min-h-0 flex-initial grid-cols-1 gap-[var(--gap-grid)] min-[900px]:grid-cols-12 min-[900px]:grid-rows-[minmax(0,1fr)] [@media(min-width:1200px)_and_(max-height:900px)]:flex-1">
       <BentoCard i={0} testid="slide-header" className={`tone-${bandTone(band)} justify-between gap-[clamp(12px,2.2svh,26px)] p-[clamp(16px,2.2svh,28px)] min-[900px]:col-span-4`}>
         <AuditLine audit={audit} />
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
-          <p className="figure text-[clamp(56px,13svh,150px)]" data-testid="slide-score">
+          <p className="figure text-[clamp(56px,13svh,150px)] [@media(min-width:1200px)_and_(max-height:900px)]:text-[clamp(56px,17svh,150px)]" data-testid="slide-score">
             <span style={d.landing ? { viewTransitionName: CONTRACTOR_SCORE } : undefined}>
               {pct(audit.totalScore)}
               <span className="ml-0.5 text-[0.42em] tracking-normal text-muted">%</span>

@@ -25,10 +25,11 @@ export const REGIONS_CARD = 'ps-regions';
 export const CONTRACTOR_NAME = 'ct-name';
 export const CONTRACTOR_SCORE = 'ct-score';
 
-/** Length of the morph (mirrors `::view-transition-group(*)` in globals.css). */
+/**
+ * Length of the morph, in ms (mirrors `::view-transition-group(*)` in globals.css, with its ease-out
+ * cubic-bezier(0.22, 1, 0.36, 1)); the category carousel's glide is tuned to about the same length.
+ */
 export const HANDOFF_MS = 1000;
-/** Ease-out (mirrors globals.css); also the carousel glide's curve. */
-export const HANDOFF_EASE = [0.22, 1, 0.36, 1] as const;
 
 let arrived: (() => void) | null = null;
 

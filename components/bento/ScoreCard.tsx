@@ -24,7 +24,7 @@ export function ScoreCard({ avgScore, band, delta, audits, quarter, byQuarter, h
     <BentoCard i={2} testid="kpi-score" handoff={PORTFOLIO_CARD} className={`${PAD} lift group justify-between gap-2 min-[640px]:col-span-3 ${band ? `tone-${bandTone(band)}` : ''}`}>
       <HandoffLink
         href={href}
-        aria-label={`Portfolio score: ${ok ? `${pct(avgScore)}%` : 'no score'}. Open past audits`}
+        aria-label={`Portfolio score: ${ok ? `${pct(avgScore)}%` : 'no score'}. Open portfolio`}
         className="absolute inset-0 z-[1] rounded-[var(--radius-card)]"
       />
       <CardChevron />

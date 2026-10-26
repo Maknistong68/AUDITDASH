@@ -306,8 +306,9 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) 
   });
 }
 
-test('the drivers are plain labels with a bar and "N of M audits", in impact order', async ({ page }) => {
+test('the drivers are plain labels with a bar and "N of M audits", most noted first (bars never grow down the list)', async ({ page }) => {
   const q = categoryQuarters(getRepo(), ALL, 'subcontractor')[0];
+  for (let i = 1; i < q.items.length; i++) expect(q.items[i - 1].hits).toBeGreaterThanOrEqual(q.items[i].hits);
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto(`/category/subcontractor?${Q}`);
   await quartersReady(page);

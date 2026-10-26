@@ -171,7 +171,7 @@ export function CategoryCarousel({ cards, current, query }: { cards: MainProblem
     >
       <h1 className="sr-only">{name}</h1>
       <p className="sr-only" aria-live="polite">{`${index + 1} of ${n}: ${name}`}</p>
-      <div data-testid="category-carousel" className="carousel-fade overflow-x-clip py-[10px]">
+      <div data-testid="category-carousel" data-clip-x className="carousel-fade overflow-x-clip py-[10px]">
         <motion.div
           ref={row}
           role="list"

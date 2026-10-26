@@ -52,10 +52,10 @@ export function StatePill({ state }: { state: ItemState }) {
 }
 
 /** Score lost in the item's official subsection for one audit (1 − scored/possible), in the single gap hue. */
-export function SectionGap({ ratio, code }: { ratio: number | null; code: string }) {
+export function SectionGap({ ratio }: { ratio: number | null }) {
   const gap = ratio === null ? null : 1 - ratio;
   return (
-    <span className="grid grid-cols-[minmax(0,1fr)_3ch] items-center gap-2" data-testid="section-gap" title={gap === null ? `Section ${code} not applicable` : `Section ${code}: ${Math.round(gap * 100)}% of its score lost in this audit`}>
+    <span className="grid grid-cols-[minmax(0,1fr)_3ch] items-center gap-2" data-testid="section-gap" title={gap === null ? 'Section not applicable' : `${Math.round(gap * 100)}% of the section's score lost in this audit`}>
       <GapBar value={gap} />
       <span className="num text-right text-[13px] font-semibold">{gap === null ? <span className="font-normal text-faint">—</span> : Math.round(gap * 100)}</span>
     </span>

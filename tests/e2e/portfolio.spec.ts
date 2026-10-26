@@ -57,6 +57,8 @@ test('portfolio delta names its baseline', async ({ page }) => {
 test('reduced motion renders bars at their final width', async ({ browser }) => {
   const ctx = await browser.newContext({ reducedMotion: 'reduce' }); const page = await ctx.newPage();
   await page.goto('/');
+  // read after hydration: before it, framer's server-rendered initial state can still be in place under load
+  await expect(page.getByTestId('contractors')).toHaveAttribute('data-hydrated', '');
   const t = await page.getByTestId('contractor-row').first().locator('span[style*="width"]').first().evaluate((el) => getComputedStyle(el).transform);
   expect(t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)').toBe(true);
   await ctx.close();
@@ -112,9 +114,17 @@ test('repeats card: questions repeating at ≥5 contractors, with a stacked bar 
     total += n;
     await expect(segs.nth(k)).toHaveAttribute('data-reach', String(reach));
     await expect(segs.nth(k)).toHaveAttribute('data-questions', String(n));
-    await expect(labels.nth(k)).toHaveText(`${n} · ${reach === 7 ? 'all 7' : `${reach} of 7`}`);
+    await expect(labels.nth(k)).toHaveText(`${n} at ${reach === 7 ? 'all 7' : `${reach} of 7`}`);
   }
   expect(total).toBe(28);
+  await expect(card.getByTestId('repeats-threshold')).toHaveText('at ≥5 of 7 contractors');
+  // a single region scales the threshold (5 of 7 → 3 of 4 in SR1, 3 of 3 in SR2) and finds repeats
+  for (const [r, label] of [['SR1', 'at ≥3 of 4 contractors'], ['SR2', 'at ≥3 of 3 contractors']] as const) {
+    await page.goto(`/?q=all&r=${r}`);
+    await expect(card.getByTestId('repeats-threshold')).toHaveText(label);
+    await expect(card.getByTestId('repeats-count')).not.toHaveText('0');
+    expect(systemicRepeats(getRepo(), { quarter: 'all', regions: [r] }).length).toBeGreaterThan(0);
+  }
   // no earlier quarter: "—" and no infographic
   await page.goto('/?q=Q4-2025&r=SR1,SR2');
   await expect(card.getByTestId('repeats-count')).toHaveText('—');
@@ -190,4 +200,21 @@ test('old category URLs redirect to Documents, keeping the query', async ({ page
     await expect(page).toHaveURL(/\/category\/documents\?q=Q1-2026&r=SR1$/);
     await expect(page.getByTestId('carousel')).toBeVisible();
   }
+});
+
+test('light theme: the orange bar fill is at least 3:1 on the white card (graphics contrast)', async ({ browser }) => {
+  const ctx = await browser.newContext({ colorScheme: 'light', viewport: { width: 1366, height: 768 } });
+  await ctx.addInitScript(() => { try { localStorage.setItem('theme', 'light'); } catch { /* private mode */ } });
+  const page = await ctx.newPage();
+  await page.goto('/');
+  const ratio = await page.evaluate(() => {
+    const cv = document.createElement('canvas').getContext('2d')!;
+    const rgb = (c: string) => { cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); return [...cv.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+    const lum = (c: number[]) => { const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    const card = lum(rgb(getComputedStyle(document.querySelector('[data-testid="kpi-repeats"]')!).backgroundColor));
+    const bar = lum(rgb(getComputedStyle(document.documentElement).getPropertyValue('--minimal-dot').trim()));
+    return (Math.max(bar, card) + 0.05) / (Math.min(bar, card) + 0.05);
+  });
+  expect(ratio).toBeGreaterThanOrEqual(3);
+  await ctx.close();
 });

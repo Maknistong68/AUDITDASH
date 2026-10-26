@@ -4,6 +4,7 @@ import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
 import { Signed } from '@/components/bento/parts';
 import { itemLabel } from '@/lib/itemLabels';
 import { pct, quarterLabel } from '@/lib/format';
+import { splitName } from '@/lib/timeline';
 import type { CategoryQuarter } from '@/lib/analytics';
 import { FitList } from './FitList';
 import { GapBar } from './parts';
@@ -33,14 +34,14 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
     // Cards are as tall as the tallest column's content, capped at the screen (flex-initial shrinks, never grows).
     <div className="flex h-full flex-col">
     <div className="grid min-h-0 flex-initial grid-cols-1 gap-[var(--gap-grid)] min-[900px]:grid-cols-12 min-[900px]:grid-rows-[minmax(0,1fr)]">
-      <BentoCard i={0} testid="slide-header" className="justify-between gap-[clamp(10px,1.6svh,20px)] p-[clamp(16px,2.2svh,28px)] min-[900px]:col-span-3">
+      <BentoCard i={0} testid="slide-header" className="justify-between gap-[clamp(10px,1.6svh,20px)] p-[clamp(16px,2.2svh,28px)] min-[900px]:col-span-3 [@media(max-height:700px)]:gap-2">
         <TileLabel>
           <span className="text-ink">{quarterLabel(q.quarter)}</span>
           <span aria-hidden>·</span>
           <span>{q.audits} {q.audits === 1 ? 'audit' : 'audits'}</span>
         </TileLabel>
         <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
-          <p className="figure text-[clamp(56px,min(15.5svh,8.5vw),190px)] text-[var(--gap)]" data-testid="slide-score">
+          <p className="figure text-[clamp(56px,min(15.5svh,8.5vw),190px)] text-[var(--gap)] [@media(max-height:700px)]:text-[clamp(44px,min(11svh,8.5vw),190px)]" data-testid="slide-score">
             {pct(q.gapRate)}
             <span className="ml-0.5 text-[0.42em] tracking-normal">%</span>
           </p>
@@ -63,9 +64,10 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
               { k: 'Worst', r: q.contractors[0] },
               { k: 'Best', r: q.contractors[q.contractors.length - 1] },
             ].map(({ k, r }) => (
-              <div key={k} className="flex min-w-0 flex-col gap-0.5 rounded-[14px] bg-surface-2 px-3 py-[clamp(8px,1.6svh,18px)]">
-                <dt className="text-[13px] text-muted">{k} · score lost</dt>
-                <dd className="flex min-w-0 items-baseline justify-between gap-2">
+              <div key={k} data-testid="slide-extreme" className="flex min-w-0 flex-col gap-0.5 rounded-[14px] bg-surface-2 px-3 py-[clamp(8px,1.6svh,18px)] [@media(max-height:700px)]:flex-row [@media(max-height:700px)]:items-baseline [@media(max-height:700px)]:gap-2.5 [@media(max-height:700px)]:py-1.5">
+                {/* Short screens: one line per box ("Worst  RPCO  77%"); the meaning stays for screen readers. */}
+                <dt className="shrink-0 text-[13px] text-muted">{k}<span className="[@media(max-height:700px)]:sr-only"> · score lost</span></dt>
+                <dd className="flex min-w-0 flex-1 items-baseline justify-between gap-2">
                   <span className="truncate text-[clamp(14px,1.6svh,18px)] font-semibold" title={r.contractor.name}>{r.contractor.name}</span>
                   <span className="num text-[clamp(15px,1.9svh,22px)] font-semibold">{pct(r.gapRate)}%</span>
                 </dd>
@@ -90,10 +92,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
               title={`${r.contractor.name}: ${pct(r.gapRate)}% score lost`}
             >
               <span className="num text-[13px] font-semibold text-faint">{ranks[i]}</span>
-              <span className="flex min-w-0 items-baseline gap-2">
-                <span className="truncate text-[15px] font-semibold leading-tight tracking-[-0.015em]">{r.contractor.name}</span>
-                <span className="hidden shrink-0 text-[12px] text-muted min-[1600px]:inline">{r.contractor.subregion}</span>
-              </span>
+              <ContractorName name={r.contractor.name} />
               <GapBar value={r.gapRate} />
               <span className="num text-right text-[16px] font-semibold">{pct(r.gapRate)}<span className="text-[0.72em] text-muted">%</span></span>
               <ChevronRight size={14} strokeWidth={2.4} className="text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
@@ -136,5 +135,16 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
       </BentoCard>
     </div>
     </div>
+  );
+}
+
+/** The contractor's name, its site qualifier ("Abyatona (Box Culvert H55)" → "Box Culvert H55") on a second, muted line. */
+function ContractorName({ name }: { name: string }) {
+  const { base, qual } = splitName(name);
+  return (
+    <span className="flex min-w-0 flex-col" title={name}>
+      <span className="truncate text-[15px] font-semibold leading-tight tracking-[-0.015em]">{base}</span>
+      {qual && <span data-testid="contractor-site" className="truncate text-[12px] leading-tight text-muted">{qual}</span>}
+    </span>
   );
 }

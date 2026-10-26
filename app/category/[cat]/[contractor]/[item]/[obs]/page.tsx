@@ -9,6 +9,7 @@ import { dateLabel, quarterLabel } from '@/lib/format';
 import { findCategory, findContractor, findItem, safeDecode } from '@/lib/routeParams';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
 import { DetailFrame } from '@/components/details/DetailFrame';
+import { itemLabel } from '@/lib/itemLabels';
 import { CategoryChip } from '@/components/details/parts';
 
 type Params = { cat: string; contractor: string; item: string; obs: string };
@@ -35,7 +36,7 @@ export default async function ObservationPage({ params, searchParams }: { params
     { label: 'Overview', href: `/?${query}` },
     { label: c.name, href: href(`/category/${cat}`, query) },
     { label: contractor.name, href: href(`/category/${cat}/${contractor.id}`, query) },
-    { label: item.code, href: itemHref },
+    { label: itemLabel(item.code, item.question), href: itemHref },
     { label: `${dateLabel(audit.date)} observation` },
   ];
 
@@ -45,7 +46,7 @@ export default async function ObservationPage({ params, searchParams }: { params
         <BentoCard i={0} testid="observation" className="min-w-0 gap-[clamp(14px,2.2svh,24px)] p-[clamp(18px,2.6svh,36px)] min-[1100px]:col-span-8">
           <div className="flex flex-col gap-1.5">
             <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[22px] min-[900px]:text-[clamp(22px,3.2svh,30px)] font-semibold leading-[1.1] tracking-[-0.03em]">
-              <span>Item {item.code}</span>
+              <span>{itemLabel(item.code, item.question)}</span>
               <span className="rounded-full bg-fill px-3 py-[3px] text-[13px] font-semibold tracking-normal text-muted">{KIND[obs.kind]}</span>
             </h1>
             <p className="text-[14px] text-muted">{dateLabel(audit.date)} · {quarterLabel(audit.quarter)} · Inspection {audit.inspectionNo}</p>

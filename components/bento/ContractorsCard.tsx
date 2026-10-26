@@ -67,6 +67,7 @@ function Row({
       exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, transition: { duration: 0.15 } }}
       transition={{ ...SPRING, delay }}
       data-testid="contractor-row"
+      data-handoff-card=""
       data-score={total}
       className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.6em_minmax(0,1.6fr)_minmax(0,1fr)_3.3em_6.4em_3.6em_24px] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
         selected ? 'bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]' : ''

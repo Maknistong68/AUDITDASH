@@ -1,12 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { filterAudits, repeatContractors, systemicRepeats } from '../../lib/analytics';
+import { filterAudits, repeatAudits, repeatContractors, systemicRepeats } from '../../lib/analytics';
 
 const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
 const Q = 'q=all&r=SR1%2CSR2';
 const ROWS = systemicRepeats(getRepo(), ALL);
 const COLS = repeatContractors(getRepo(), ALL);
-const AUDITS = { q4: filterAudits(getRepo(), { ...ALL, quarter: 'Q4-2025' }).length, q1: filterAudits(getRepo(), { ...ALL, quarter: 'Q1-2026' }).length };
+// Denominators: the audits of the contractors audited in both quarters (the same audits the notes are counted over).
+const AUDITS = repeatAudits(getRepo(), ALL);
 const CODE = /\b[ABC]\d+(\.\d+)?\b/;
 
 /** Wrap startViewTransition: count hand-offs and, once each is running, record its pseudo-element animation durations. */
@@ -112,20 +113,20 @@ for (const [w, h] of [[1366, 768], [1920, 1080]] as const) {
   });
 }
 
-test('/repeats: a row shows its Q4 → Q1 notes on hover; dot, label and column drill down', async ({ page }) => {
+test('/repeats: every row shows its Q4 → Q1 audits noting it by default; dot, label and column drill down', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto(`/repeats?${Q}`);
   const row = page.getByTestId('repeats-row').first();
   const trend = row.getByTestId('repeats-trend');
-  await expect(trend).toHaveCSS('opacity', '0');
-  await row.hover();
-  await expect(trend).toHaveCSS('opacity', '1');
-  await expect(trend).toHaveText(`${ROWS[0].q4Audits} of ${AUDITS.q4}→${ROWS[0].q1Audits} of ${AUDITS.q1}audits`);
+  await expect(page.getByTestId('repeats-matrix')).toContainText('audits noting it: Q4 → Q1');
+  // shown for every row without hover (no empty strip)
+  const rows = await allRows(page);
+  for (let i = 0; i < (await rows.count()); i++) {
+    await expect(rows.nth(i).getByTestId('repeats-trend')).toHaveCSS('opacity', '1');
+    await expect(rows.nth(i).getByTestId('repeats-trend')).toHaveText(`${ROWS[i].q4Audits} of ${AUDITS.q4}→${ROWS[i].q1Audits} of ${AUDITS.q1}`);
+  }
   await expect(trend).toHaveAttribute('aria-label', `Noted at ${ROWS[0].q4Audits} of ${AUDITS.q4} audits in Q4, ${ROWS[0].q1Audits} of ${AUDITS.q1} audits in Q1`);
-  // focus shows it too
-  await page.mouse.move(0, 0);
-  await page.getByTestId('repeats-row').nth(1).getByTestId('repeats-label').focus();
-  await expect(page.getByTestId('repeats-row').nth(1).getByTestId('repeats-trend')).toHaveCSS('opacity', '1');
+  await page.goto(`/repeats?${Q}`);
 
   const r = ROWS[0];
   await row.locator('[data-testid="repeats-cell"][data-filled]').first().click();
@@ -192,33 +193,75 @@ test('/repeats on a short screen: top rows + "+M more" that expands in place; th
   await noPageScroll(page);
 });
 
-test('/repeats header: Q4 → Q1 as notes per audit, so extra Q1 audits do not read as a rise', async ({ page }) => {
+test('/repeats header: Q4 → Q1 as notes per audit over the eligible contractors\' audits; the threshold is labelled', async ({ page }) => {
   await page.goto(`/repeats?${Q}`);
   const notes = page.getByTestId('repeats-notes');
-  await expect(notes).toContainText('per audit');
+  await expect(notes).toContainText('notes per audit');
   await expect(notes).not.toContainText('contractor notes');
+  await expect(page.getByTestId('repeats-header').getByTestId('repeats-threshold')).toHaveText('at ≥5 of 7 contractors');
   const sum = (k: 'q4Audits' | 'q1Audits') => ROWS.reduce((s, r) => s + r[k], 0);
   expect(AUDITS.q4).toBeGreaterThan(0);
   expect(AUDITS.q1).toBeGreaterThan(0);
+  // the denominators leave out contractors audited in one quarter only
+  expect(AUDITS.q1).toBeLessThan(filterAudits(getRepo(), { ...ALL, quarter: 'Q1-2026' }).length);
   await expect(page.getByTestId('repeats-notes-count')).toHaveText([
     (sum('q4Audits') / AUDITS.q4).toFixed(1),
     (sum('q1Audits') / AUDITS.q1).toFixed(1),
   ]);
 });
 
-test('/repeats dark theme: every dot tint is at least 3:1 against the dark card', async ({ browser }) => {
-  const ctx = await browser.newContext({ colorScheme: 'dark', viewport: { width: 1920, height: 1080 } });
-  const page = await ctx.newPage();
-  await page.goto(`/repeats?${Q}`);
-  await expect(page.getByTestId('repeats-matrix')).toBeVisible();
-  const ratios = await page.evaluate(() => {
-    const cv = document.createElement('canvas').getContext('2d')!;
-    const rgb = (c: string) => { cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); return [...cv.getImageData(0, 0, 1, 1).data].slice(0, 3); };
-    const lum = (c: number[]) => { const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
-    const card = lum(rgb(getComputedStyle(document.querySelector('[data-testid="repeats-matrix"]')!).backgroundColor));
-    const root = getComputedStyle(document.documentElement);
-    return [0, 1, 2, 3].map((k) => { const l = lum(rgb(root.getPropertyValue(`--rp-${k}`).trim())); return (Math.max(l, card) + 0.05) / (Math.min(l, card) + 0.05); });
-  });
-  for (const r of ratios) expect(r).toBeGreaterThanOrEqual(3);
-  await ctx.close();
+test('/repeats single region: the scaled threshold finds repeats and says so', async ({ page }) => {
+  for (const [r, label] of [['SR1', 'at ≥3 of 4 contractors'], ['SR2', 'at ≥3 of 3 contractors']] as const) {
+    await page.goto(`/repeats?q=all&r=${r}`);
+    await expect(page.getByTestId('repeats-header').getByTestId('repeats-threshold')).toHaveText(label);
+    await expect(page.getByTestId('repeats-figure')).not.toHaveText('0');
+    await expect(page.getByTestId('repeats-matrix')).toBeVisible();
+  }
 });
+
+test('/repeats matrix: two encodings (tint and size by step), per-cell labels, plain legends, row indices', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto(`/repeats?${Q}`);
+  const matrix = page.getByTestId('repeats-matrix');
+  await expect(page.getByTestId('repeats-legend')).toHaveText(/^score lost: low\s*high$/);
+  const cells = matrix.locator('[data-testid="repeats-cell"][data-filled]');
+  const info = await cells.evaluateAll((els) => els.map((e) => {
+    const dot = e.querySelector('[data-testid="repeats-dot"], [data-testid="repeats-dot-unscored"]') as HTMLElement;
+    return { step: e.getAttribute('data-step'), label: e.getAttribute('aria-label'), w: dot.getBoundingClientRect().width, unscored: dot.dataset.testid === 'repeats-dot-unscored' };
+  }));
+  expect(info.length).toBeGreaterThan(0);
+  const width = new Map<string, number>();
+  for (const c of info) {
+    expect(c.label).toMatch(/^.+: repeated, (\d+% score lost|score not available)$/);
+    expect(c.unscored).toBe(c.step === 'none');
+    if (c.step !== 'none') width.set(c.step!, Math.round(c.w * 10) / 10);
+  }
+  // larger dot = more score lost
+  const steps = [...width.keys()].sort();
+  for (let i = 1; i < steps.length; i++) expect(width.get(steps[i])!).toBeGreaterThan(width.get(steps[i - 1])!);
+  await expect(matrix.locator('[data-testid="repeats-cell"]:not([data-filled])').first()).toHaveAttribute('aria-label', /^.+: not repeated$/);
+  // aria-rowcount is backed by aria-rowindex on every row
+  await expect(matrix).toHaveAttribute('aria-rowcount', String(ROWS.length + 1));
+  const idx = await matrix.locator('[role="row"]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-rowindex')));
+  expect(idx.slice(0, ROWS.length + 1)).toEqual(Array.from({ length: ROWS.length + 1 }, (_, i) => String(i + 1)));
+});
+
+for (const scheme of ['light', 'dark'] as const) {
+  test(`/repeats ${scheme} theme: every dot tint is at least 3:1 against the card`, async ({ browser }) => {
+    const ctx = await browser.newContext({ colorScheme: scheme, viewport: { width: 1920, height: 1080 } });
+    await ctx.addInitScript((t) => { try { localStorage.setItem('theme', t); } catch { /* private mode */ } }, scheme);
+    const page = await ctx.newPage();
+    await page.goto(`/repeats?${Q}`);
+    await expect(page.getByTestId('repeats-matrix')).toBeVisible();
+    const ratios = await page.evaluate(() => {
+      const cv = document.createElement('canvas').getContext('2d')!;
+      const rgb = (c: string) => { cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); return [...cv.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+      const lum = (c: number[]) => { const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+      const card = lum(rgb(getComputedStyle(document.querySelector('[data-testid="repeats-matrix"]')!).backgroundColor));
+      const root = getComputedStyle(document.documentElement);
+      return [0, 1, 2, 3].map((k) => { const l = lum(rgb(root.getPropertyValue(`--rp-${k}`).trim())); return (Math.max(l, card) + 0.05) / (Math.min(l, card) + 0.05); });
+    });
+    for (const r of ratios) expect(r).toBeGreaterThanOrEqual(3);
+    await ctx.close();
+  });
+}

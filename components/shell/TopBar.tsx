@@ -4,6 +4,7 @@ import type { Filter } from '@/lib/types';
 import { FilterBar } from './FilterBar';
 import { NewAuditButton } from './NewAuditButton';
 import { ThemeToggle } from './ThemeToggle';
+import { TopBarHeight } from './TopBarHeight';
 import { TypeTabs } from './TypeTabs';
 
 /** Product mark: a hard-hat brim under a three-quarter score arc. */
@@ -44,6 +45,7 @@ export function TopBar({ filter, detail = false }: { filter: Filter; detail?: bo
         <NewAuditButton type={filter.type} />
         <ThemeToggle />
       </div>
+      <TopBarHeight />
     </header>
   );
 }

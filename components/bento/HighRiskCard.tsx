@@ -1,13 +1,13 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ChevronRight, TriangleAlert } from 'lucide-react';
+import { TriangleAlert } from 'lucide-react';
 import { CountUp } from '@/components/motion/CountUp';
 import { HandoffLink } from '@/components/motion/HandoffLink';
 import { int } from '@/lib/format';
 import { HIGHRISK_CARD, HIGHRISK_FIGURE } from '@/lib/handoff';
 import type { Quarter } from '@/lib/types';
 import { BentoCard, TileLabel } from './BentoGrid';
-import { BIG, PAD } from './parts';
+import { BIG, CardChevron, PAD } from './parts';
 
 /**
  * S: high-risk work findings (total), with a tiny per-quarter bar of findings per audit (quarters have different audit
@@ -30,12 +30,7 @@ export function HighRiskCard({ count, byQuarter, href }: {
         aria-label={`High-risk work: ${count} findings. Open details`}
         className="absolute inset-0 z-[1] rounded-[var(--radius-card)]"
       />
-      <span
-        aria-hidden
-        className="absolute right-[clamp(12px,1.4svh,20px)] top-[clamp(10px,1.4svh,18px)] grid size-7 place-items-center rounded-full bg-fill-2 text-muted transition-transform duration-300 group-hover:translate-x-0.5"
-      >
-        <ChevronRight size={16} strokeWidth={2.4} />
-      </span>
+      <CardChevron />
       <TileLabel tone="var(--tone)">
         <TriangleAlert size={15} strokeWidth={2.4} aria-hidden />
         High-risk work

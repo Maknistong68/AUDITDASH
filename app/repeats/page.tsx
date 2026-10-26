@@ -1,22 +1,18 @@
 import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
-import { filterAudits, repeatContractors, repeatSpread, systemicRepeats } from '@/lib/analytics';
+import { repeatAudits, repeatContractors, repeatNotesPerAudit, repeatSpread, repeatThreshold, systemicRepeats } from '@/lib/analytics';
 import { detailContext, href, type SP } from '@/lib/details';
+import { splitName } from '@/lib/timeline';
 import { DetailFrame } from '@/components/details/DetailFrame';
 import { RepeatsView, type RepeatCol, type RepeatRow } from '@/components/details/RepeatsView';
 
 export const metadata: Metadata = { title: 'Repeat findings' };
 
-/** Latest section score → score lost, in four tint steps (0 = little lost … 3 = most). */
+/** Latest section score → score lost, in four steps (0 = little lost … 3 = most); null when the section was not scored. */
 const step = (ratio: number | null) => {
-  const lost = 1 - Math.min(1, Math.max(0, ratio ?? 0.5));
+  if (ratio === null) return null;
+  const lost = 1 - Math.min(1, Math.max(0, ratio));
   return lost < 0.2 ? 0 : lost < 0.4 ? 1 : lost < 0.6 ? 2 : 3;
-};
-
-/** "Abyatona (Box Culvert H55)" → base "Abyatona", qualifier "Box Culvert H55". */
-const split = (name: string) => {
-  const m = /^(.*?)\s*\((.*)\)\s*$/.exec(name);
-  return m ? { base: m[1], qual: m[2] } : { base: name, qual: '' };
 };
 
 /**
@@ -32,7 +28,7 @@ export default async function RepeatsPage({ searchParams }: { searchParams: Prom
   const contractors = twoQuarters ? repeatContractors(repo, filter) : [];
   const hits = (id: string) => repeats.filter((r) => r.contractors.some((c) => c.id === id)).length;
   const cols: RepeatCol[] = contractors
-    .map((c) => ({ id: c.id, name: c.name, ...split(c.name), hits: hits(c.id), href: href(`/contractor/${c.id}`, query) }))
+    .map((c) => ({ id: c.id, name: c.name, ...splitName(c.name), hits: hits(c.id), href: href(`/contractor/${c.id}`, query) }))
     .sort((a, b) => b.hits - a.hits || a.name.localeCompare(b.name));
   const rows: RepeatRow[] = repeats.map((r) => ({
     key: r.itemCode,
@@ -52,8 +48,10 @@ export default async function RepeatsPage({ searchParams }: { searchParams: Prom
       };
     }),
   }));
-  // Audits per quarter within the filter's regions: the denominators, so a quarter with more audits does not read as a rise.
-  const audits = { q4: filterAudits(repo, { ...filter, quarter: 'Q4-2025' }).length, q1: filterAudits(repo, { ...filter, quarter: 'Q1-2026' }).length };
+  // Audits per quarter of the eligible contractors (audited in both quarters): the denominators, over the same audits as
+  // the notes, so neither a quarter with more audits nor a contractor audited once reads as a rise.
+  const audits = repeatAudits(repo, filter);
+  const eligible = contractors.length;
   const empty = twoQuarters ? (repeats.length ? null : 'No questions repeating') : 'Needs an earlier quarter';
 
   return (
@@ -61,7 +59,8 @@ export default async function RepeatsPage({ searchParams }: { searchParams: Prom
       <RepeatsView
         count={twoQuarters ? repeats.length : null}
         spread={repeatSpread(repeats)}
-        notes={{ q4: repeats.reduce((s, r) => s + r.q4Audits, 0), q1: repeats.reduce((s, r) => s + r.q1Audits, 0) }}
+        rates={repeatNotesPerAudit(repeats, audits)}
+        threshold={{ min: repeatThreshold(eligible), of: eligible }}
         audits={audits}
         rows={rows}
         cols={cols}

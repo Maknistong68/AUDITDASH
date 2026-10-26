@@ -49,6 +49,7 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
     <motion.section
       data-testid="main-problem"
       data-handoff={HANDOFF}
+      data-handoff-card=""
       aria-labelledby="mp-title"
       initial={reduce ? false : { opacity: 0, y: 22, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}

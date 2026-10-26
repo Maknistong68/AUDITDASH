@@ -30,13 +30,3 @@ export function href(path: string, query: string, opts: { s?: number; hash?: str
   const s = opts.s !== undefined && (opts.s > 0 || explicitZero) ? `&s=${opts.s}` : '';
   return `${path}?${query}${s}${opts.hash ? `#${opts.hash}` : ''}`;
 }
-
-/**
- * Where a repeat-finding row leads: the item page when one contractor repeats the item, else the item inside
- * the category view (`#item-<code>` is the anchor on the category slide).
- */
-export function repeatHref(category: string, itemCode: string, contractorIds: readonly string[], query: string): string {
-  return contractorIds.length === 1
-    ? href(`/category/${category}/${contractorIds[0]}/${encodeURIComponent(itemCode)}`, query)
-    : href(`/category/${category}`, query, { hash: `item-${itemCode}` });
-}

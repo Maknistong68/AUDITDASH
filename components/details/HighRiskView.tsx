@@ -2,9 +2,11 @@
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
 import { TriangleAlert, X } from 'lucide-react';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { HandoffLanding } from '@/components/motion/HandoffLink';
 import { HIGHRISK_CARD, HIGHRISK_FIGURE } from '@/lib/handoff';
+import { splitName } from '@/lib/timeline';
+import { QuarterBar } from '@/components/charts/QuarterBar';
 import { rankHighRisk, type HazardId, type HighRiskContractor } from '@/lib/highRisk';
 import type { Quarter } from '@/lib/types';
 
@@ -15,12 +17,6 @@ const hue = (h: HazardId) => `var(--hz-${h})`;
 const pct = (share: number) => `${Math.round(share * 100)}%`;
 const qShort = (q: Quarter) => q.slice(0, 2);
 const EASE = [0.22, 1, 0.36, 1] as const;
-
-/** "Abyatona (Box Culvert H55)" → base "Abyatona", qualifier "Box Culvert H55". */
-const split = (name: string) => {
-  const m = /^(.*?)\s*\((.*)\)\s*$/.exec(name);
-  return m ? { base: m[1], qual: m[2] } : { base: name, qual: '' };
-};
 
 /**
  * The /high-risk screen under the breadcrumb. Header strip (the landing of the dashboard card's hand-off): the figure and
@@ -57,7 +53,7 @@ export function HighRiskView({ count, byQuarter, hazards, contractors, latest, i
           <h2 className="text-[21px] font-semibold tracking-[-0.02em]">{empty}</h2>
         </section>
       ) : (
-        <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-[var(--gap-grid)]">
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-[var(--gap-grid)] min-[900px]:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <Hazards hazards={hazards} total={count} hz={hz} pick={pick} />
           <Contractors rows={contractors} hazard={hazards.find((h) => h.hazard === hz) ?? null} latest={latest} clear={() => hz && pick(hz)} />
         </div>
@@ -67,7 +63,6 @@ export function HighRiskView({ count, byQuarter, hazards, contractors, latest, i
 }
 
 function Header({ count, byQuarter }: { count: number; byQuarter: QuarterCount[] }) {
-  const reduce = useReducedMotion();
   const rates = byQuarter.map((q) => ({ ...q, rate: q.count / q.audits }));
   const max = Math.max(1e-9, ...rates.map((r) => r.rate));
   const [a, b] = rates;
@@ -76,7 +71,7 @@ function Header({ count, byQuarter }: { count: number; byQuarter: QuarterCount[]
   return (
     <section
       data-testid="highrisk-header"
-      className="card grid shrink-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-[clamp(28px,5vw,110px)] px-[clamp(16px,1.5vw,28px)] py-[clamp(10px,1.5svh,20px)]"
+      className="card grid shrink-0 grid-cols-1 items-center gap-x-[clamp(28px,5vw,110px)] gap-y-3 px-[clamp(16px,1.5vw,28px)] py-[clamp(10px,1.5svh,20px)] min-[700px]:grid-cols-[auto_minmax(0,1fr)]"
       style={{ viewTransitionName: HIGHRISK_CARD }}
     >
       <div className="flex flex-col gap-1">
@@ -103,40 +98,24 @@ function Header({ count, byQuarter }: { count: number; byQuarter: QuarterCount[]
           <span className="text-right text-[11px] leading-none text-muted">per audit</span>
           <span className="text-right text-[11px] leading-none text-muted">total</span>
           {rates.map((q, k) => (
-            <QuarterRow
-              key={q.quarter}
-              q={q}
-              max={max}
-              bg={k === rates.length - 1 ? last : 'color-mix(in srgb, var(--muted) 40%, transparent)'}
-              delay={0.3 + k * 0.09}
-              reduce={!!reduce}
-            />
+            <Fragment key={q.quarter}>
+              <QuarterBar
+                label={q.quarter.replace('-', ' ')}
+                fraction={q.rate / max}
+                hue={k === rates.length - 1 ? last : 'color-mix(in srgb, var(--muted) 40%, transparent)'}
+                delay={300 + k * 90}
+                value={q.rate.toFixed(1)}
+                barTestid="highrisk-quarter-bar"
+                valueTestid="highrisk-quarter-rate"
+              />
+              <span data-testid="highrisk-quarter-total" className="num min-w-[3ch] text-right text-[12px] leading-none text-muted">{q.count}</span>
+            </Fragment>
           ))}
         </div>
       ) : (
         <div />
       )}
     </section>
-  );
-}
-
-function QuarterRow({ q, max, bg, delay, reduce }: { q: QuarterCount & { rate: number }; max: number; bg: string; delay: number; reduce: boolean }) {
-  return (
-    <>
-      <span className="num text-[12px] leading-none text-muted">{q.quarter.replace('-', ' ')}</span>
-      <span className="block h-[clamp(10px,1.4svh,14px)] rounded-full bg-fill-2">
-        <motion.span
-          data-testid="highrisk-quarter-bar"
-          className="block h-full rounded-full"
-          style={{ width: `${(q.rate / max) * 100}%`, background: bg, transformOrigin: 'left' }}
-          initial={reduce ? false : { scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 0.9, ease: EASE, delay }}
-        />
-      </span>
-      <span data-testid="highrisk-quarter-rate" className="num text-right text-[clamp(15px,2svh,20px)] font-semibold leading-none">{q.rate.toFixed(1)}</span>
-      <span data-testid="highrisk-quarter-total" className="num min-w-[3ch] text-right text-[12px] leading-none text-muted">{q.count}</span>
-    </>
   );
 }
 
@@ -165,8 +144,8 @@ function Hazards({ hazards, total, hz, pick }: { hazards: Hazard[]; total: numbe
     <section data-testid="highrisk-hazards" aria-labelledby="hz-title" className="card flex min-h-0 flex-col gap-[clamp(6px,1.2svh,16px)] px-[clamp(14px,1.4vw,26px)] py-[clamp(10px,1.6svh,22px)]">
       <h2 id="hz-title" className="text-[clamp(13px,1.5svh,15px)] font-semibold tracking-[-0.01em]">By hazard</h2>
       {/* Side by side on short screens; on tall ones (the panel is tall) the donut sits over its legend. */}
-      <div className="flex min-h-0 flex-1 items-center justify-center gap-[clamp(14px,2vw,40px)] [@media(min-height:900px)]:flex-col">
-        <div className="relative aspect-square h-full max-h-[340px] min-h-0 max-w-[46%] shrink-0 [@media(min-height:900px)]:h-auto [@media(min-height:900px)]:max-h-none [@media(min-height:900px)]:w-[min(100%,36svh)] [@media(min-height:900px)]:max-w-none">
+      <div className="flex min-h-0 flex-1 items-center justify-center gap-[clamp(14px,2vw,40px)] max-[899px]:flex-col [@media(min-height:900px)]:flex-col">
+        <div className="relative aspect-square h-full max-h-[340px] min-h-0 max-w-[46%] shrink-0 max-[899px]:h-auto max-[899px]:w-[min(100%,260px)] max-[899px]:max-w-none [@media(min-height:900px)]:h-auto [@media(min-height:900px)]:max-h-none [@media(min-height:900px)]:w-[min(100%,36svh)] [@media(min-height:900px)]:max-w-none">
           <svg viewBox="0 0 100 100" className="block size-full" aria-hidden>
             <circle cx="50" cy="50" r={R} fill="none" stroke="var(--fill-2)" strokeWidth={STROKE} />
             {segs.map(({ h, from, to }, k) => (
@@ -192,7 +171,7 @@ function Hazards({ hazards, total, hz, pick }: { hazards: Hazard[]; total: numbe
             <span className="max-w-[60%] truncate text-[clamp(11px,1.4svh,13px)] leading-tight text-muted">{picked ? pct(picked.share) : 'all hazards'}</span>
           </div>
         </div>
-        <ul className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(2px,0.4svh,6px)] [@media(min-height:900px)]:w-full [@media(min-height:900px)]:max-w-[440px] [@media(min-height:900px)]:flex-none">
+        <ul className="flex min-w-0 flex-1 flex-col justify-center gap-[clamp(2px,0.4svh,6px)] max-[899px]:w-full max-[899px]:flex-none [@media(min-height:900px)]:w-full [@media(min-height:900px)]:max-w-[440px] [@media(min-height:900px)]:flex-none">
           {shown.map((h) => {
             const on = hz === h.hazard;
             return (
@@ -266,7 +245,7 @@ function Contractors({ rows, hazard, latest, clear }: {
       </div>
       <ol className="flex min-h-0 flex-1 flex-col">
         {ranked.map((r, i) => {
-          const { base, qual } = split(r.name);
+          const { base, qual } = splitName(r.name);
           const current = r.nowQuarter === latest;
           return (
             <motion.li key={r.id} layout transition={{ duration: 0.5, ease: EASE }} className="flex min-h-[20px] flex-[1_1_0] [max-height:64px]">

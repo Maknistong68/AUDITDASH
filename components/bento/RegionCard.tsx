@@ -44,7 +44,7 @@ export function RegionCard({ rows, quarter, href }: { rows: Row[]; quarter: Filt
               <div className="flex items-baseline justify-between gap-2">
                 <span className="text-[14px] font-semibold">{r.region}</span>
                 <span className="flex items-baseline gap-2">
-                  {d !== null && <span className="text-[12px]"><Signed d={d} unit={false} /></span>}
+                  {d !== null && <span className="text-[12px]"><Signed d={d} /></span>}
                   <span data-testid="region-value" className="figure text-[clamp(20px,2.8svh,30px)]">
                     {pct(v)}
                     {v !== null && <span className="text-[0.5em] tracking-normal text-muted">%</span>}

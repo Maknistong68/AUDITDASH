@@ -3,11 +3,10 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { HandoffLink } from '@/components/motion/HandoffLink';
 import { bandShort, bandTone } from '@/lib/format';
 import { BANDS_CARD } from '@/lib/handoff';
+import { BANDS } from '@/lib/scoring';
 import type { Band } from '@/lib/types';
 import { BentoCard, TileLabel } from './BentoGrid';
 import { CardChevron, PAD } from './parts';
-
-export const BANDS: Band[] = ['Excellent', 'Good', 'Partially Compliant', 'Minimally Compliant', 'Non-Compliant'];
 
 /**
  * S: contractors per band — segmented bar and the five counts (zeros grey). The whole tile opens /audits?focus=bands with

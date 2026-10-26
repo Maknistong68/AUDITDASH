@@ -116,3 +116,17 @@ describe('sectionRatios', () => {
     expect(r.A).toBeCloseTo(27 / 45);
   });
 });
+
+describe('categoryQuarters "Driven by" order', () => {
+  it('audits noted desc, then impact desc: the bars are monotonic in every category and quarter', () => {
+    for (const c of CATEGORIES) {
+      for (const q of categoryQuarters(repo, ALL, c.id)) {
+        for (let i = 1; i < q.items.length; i++) {
+          const [a, b] = [q.items[i - 1], q.items[i]];
+          expect(a.hits).toBeGreaterThanOrEqual(b.hits);
+          if (a.hits === b.hits) expect(a.impact).toBeGreaterThanOrEqual(b.impact);
+        }
+      }
+    }
+  });
+});

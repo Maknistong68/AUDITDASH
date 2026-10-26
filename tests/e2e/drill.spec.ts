@@ -223,3 +223,46 @@ test('the Q4 main-problem tile opens its category on Q4 with the same gap and it
   await expect(active(page).getByTestId('slide-score')).toHaveText(`${gap}%`);
   await expect(active(page).locator('[id^="item-"]').first()).toBeAttached();
 });
+
+test('drill pages show plain labels, never codes: titles, item rows, siblings and every breadcrumb', async ({ page }) => {
+  const CODE = /\b[ABC]\d+(\.\d+)?\b/;
+  const repo = getRepo();
+  const items = new Map(repo.checklist().map((i) => [i.code, i]));
+  const obs = repo.observations().find((o) => o.itemCode === 'B6.1' && o.kind === 'negative' && repo.audits().find((a) => a.id === o.auditId)?.contractorId === '4800001131')!;
+  await page.setViewportSize({ width: 1366, height: 768 });
+
+  await page.goto('/category/subcontractor/4800001131');
+  await ready(page);
+  await expect(active(page).getByTestId('item-label').first()).toBeVisible();
+  for (const t of await active(page).getByTestId('item-label').allInnerTexts()) expect(t).not.toMatch(CODE);
+  expect(await active(page).getByTestId('items').innerText()).not.toMatch(/\?/); // no question sentences
+  expect(await page.getByTestId('breadcrumb').innerText()).not.toMatch(CODE);
+
+  await page.goto('/category/subcontractor/4800001131/B6.1');
+  await expect(page.getByTestId('item-title')).toHaveText('Subcontractor screening & evaluation');
+  // the full question stays, once, as a muted subtitle
+  await expect(page.getByTestId('item-question')).toHaveText(items.get('B6.1')!.question);
+  for (const t of await page.getByTestId('sibling-item').allInnerTexts()) expect(t).not.toMatch(CODE);
+  expect(await page.getByTestId('breadcrumb').innerText()).not.toMatch(CODE);
+  await expect(page.getByTestId('breadcrumb')).toContainText('Subcontractor screening & evaluation');
+
+  if (obs) {
+    await page.goto(`/category/subcontractor/4800001131/B6.1/${obs.id}`);
+    expect(await page.getByTestId('breadcrumb').innerText()).not.toMatch(CODE);
+    await expect(page.locator('h1')).toContainText('Subcontractor screening & evaluation');
+  }
+});
+
+for (const vp of [{ width: 1366, height: 768 }, { width: 1280, height: 600 }, { width: 1920, height: 1080 }]) {
+  test(`the item page fits one screen at ${vp.width}×${vp.height}`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await page.goto('/category/subcontractor/4800001131/B6.1');
+    await expect(page.getByTestId('item-timeline')).toBeVisible();
+    const [sh, ih] = await page.evaluate(() => [document.documentElement.scrollHeight, innerHeight]);
+    expect(sh).toBeLessThanOrEqual(ih);
+    for (const id of ['item-timeline', 'item-summary', 'sibling-items']) {
+      const b = (await page.getByTestId(id).boundingBox())!;
+      expect(b.y + b.height, id).toBeLessThanOrEqual(vp.height);
+    }
+  });
+}

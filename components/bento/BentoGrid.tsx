@@ -28,6 +28,7 @@ export function BentoCard({
     <motion.section
       data-testid={testid}
       data-handoff={handoff}
+      data-handoff-card={handoff ? '' : undefined}
       aria-label={label}
       initial={reduce ? false : { opacity: 0, y: 22, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}

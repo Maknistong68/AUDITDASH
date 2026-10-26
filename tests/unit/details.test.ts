@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { detailContext, href, repeatHref, toSearchParams } from '@/lib/details';
+import { detailContext, href, toSearchParams } from '@/lib/details';
 
 describe('details helpers', () => {
   it('reads the filter and the slide', () => {
@@ -18,18 +18,11 @@ describe('details helpers', () => {
   });
 });
 
-describe('repeatHref', () => {
-  it('opens the item page when one contractor repeats the item', () => {
-    expect(repeatHref('documents', 'B4.1', ['4800001131'], 'q=all&r=SR1')).toBe('/category/documents/4800001131/B4.1?q=all&r=SR1');
-  });
-  it('opens the item in the category view when several contractors repeat it', () => {
-    expect(repeatHref('leadership', 'A2', ['1', '2'], 'q=Q1-2026&r=SR1')).toBe('/category/leadership?q=Q1-2026&r=SR1#item-A2');
-  });
+describe('audit type', () => {
   it('keeps the audit type in the query and in links', () => {
     const c = detailContext({ q: 'Q1-2026', r: 'SR1', t: 'welfare' });
     expect(c.filter).toEqual({ quarter: 'Q1-2026', regions: ['SR1'], type: 'welfare' });
     expect(c.query).toBe('q=Q1-2026&r=SR1&t=welfare');
     expect(href('/category/documents', c.query, { s: 1 })).toBe('/category/documents?q=Q1-2026&r=SR1&t=welfare&s=1');
-    expect(repeatHref('documents', 'B1.1', ['1', '2'], c.query)).toBe('/category/documents?q=Q1-2026&r=SR1&t=welfare#item-B1.1');
   });
 });

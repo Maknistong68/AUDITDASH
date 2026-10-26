@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { getRepo, type Repo } from '@/lib/data/repo';
 import {
-  applicableSlots, auditCompliance, categoryDetail, categoryGaps, contractorInCategory, filterAudits, itemHistory, league, portfolioSummary, topIssues,
+  applicableSlots, auditCompliance, categoryDetail, categoryGaps, contractorInCategory, filterAudits, itemHistory, league, portfolioSummary,
 } from '@/lib/analytics';
 import { CATEGORIES } from '@/lib/categories';
 import type { Filter } from '@/lib/types';
@@ -134,28 +134,6 @@ describe('league', () => {
   test('empty filter -> empty', () => expect(league(repo, { quarter: 'all', regions: [] })).toEqual([]));
 });
 
-describe('topIssues', () => {
-  test('top issues sorted', () => {
-    const t = topIssues(repo, ALL);
-    expect(t).toHaveLength(6);
-    for (let i = 1; i < t.length; i++) expect(t[i - 1].impact).toBeGreaterThanOrEqual(t[i].impact);
-    t.forEach((x) => { expect(x.impact).toBeGreaterThanOrEqual(0); expect(x.impact).toBeLessThanOrEqual(x.auditsHit); });
-    expect(t[0].auditsTotal).toBe(20);
-    t.forEach((x) => {
-      expect(x.auditsHit).toBeLessThanOrEqual(x.auditsTotal);
-      expect(x.byQuarter['Q4-2025'] + x.byQuarter['Q1-2026']).toBe(x.auditsHit);
-    });
-  });
-  test('one item per subsection, still impact-sorted', () => {
-    const t = topIssues(repo, ALL);
-    const items = new Map(repo.checklist().map((i) => [i.code, i]));
-    const keys = t.map((x) => items.get(x.itemCode)!.subsection ?? 'A');
-    expect(new Set(keys).size).toBe(6);
-    for (let i = 1; i < t.length; i++) expect(t[i - 1].impact).toBeGreaterThanOrEqual(t[i].impact);
-  });
-  test('empty filter -> []', () => expect(topIssues(repo, { quarter: 'all', regions: [] })).toEqual([]));
-});
-
 describe('drill selectors', () => {
   test('itemHistory chronological', () => {
     const h = itemHistory(repo, '4800001272', 'B4.1');
@@ -183,7 +161,6 @@ describe('N/A notes imported as negatives', () => {
     const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
     const g = categoryGaps(repo, f).find((x) => x.category === 'documents')!;
     expect(g.gapRate).toBeLessThanOrEqual(1);
-    expect(topIssues(repo, f, 99).some((t) => t.itemCode.startsWith('B5.'))).toBe(false);
     expect(categoryDetail(repo, f, 'documents').items.some((i) => i.itemCode.startsWith('B5.'))).toBe(false);
   });
   test('all gap rates and contractor rates within [0,1] for every filter', () => {

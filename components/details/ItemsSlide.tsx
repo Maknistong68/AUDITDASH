@@ -6,7 +6,8 @@ import { bandShort, bandTone, dateLabel, pct } from '@/lib/format';
 import { bandFor } from '@/lib/scoring';
 import type { Audit } from '@/lib/types';
 import { AuditLine } from './ContractorSlide';
-import { AuditDelta, CodeChip, GapBar, SectionGap, StatePill } from './parts';
+import { itemLabel } from '@/lib/itemLabels';
+import { AuditDelta, GapBar, SectionGap, StatePill } from './parts';
 
 export interface ItemsSlideData {
   audit: Audit;
@@ -18,7 +19,7 @@ export interface ItemsSlideData {
   history: { id: string; date: string; gap: number | null }[];
 }
 
-/** One audit of a contractor in one category: the category gap, the audit's score, each item's state. */
+/** One audit of a contractor in one category: the category gap, the audit's score, each item's state (plain labels, no codes). */
 export function ItemsSlide({ d }: { d: ItemsSlideData }) {
   const { audit, previous, rows } = d;
   const band = bandFor(audit.totalScore);
@@ -70,8 +71,8 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
       </BentoCard>
 
       <BentoCard i={1} testid="items" className="gap-2 px-[clamp(10px,1vw,18px)] py-[clamp(14px,2svh,24px)] min-[900px]:col-span-8">
-        <div className="grid grid-cols-[3.4em_minmax(0,1fr)_minmax(64px,7.5em)_5.2em_14px] items-end gap-3 px-[clamp(6px,0.6vw,10px)]">
-          <TileLabel className="col-span-2">Checklist items · this audit</TileLabel>
+        <div className="grid grid-cols-[minmax(0,1fr)_minmax(64px,7.5em)_5.2em_14px] items-end gap-3 px-[clamp(6px,0.6vw,10px)]">
+          <TileLabel>Checklist items · this audit</TileLabel>
           <span className="text-[12px] text-muted" title="Share of the item's official subsection score lost in this audit">Section gap</span>
           <span className="text-[12px] text-muted">Note</span>
         </div>
@@ -82,16 +83,15 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
                 data-testid="item-row"
                 data-state={r.state}
                 href={d.itemHref(r.item.code)}
-                className="group grid grid-cols-[3.4em_minmax(0,1fr)_minmax(64px,7.5em)_5.2em_14px] items-center gap-3 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(7px,1.2svh,11px)] transition-colors hover:bg-fill-2"
+                className="group grid grid-cols-[minmax(0,1fr)_minmax(64px,7.5em)_5.2em_14px] items-center gap-3 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(7px,1.2svh,11px)] transition-colors hover:bg-fill-2"
               >
-                <CodeChip code={r.item.code} />
                 <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="line-clamp-2 text-[14px] leading-snug">{r.item.question}</span>
+                  <span data-testid="item-label" className="truncate text-[14px] font-semibold leading-snug tracking-[-0.01em]">{itemLabel(r.item.code, r.item.question)}</span>
                   {r.observation && (
                     <span className="truncate text-[13px] text-muted">{r.observation.text.replace(/\s+/g, ' ')}</span>
                   )}
                 </span>
-                <SectionGap ratio={r.ratio} code={r.item.subsection ?? r.item.section} />
+                <SectionGap ratio={r.ratio} />
                 <span><StatePill state={r.state} /></span>
                 <ChevronRight size={14} strokeWidth={2.4} className="text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
               </Link>

@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { BANDS, BandBar } from '@/components/bento/BandsCard';
+import { BandBar } from '@/components/bento/BandsCard';
+import { QuarterBar } from '@/components/charts/QuarterBar';
 import { Signed } from '@/components/bento/parts';
 import { HandoffLanding } from '@/components/motion/HandoffLink';
 import { bandShort, bandTone, dateLabel, deltaPoints, pct, quarterLabel } from '@/lib/format';
 import { BANDS_CARD, PORTFOLIO_CARD, PORTFOLIO_FIGURE, REGIONS_CARD } from '@/lib/handoff';
-import { bandFor } from '@/lib/scoring';
-import { BAND_SLUGS, type Trend } from '@/lib/timeline';
+import { BANDS, bandFor } from '@/lib/scoring';
+import { BAND_SLUGS, rowsInBand, type Trend } from '@/lib/timeline';
 import type { Band, Quarter, Subregion } from '@/lib/types';
 
 export interface AuditDot { id: string; date: string; score: number; band: Band; quarter: Quarter; x: number; href: string }
@@ -79,7 +80,7 @@ export function AuditsView(props: {
     params.set('r', next.join(','));
     router.push(`/audits?${params}`, { scroll: false });
   };
-  const shown = band ? rows.filter((r) => r.latestBand === band) : rows;
+  const shown = rowsInBand(rows, band);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-[var(--gap-grid)] px-[var(--gutter)]">
@@ -138,14 +139,15 @@ function Header({ avg, band, auditCount, byQuarter }: { avg: number | null; band
           className="grid max-w-[920px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5"
         >
           {byQuarter.map((q, k) => (
-            <Bar
+            <QuarterBar
               key={q.quarter}
               label={quarterLabel(q.quarter)}
-              value={q.value}
+              fraction={q.value}
               hue={k === byQuarter.length - 1 ? (byQuarter.length > 1 ? latestHue(byQuarter[0].value, q.value) : bandHue(q.value)) : GREY}
               delay={300 + k * 90}
-              testid="audits-quarter"
-              big
+              value={<Percent value={q.value} />}
+              barTestid="audits-quarter-bar"
+              valueTestid="audits-quarter-value"
             />
           ))}
           {d !== null && (
@@ -165,24 +167,12 @@ function Header({ avg, band, auditCount, byQuarter }: { avg: number | null; band
   );
 }
 
-/** One 0–100% bar row: label, bar, value. Honest scale: small differences look small. */
-function Bar({ label, value, hue, delay, testid, big = false }: { label: string; value: number | null; hue: string; delay: number; testid: string; big?: boolean }) {
+/** A 0–1 value as a whole percent with a small muted "%"; "—" without a value. */
+function Percent({ value }: { value: number | null }) {
   return (
     <>
-      <span className="num whitespace-nowrap text-[12px] leading-none text-muted">{label}</span>
-      <span className={`block rounded-full bg-fill-2 ${big ? 'h-[clamp(10px,1.4svh,14px)]' : 'h-[clamp(7px,1svh,10px)]'}`}>
-        {value !== null && Number.isFinite(value) && (
-          <span
-            data-testid={`${testid}-bar`}
-            className="rp-grow block h-full rounded-full"
-            style={{ width: `${Math.min(1, Math.max(0, value)) * 100}%`, background: hue, ['--d' as string]: `${delay}ms` }}
-          />
-        )}
-      </span>
-      <span data-testid={`${testid}-value`} className={`num text-right font-semibold leading-none ${big ? 'text-[clamp(15px,2svh,20px)]' : 'text-[clamp(13px,1.7svh,15px)]'}`}>
-        {pct(value)}
-        {value !== null && <span className="text-[0.7em] font-normal text-muted">%</span>}
-      </span>
+      {pct(value)}
+      {value !== null && <span className="text-[0.7em] font-normal text-muted">%</span>}
     </>
   );
 }
@@ -359,6 +349,7 @@ function Row({ row, i, show, hide }: { row: AuditsRow; i: number; show: (d: Audi
               aria-hidden
             >
               {pct(a.score)}
+              <span className="text-[0.75em] font-normal">%</span>
             </span>
             <span
               className="rp-dot block size-[clamp(11px,1.5svh,15px)] rounded-full shadow-[0_0_0_2.5px_var(--surface)] transition-transform duration-200 group-hover/dot:scale-[1.35]"
@@ -439,16 +430,17 @@ function RegionsPanel({ regions, pick, focused }: { regions: RegionRow[]; pick: 
                 className={`grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-[clamp(3px,0.6svh,6px)] rounded-[12px] px-2 py-[clamp(4px,0.8svh,8px)] text-left transition-[background-color,opacity] duration-300 hover:bg-fill-2 ${only ? 'bg-fill-2' : ''} ${r.selected ? '' : 'opacity-45'}`}
               >
                 <span className="col-span-2 text-[clamp(13px,1.8svh,16px)] font-semibold">{r.region}</span>
-                <span className="text-right text-[12px] leading-none">{d !== null && <Signed d={d} unit={false} />}</span>
+                <span className="text-right text-[12px] leading-none">{d !== null && <Signed d={d} />}</span>
                 {r.byQuarter.map((q, k) => (
-                  <Bar
+                  <QuarterBar
                     key={q.quarter}
                     label={q.quarter.slice(0, 2)}
-                    value={q.value}
+                    fraction={q.value}
                     hue={k === r.byQuarter.length - 1 ? (r.byQuarter.length > 1 ? latestHue(a.value, q.value) : bandHue(q.value)) : GREY}
                     delay={450 + k * 90}
-                    testid="region-quarter"
-                    big
+                    value={<Percent value={q.value} />}
+                    barTestid="region-quarter-bar"
+                    valueTestid="region-quarter-value"
                   />
                 ))}
               </button>
