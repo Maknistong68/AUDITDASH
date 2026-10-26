@@ -61,3 +61,10 @@ def test_site_keywords_health(): assert category_for(None,'site','Mosquito prese
 def test_site_default(): assert category_for(None,'site','Parking area requires expansion') == 'site'
 def test_positive_has_no_category(): assert category_for(None,'positive','Neat offices') is None
 def test_site_keywords_medicine(): assert category_for(None,'site','Medicine expired, site nurse not maintaining inventory') == 'health'
+def test_mislabelled_audit_notes_imported_as_negatives(seed):  # 4800001112-Q4-2025-20251015
+    obs = [o for o in seed.observations if o['auditId']=='4800001112-Q4-2025-20251015']
+    neg = [o for o in obs if o['kind']=='negative']
+    assert sum(o['kind']=='positive' for o in obs) == 17 and len(neg) >= 40
+    assert all(o['category'] for o in neg)
+def test_every_non_positive_has_category(seed):
+    assert all(o['category'] for o in seed.observations if o['kind'] != 'positive')

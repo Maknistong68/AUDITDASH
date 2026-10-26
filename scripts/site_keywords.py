@@ -30,9 +30,9 @@ def category_for(code, kind, text):
     """Category id for an observation, or None when it has none (e.g. positives)."""
     if kind == "positive":
         return None
-    if code:
-        return CODE_CATEGORY.get(code)
-    if kind == "site":
+    if code and CODE_CATEGORY.get(code):
+        return CODE_CATEGORY[code]
+    if kind in ("site", "negative"):
         for cat, pattern in _KEYWORDS:
             if re.search(pattern, text or "", re.I):
                 return cat

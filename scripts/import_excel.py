@@ -153,7 +153,17 @@ def _classify_kind(label):
     return None
 
 
-def _parse_observations(rows, start, audit_id):
+def _match_question(notes, questions):
+    n = " ".join(notes.lower().split())
+    if not n:
+        return None
+    for q, code in questions:
+        if q == n or q.startswith(n) or n.startswith(q):
+            return code
+    return None
+
+
+def _parse_observations(rows, start, audit_id, questions=()):
     hdr = _find(rows, start, "SR#")
     com = _find(rows, start, "Observation/Comment", hdr[0])
     sr_col, com_col = hdr[1], com[1]
@@ -179,23 +189,23 @@ def _parse_observations(rows, start, audit_id):
         if code and not kind:
             kind = "negative"  # a code with a Positive/Site label stays positive/site
         if kind:
-            entries.append({"kind": kind, "code": code, "numbered": numbered,
+            notes = " ".join(str(v) for o, v in left if o > sr_col and not _classify_kind(str(v)))
+            entries.append({"kind": kind, "code": code, "numbered": numbered, "notes": notes,
                             "parts": [text] if text else [], "photo": photo})
         elif entries and (text or photo):
             if text:
                 entries[-1]["parts"].append(text)
             entries[-1]["photo"] = entries[-1]["photo"] or photo
 
-    # Some blocks number their positives 1..N and then list further notes under the same
-    # "Positive Observations" label without a number; those are not positives.
-    dropped = 0
+    # Audit 4800001112-Q4-2025-20251015 (Abyatona Zone F, Q4) numbers its positives 1..N and
+    # then lists per-checklist-item notes, unnumbered, under the same "Positive Observations"
+    # label. Those are findings, not positives: import them as negatives, resolving itemCode
+    # by matching the row's notes text to a checklist question (None if no match).
     if any(e["kind"] == "positive" and e["numbered"] for e in entries):
-        kept = [e for e in entries if not (e["kind"] == "positive" and not e["numbered"])]
-        dropped = len(entries) - len(kept)
-        entries = kept
-    if dropped:
-        print(f"WARNING: {audit_id}: dropped {dropped} unnumbered rows labelled 'Positive "
-              f"Observations' after a numbered list (mislabelled checklist notes)", file=sys.stderr)
+        for e in entries:
+            if e["kind"] == "positive" and not e["numbered"]:
+                e["kind"] = "negative"
+                e["code"] = _match_question(e["notes"], questions)
 
     # Template rows: a checklist code with no comment and no photo is not an observation.
     entries = [e for e in entries if e["parts"] or e["photo"]]
@@ -214,7 +224,8 @@ def _parse_observations(rows, start, audit_id):
     return out
 
 
-def parse_results(path):
+def parse_results(path, checklist=()):
+    questions = [(" ".join(i["question"].lower().split()), i["code"]) for i in checklist]
     wb = _load(path)
     contractors, audits, observations = {}, [], []
     for ws in wb.worksheets:
@@ -250,7 +261,7 @@ def parse_results(path):
             contractors.setdefault(info["contractNo"], {
                 "id": info["contractNo"], "name": info["name"],
                 "contractNo": info["contractNo"], "subregion": info["subregion"]})
-            observations.extend(_parse_observations(rows, start, audit_id))
+            observations.extend(_parse_observations(rows, start, audit_id, questions))
     order = {no: i for i, no in enumerate(CONTRACTS)}
     return (sorted(contractors.values(), key=lambda c: order[c["id"]]), audits, observations)
 
@@ -264,7 +275,7 @@ def main(argv=None):
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
     checklist = parse_checklist(args.checklist)
-    contractors, audits, observations = parse_results(args.results)
+    contractors, audits, observations = parse_results(args.results, checklist)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for name, data in (("checklist", checklist), ("contractors", contractors),
