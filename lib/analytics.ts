@@ -2,7 +2,7 @@ import { bandFor } from './scoring';
 import type { Repo } from './data/repo';
 import type { Audit, Band, CategoryId, ChecklistItem, Contractor, Filter, Observation, Quarter, Subregion } from './types';
 import { CATEGORIES } from './categories';
-import { isHighRisk } from './highRisk';
+import { HAZARDS, hazardOf, isHighRisk, type HazardId, type HighRiskContractor } from './highRisk';
 import { itemLabel } from './itemLabels';
 
 const QUARTER_ORDER: Quarter[] = ['Q4-2025', 'Q1-2026'];
@@ -439,10 +439,41 @@ export function repeatSpread(rows: SystemicRepeat[]): { reach: number; of: numbe
 
 /** High-risk (B4/B5 items, keyword site findings) non-positive observations over filtered audits, N/A subsections excluded. */
 export function highRiskCount(repo: Repo, filter: Filter): number {
-  const audits = select(repo, filter);
+  return highRiskObservations(repo, select(repo, filter)).length;
+}
+
+function highRiskObservations(repo: Repo, audits: Audit[]): Observation[] {
   const items = itemMap(repo);
   const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
-  return obsByAudit(repo, audits).filter((o) => o.kind !== 'positive' && !onNaItem(o, items, na) && isHighRisk(o)).length;
+  return obsByAudit(repo, audits).filter((o) => o.kind !== 'positive' && !onNaItem(o, items, na) && isHighRisk(o));
+}
+
+/**
+ * The highRiskCount findings split by hazard type (lib/highRisk hazardOf): every finding in exactly one bucket, so the
+ * counts sum to highRiskCount. All HAZARDS in display order, empty ones included; share is of the total (0 when none).
+ */
+export function highRiskByHazard(repo: Repo, filter: Filter): { hazard: HazardId; label: string; count: number; share: number }[] {
+  const obs = highRiskObservations(repo, select(repo, filter));
+  return HAZARDS.map((h) => {
+    const count = obs.filter((o) => hazardOf(o) === h.id).length;
+    return { hazard: h.id, label: h.label, count, share: obs.length ? count / obs.length : 0 };
+  });
+}
+
+/** High-risk findings and audits per contractor and quarter (filter's quarter and regions), with the hazard split. */
+export function highRiskByContractor(repo: Repo, filter: Filter): HighRiskContractor[] {
+  const audits = select(repo, filter);
+  const obs = highRiskObservations(repo, audits);
+  return repo.contractors().flatMap((c) => {
+    const quarters = QUARTER_ORDER.map((quarter) => {
+      const mine = new Set(audits.filter((a) => a.contractorId === c.id && a.quarter === quarter).map((a) => a.id));
+      const hits = obs.filter((o) => mine.has(o.auditId));
+      const byHazard: Partial<Record<HazardId, number>> = {};
+      for (const o of hits) byHazard[hazardOf(o)] = (byHazard[hazardOf(o)] ?? 0) + 1;
+      return { quarter, audits: mine.size, findings: hits.length, byHazard };
+    }).filter((q) => q.audits > 0);
+    return quarters.length ? [{ id: c.id, name: c.name, quarters }] : [];
+  });
 }
 
 /** Average totalScore per region and quarter; ignores filter.quarter, respects regions and contractorId. */

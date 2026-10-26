@@ -1,9 +1,10 @@
 'use client';
-import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
-import { TriangleAlert } from 'lucide-react';
+import { ChevronRight, TriangleAlert } from 'lucide-react';
 import { CountUp } from '@/components/motion/CountUp';
+import { HandoffLink } from '@/components/motion/HandoffLink';
 import { int } from '@/lib/format';
+import { HIGHRISK_CARD, HIGHRISK_FIGURE } from '@/lib/handoff';
 import type { Quarter } from '@/lib/types';
 import { BentoCard, TileLabel } from './BentoGrid';
 import { BIG, PAD } from './parts';
@@ -11,7 +12,8 @@ import { BIG, PAD } from './parts';
 /**
  * S: high-risk work findings (total), with a tiny per-quarter bar of findings per audit (quarters have different audit
  * counts, so raw counts would mislead). More is worse: the latest bar is red when it rose, green when it fell.
- * The whole tile opens the Permits & High-Risk Work category.
+ * The whole tile opens /high-risk with the shared hand-off: the tile grows into the view's header strip and the figure
+ * flies into its header figure (lib/handoff).
  */
 export function HighRiskCard({ count, byQuarter, href }: {
   count: number; byQuarter: { quarter: Quarter; count: number; audits: number }[]; href: string;
@@ -22,18 +24,24 @@ export function HighRiskCard({ count, byQuarter, href }: {
   const [a, b] = rates;
   const last = !a || !b ? 'var(--tone-dot)' : b.rate > a.rate ? 'var(--down)' : b.rate < a.rate ? 'var(--up)' : 'var(--muted)';
   return (
-    <BentoCard i={4} testid="kpi-highrisk" className={`tone-non ${PAD} lift justify-between gap-1 min-[640px]:col-span-2`}>
-      <Link
+    <BentoCard i={4} testid="kpi-highrisk" handoff={HIGHRISK_CARD} className={`tone-non ${PAD} lift group justify-between gap-1 min-[640px]:col-span-2`}>
+      <HandoffLink
         href={href}
-        aria-label={`High-risk work: ${count} findings. Open Permits & High-Risk Work`}
+        aria-label={`High-risk work: ${count} findings. Open details`}
         className="absolute inset-0 z-[1] rounded-[var(--radius-card)]"
       />
+      <span
+        aria-hidden
+        className="absolute right-[clamp(12px,1.4svh,20px)] top-[clamp(10px,1.4svh,18px)] grid size-7 place-items-center rounded-full bg-fill-2 text-muted transition-transform duration-300 group-hover:translate-x-0.5"
+      >
+        <ChevronRight size={16} strokeWidth={2.4} />
+      </span>
       <TileLabel tone="var(--tone)">
         <TriangleAlert size={15} strokeWidth={2.4} aria-hidden />
         High-risk work
       </TileLabel>
       <div className="flex items-end justify-between gap-3">
-        <p className={BIG}>
+        <p data-testid="highrisk-count" data-handoff={HIGHRISK_FIGURE} className={BIG}>
           <CountUp value={count} format={int} duration={1.2} delay={0.36} />
         </p>
         <div className="flex flex-col items-center gap-1 pb-[0.2em]">

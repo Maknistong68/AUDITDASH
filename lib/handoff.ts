@@ -13,6 +13,9 @@ export const HANDOFF = 'mp-card';
 /** Repeat findings card → the /repeats header strip, and its figure → the header figure. */
 export const REPEATS_CARD = 'rp-card';
 export const REPEATS_FIGURE = 'rp-figure';
+/** High-risk work card → the /high-risk header strip, and its figure → the header figure. */
+export const HIGHRISK_CARD = 'hr-card';
+export const HIGHRISK_FIGURE = 'hr-figure';
 
 /** Length of the morph (mirrors `::view-transition-group(*)` in globals.css). */
 export const HANDOFF_MS = 1000;

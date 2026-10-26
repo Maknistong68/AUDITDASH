@@ -84,14 +84,14 @@ test('main problem tile lifts on hover', async ({ page }) => {
   await expect.poll(async () => y0 - (await mp.boundingBox())!.y).toBeGreaterThan(2);
 });
 
-test('the high-risk tile opens Documents with the filter', async ({ page }) => {
+test('the high-risk tile opens /high-risk with the filter', async ({ page }) => {
   await page.goto('/?q=Q1-2026&r=SR1');
   await hydrated(page);
   const link = page.getByTestId('kpi-highrisk').getByRole('link');
-  await expect(link).toHaveAttribute('href', '/category/documents?q=Q1-2026&r=SR1');
+  await expect(link).toHaveAttribute('href', '/high-risk?q=Q1-2026&r=SR1');
   await link.click();
-  await expect(page).toHaveURL(/\/category\/documents\?q=Q1-2026&r=SR1$/);
-  await expect(page.getByTestId('carousel')).toBeVisible();
+  await expect(page).toHaveURL(/\/high-risk\?q=Q1-2026&r=SR1$/);
+  await expect(page.getByTestId('highrisk-header')).toBeVisible();
 });
 
 test('repeats card: questions repeating at ≥5 contractors, with a stacked bar of how widespread', async ({ page }) => {
