@@ -1,4 +1,5 @@
 import { getRepo } from '@/lib/data/repo';
+import { toSearchParams, type SP } from '@/lib/details';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
   bandDistribution, compareContractors, contractorCards, filterAudits, highRiskCount, mainProblem, portfolioSummary,
@@ -16,17 +17,6 @@ import { RepeatsCard } from '@/components/bento/RepeatsCard';
 import { HighRiskCard } from '@/components/bento/HighRiskCard';
 import { BandsCard } from '@/components/bento/BandsCard';
 import { RegionCard } from '@/components/bento/RegionCard';
-
-type SP = Record<string, string | string[] | undefined>;
-
-function toSearchParams(sp: SP): URLSearchParams {
-  const out = new URLSearchParams();
-  for (const [k, v] of Object.entries(sp)) {
-    if (typeof v === 'string') out.set(k, v);
-    else if (Array.isArray(v) && v.length) out.set(k, v[0]);
-  }
-  return out;
-}
 
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<SP> }) {
   const filter = parseFilter(toSearchParams(await searchParams));

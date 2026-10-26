@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bandColor, bandShort, bandTone, deltaPoints, int, pct, prevQuarterShort, pts } from '@/lib/format';
+import { bandColor, bandShort, bandTone, deltaPoints, int, pct, prevQuarterShort, pts, dateLabel, quarterLabel } from '@/lib/format';
 
 describe('format', () => {
   it('pct rounds and never prints NaN', () => {
@@ -43,4 +43,13 @@ describe('scoreboard format', () => {
     expect(prevQuarterShort('4800001131-Q1-2026-20260210')).toBe('Q4');
     expect(prevQuarterShort('4800001131-Q4-2025-20251110')).toBeNull();
   });
+});
+
+describe('dateLabel / quarterLabel', () => {
+  it('formats ISO dates without time zones', () => {
+    expect(dateLabel('2026-03-01')).toBe('1 Mar 2026');
+    expect(dateLabel('2025-11-19', false)).toBe('19 Nov');
+    expect(dateLabel('bad')).toBe('bad');
+  });
+  it('labels quarters', () => expect(quarterLabel('Q4-2025')).toBe('Q4 2025'));
 });

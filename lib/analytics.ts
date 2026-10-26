@@ -423,3 +423,79 @@ export function mainProblem(repo: Repo, filter: Filter): {
     items: categoryDetail(repo, qf, worst.category).items.slice(0, 3),
   };
 }
+
+// ---------------------------------------------------------------- details pages (swipeable histories, drill levels)
+
+/** A contractor's audits within the filter's regions, quarter filter ignored, LATEST FIRST (slide 0 = latest). */
+export function contractorAudits(repo: Repo, filter: Filter, contractorId: string): { audit: Audit; previous: Audit | null }[] {
+  const chrono = select(repo, { ...filter, contractorId }, 'all');
+  return chrono.map((audit, i) => ({ audit, previous: i > 0 ? chrono[i - 1] : null })).reverse();
+}
+
+/** Official A/B/C section ratios of one audit (null when the section is not applicable). */
+export function sectionRatios(a: Audit): { A: number | null; B: number | null; C: number | null } {
+  return { A: ring(a, 'A'), B: ring(a, 'B'), C: ring(a, 'C') };
+}
+
+/** Score-based gap of each category for ONE audit, worst first; N/A categories (null) last. */
+export function auditGaps(repo: Repo, audit: Audit): { category: CategoryId; gapRate: number | null; findings: number }[] {
+  return gapsOver(repo, { quarter: 'all', regions: ['SR1', 'SR2'] }, [audit], null)
+    .map((g) => ({ category: g.category, gapRate: g.gapRate, findings: g.findings }))
+    .sort((a, b) => (b.gapRate ?? -1) - (a.gapRate ?? -1) || CATEGORIES.findIndex((c) => c.id === a.category) - CATEGORIES.findIndex((c) => c.id === b.category));
+}
+
+/**
+ * An audit's findings (negative + site observations, N/A-subsection notes excluded) grouped by category,
+ * groups ordered by finding count (most first), observations in id order. Also the audit's positives count.
+ */
+export function auditFindings(repo: Repo, audit: Audit): { groups: { category: CategoryId; observations: Observation[] }[]; positives: number } {
+  const obs = obsByAudit(repo, [audit]);
+  const groups = CATEGORIES.map((c) => ({ category: c.id, observations: findingsOf(repo, [audit], obs, c.id) }))
+    .filter((g) => g.observations.length > 0)
+    .sort((a, b) => b.observations.length - a.observations.length);
+  return { groups, positives: obs.filter((o) => o.kind === 'positive').length };
+}
+
+export interface CategoryQuarter {
+  quarter: Quarter;
+  audits: number;
+  gapRate: number | null;
+  /** Gap of the chronologically previous quarter that has audits (same regions); null when none. */
+  prevGapRate: number | null;
+  contractors: { contractor: Contractor; gapRate: number; findings: number }[];
+  items: { itemCode: string; question: string; hits: number }[];
+}
+
+/** One entry per quarter with audits in the filter's regions (quarter filter ignored), LATEST FIRST. */
+export function categoryQuarters(repo: Repo, filter: Filter, cat: CategoryId): CategoryQuarter[] {
+  const out: CategoryQuarter[] = [];
+  let prev: number | null = null;
+  for (const quarter of QUARTER_ORDER) {
+    const audits = select(repo, filter, quarter);
+    if (!audits.length) continue;
+    const gapRate = scoreGap(repo, audits, cat);
+    const detail = categoryDetail(repo, { ...filter, quarter }, cat);
+    out.push({ quarter, audits: audits.length, gapRate, prevGapRate: prev, ...detail });
+    prev = gapRate;
+  }
+  return out.reverse();
+}
+
+export type ItemState = 'finding' | 'clear' | 'na';
+
+/** The category's checklist items for one audit: finding (applicable negative note) / clear / N/A (subsection possible 0). */
+export function auditItemStates(repo: Repo, audit: Audit, cat: CategoryId): { item: ChecklistItem; state: ItemState; observation: Observation | null }[] {
+  const na = naSubsections(audit);
+  const negs = itemNegatives([audit], obsByAudit(repo, [audit]), itemMap(repo));
+  return itemsOf(repo, cat).map((item) => {
+    if (isNa(item, na)) return { item, state: 'na' as const, observation: null };
+    const o = negs.find((x) => x.itemCode === item.code) ?? null;
+    return { item, state: o ? ('finding' as const) : ('clear' as const), observation: o };
+  });
+}
+
+/** True when the observation sits on an item whose subsection is N/A in its audit (such notes are not findings). */
+export function isNaObservation(repo: Repo, o: Observation): boolean {
+  const audit = repo.audits().find((a) => a.id === o.auditId);
+  return !!audit && onNaItem(o, itemMap(repo), new Map([[audit.id, naSubsections(audit)]]));
+}

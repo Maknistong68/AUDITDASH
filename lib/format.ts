@@ -54,3 +54,15 @@ export function prevQuarterShort(auditId: string): string | null {
   const i = m ? QUARTERS.indexOf(m[1] as Quarter) : -1;
   return i > 0 ? QUARTERS[i - 1].slice(0, 2) : null;
 }
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+/** "2026-03-01" -> "1 Mar 2026" (string maths: no time zone can shift the day). */
+export function dateLabel(iso: string, withYear = true): string {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return iso;
+  const s = `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]}`;
+  return withYear ? `${s} ${m[1]}` : s;
+}
+
+/** "Q1-2026" -> "Q1 2026". */
+export const quarterLabel = (q: Quarter): string => q.replace('-', ' ');

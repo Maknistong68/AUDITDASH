@@ -44,7 +44,9 @@ function Row({
   disabled,
   onToggle,
   animateIn,
+  query,
 }: {
+  query: string;
   card: Card;
   i: number;
   selected: boolean;
@@ -101,7 +103,7 @@ function Row({
         <Delta total={total} previous={previous} auditId={auditId} size={13} bare />
       </span>
       <Link
-        href={`/contractor/${contractor.id}`}
+        href={`/contractor/${contractor.id}${query}`}
         aria-label={`${contractor.name}, rank ${rank}, ${pct(total)}%, ${band}`}
         className="absolute inset-0 z-[1] rounded-[14px]"
       />
@@ -145,6 +147,8 @@ export function ContractorsCard({ cards, compare }: { cards: Card[]; compare: Re
     [pathname],
   );
   const full = selected.length >= MAX_COMPARE;
+  // Carry an explicit filter into the details (the default overview URL stays clean).
+  const query = sp.has('q') || sp.has('r') ? `?${new URLSearchParams([...sp].filter(([k]) => k === 'q' || k === 'r')).toString()}` : '';
 
   return (
     <>
@@ -184,6 +188,7 @@ export function ContractorsCard({ cards, compare }: { cards: Card[]; compare: Re
                 disabled={!on && full}
                 onToggle={() => setSelected(toggleCompare(selected, id))}
                 animateIn={firstPaint.current}
+                query={query}
               />
             );
           })}

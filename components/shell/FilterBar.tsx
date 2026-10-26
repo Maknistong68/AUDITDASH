@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { QUARTERS, REGIONS, filterToQuery } from '@/lib/filters';
 import type { Filter, Subregion } from '@/lib/types';
@@ -9,14 +9,16 @@ const QUARTER_LABEL: Record<Filter['quarter'], string> = { 'Q4-2025': 'Q4 2025',
 
 /**
  * Apple segmented control for the quarter (sliding thumb) and pill toggles for the sub-regions.
- * State lives in the URL (?q=&r=); a compare selection (?c=) is carried over.
+ * State lives in the URL (?q=&r=) of the current page; a compare selection (?c=) is carried over.
+ * A details page keeps its path and restarts its carousel at the latest slide (`s` dropped).
  */
 export function FilterBar({ filter }: { filter: Filter }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [pending, start] = useTransition();
   const go = (next: Filter) => {
     const c = new URLSearchParams(window.location.search).get('c');
-    start(() => router.push(`/?${filterToQuery(next)}${c ? `&c=${encodeURIComponent(c)}` : ''}`, { scroll: false }));
+    start(() => router.push(`${pathname}?${filterToQuery(next)}${c ? `&c=${encodeURIComponent(c)}` : ''}`, { scroll: false }));
   };
   const toggleRegion = (r: Subregion) => {
     const on = filter.regions.includes(r);
