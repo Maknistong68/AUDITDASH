@@ -435,6 +435,50 @@ export function mainProblem(repo: Repo, filter: Filter): {
   };
 }
 
+/**
+ * "Driven by": how much of the latest quarter's lost score each category accounts for (same quarter as mainProblem).
+ *
+ *   weightShare(c) = mean over the quarter's audits of  W(a, c) / W(a)
+ *                    W(a, c) = total weight of c's items applicable in audit a (subsection not N/A),
+ *                    W(a)    = total weight of all applicable items in a  (an audit where c is N/A adds 0)
+ *   contribution(c) = gapRate(c) × weightShare(c)     gapRate = the score-based gap of categoryGaps / mainProblem
+ *   share(c)        = contribution(c) / Σ contribution
+ *
+ * So a category's share is the part of the weighted score lost through it: a big category with a moderate gap can
+ * outweigh a small one with a severe gap. Categories with no applicable item (gapRate null) are left out. Sorted by
+ * share desc, then gapRate desc, then category order. [] for an empty filter, a non-H&S type, or nothing lost.
+ */
+export function gapContribution(repo: Repo, filter: Filter): { category: CategoryId; gapRate: number; share: number }[] {
+  const all = select(repo, filter);
+  if (!all.length) return [];
+  const quarter = QUARTER_ORDER.filter((q) => all.some((a) => a.quarter === q)).at(-1)!;
+  const audits = all.filter((a) => a.quarter === quarter);
+  const checklist = repo.checklist();
+  const shareSum = new Map<CategoryId, number>();
+  for (const a of audits) {
+    const byCat = new Map<CategoryId, number>();
+    let total = 0;
+    for (const i of checklist) {
+      if (itemRatio(a, i) === null) continue;
+      total += i.weight;
+      byCat.set(i.category, (byCat.get(i.category) ?? 0) + i.weight);
+    }
+    if (total === 0) continue;
+    for (const [c, w] of byCat) shareSum.set(c, (shareSum.get(c) ?? 0) + w / total);
+  }
+  const rows = CATEGORIES.flatMap((c, order) => {
+    const gapRate = scoreGap(repo, audits, c.id);
+    if (gapRate === null) return [];
+    return [{ category: c.id, gapRate, contribution: gapRate * ((shareSum.get(c.id) ?? 0) / audits.length), order }];
+  });
+  const sum = rows.reduce((s, r) => s + r.contribution, 0);
+  if (!(sum > 0)) return [];
+  return rows
+    .map((r) => ({ ...r, share: r.contribution / sum }))
+    .sort((a, b) => b.share - a.share || b.gapRate - a.gapRate || a.order - b.order)
+    .map(({ category, gapRate, share }) => ({ category, gapRate, share }));
+}
+
 // ---------------------------------------------------------------- details pages (swipeable histories, drill levels)
 
 /** A contractor's audits within the filter's regions, quarter filter ignored, LATEST FIRST (slide 0 = latest). */

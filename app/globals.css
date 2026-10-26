@@ -29,6 +29,7 @@
   --bar: #2f6fe0;
   --hero-bg: #1d1d1f; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.12);
   --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
+  --hero-gap: #ff6a4d; --hero-ring: transparent; --hero-rule: rgba(255, 255, 255, 0.1);
 
   --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
   --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
@@ -87,7 +88,8 @@
   --accent: #2997ff;
   --on-accent: #000000; /* white on Sky Blue is ~3:1; black is ~7:1 */
   --bar: #5b8cff;
-  --hero-bg: #2c2c2e; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.1);
+  --hero-bg: #2e2220; --hero-text: #f5f5f7; --hero-muted: #b0a6a4; --hero-chip: rgba(255, 255, 255, 0.1);
+  --hero-gap: #ff6a4d; --hero-ring: rgba(255, 122, 92, 0.42); --hero-rule: rgba(255, 255, 255, 0.1);
   --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
   --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
   --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
@@ -126,7 +128,8 @@
     --accent: #2997ff;
     --on-accent: #000000;
     --bar: #5b8cff;
-    --hero-bg: #2c2c2e; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.1);
+    --hero-bg: #2e2220; --hero-text: #f5f5f7; --hero-muted: #b0a6a4; --hero-chip: rgba(255, 255, 255, 0.1);
+    --hero-gap: #ff6a4d; --hero-ring: rgba(255, 122, 92, 0.42); --hero-rule: rgba(255, 255, 255, 0.1);
     --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
     --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
     --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
@@ -274,11 +277,44 @@ html.js [data-countup]:not([data-ready]) {
   backdrop-filter: saturate(160%) blur(40px);
 }
 
-/* The inverted Apple tile: the right side's hero (main problem). */
+/*
+ * The inverted Apple tile: the right side's hero (main problem) and the category header it hands off to.
+ * Light: near-black on parchment. Dark: a warm-tinted elevated surface with an accent ring (--hero-ring), so it still
+ * stands out from the #1c1c1e cards. --hero-gap is the dark-surface step of --gap (the tile is dark in both themes).
+ */
 .hero-tile {
   background: var(--hero-bg);
   color: var(--hero-text);
-  box-shadow: var(--shadow-card);
+  box-shadow: inset 0 0 0 1px var(--hero-ring), var(--shadow-card);
+}
+.hero-tile.lift:hover {
+  box-shadow: inset 0 0 0 1px var(--hero-ring), var(--shadow-lift);
+}
+
+/*
+ * Main Problem -> category hand-off (lib/handoff.ts): the card morphs into the category header tile, its title into
+ * the header's title, the rest of the page cross-fades. Names exist only while html[data-handoff] is set.
+ */
+html[data-handoff] [data-handoff-target] { view-transition-name: mp-hero; }
+html[data-handoff] [data-handoff-target] [data-handoff-name] { view-transition-name: mp-name; }
+::view-transition-group(mp-hero),
+::view-transition-group(mp-name) {
+  animation-duration: 560ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-old(mp-hero),
+::view-transition-new(mp-hero) {
+  height: 100%;
+  animation-duration: 560ms;
+}
+::view-transition-old(root) { animation: 220ms ease-out both vt-fade-out; }
+::view-transition-new(root) { animation: 360ms 140ms ease-out both vt-fade-in; }
+@keyframes vt-fade-out { to { opacity: 0; } }
+@keyframes vt-fade-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
 }
 
 /*

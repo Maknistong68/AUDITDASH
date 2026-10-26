@@ -3,7 +3,7 @@ import { href, repeatHref, toSearchParams, type SP } from '@/lib/details';
 import type { CategoryId } from '@/lib/types';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
-  bandDistribution, categoryGaps, compareContractors, contractorCards, filterAudits, highRiskCount, mainProblem, portfolioSummary,
+  bandDistribution, categoryGaps, compareContractors, contractorCards, filterAudits, gapContribution, highRiskCount, mainProblem, portfolioSummary,
   regionComparison, repeatFindings, topIssues,
 } from '@/lib/analytics';
 import { MAX_COMPARE } from '@/lib/compare';
@@ -94,11 +94,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
               right={
                 <>
                   {problem && (
-                    <MainProblemCard
-                      problem={problem}
-                      audits={filterAudits(repo, { ...filter, quarter: problem.quarter }).length}
-                      query={query}
-                    />
+                    <MainProblemCard problem={problem} drivers={gapContribution(repo, filter).slice(0, 4)} query={query} />
                   )}
                   <AuditOverviewCard
                     avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter}

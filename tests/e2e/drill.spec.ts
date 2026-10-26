@@ -7,7 +7,7 @@ const escReady = (page: Page) => expect(page.locator('body')).toHaveAttribute('d
 
 test('four-level drill from the main problem to an observation, Esc back to the item', async ({ page }) => {
   await page.goto('/');
-  await page.getByTestId('main-problem').getByRole('link').click();
+  await page.getByTestId('main-problem-open').click({ position: { x: 24, y: 24 } });
   await expect(page).toHaveURL(/\/category\/subcontractor\?q=all&r=SR1%2CSR2$/);
   await ready(page);
 
@@ -213,9 +213,9 @@ test('a Q4 contractor row opens the contractor on that Q4 audit (same score)', a
 
 test('the Q4 main-problem tile opens its category on Q4 with the same gap and item anchors', async ({ page }) => {
   await page.goto('/?q=Q4-2025&r=SR1%2CSR2');
-  const link = page.getByTestId('main-problem').getByRole('link');
+  const link = page.getByTestId('main-problem-open');
   const gap = /gap (\d+)%/.exec((await link.getAttribute('aria-label'))!)![1];
-  await link.click();
+  await link.click({ position: { x: 24, y: 24 } });
   await expect(page).toHaveURL(/\/category\/[a-z]+\?q=Q4-2025/);
   await ready(page);
   await expect(active(page).getByTestId('slide-score')).toHaveText(`${gap}%`);
