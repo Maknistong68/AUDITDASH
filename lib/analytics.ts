@@ -38,6 +38,8 @@ export function portfolioSummary(repo: Repo, filter: Filter): {
   const audits = select(repo, filter);
   const avgScore = avg(audits);
   const obs = obsByAudit(repo, audits);
+  const items = itemMap(repo);
+  const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
   let delta: number | null = null;
   if (filter.quarter === 'Q1-2026' || filter.quarter === 'all') {
     const q1 = avg(select(repo, filter, 'Q1-2026'));
@@ -49,7 +51,7 @@ export function portfolioSummary(repo: Repo, filter: Filter): {
     band: avgScore === null ? null : bandFor(avgScore),
     delta,
     audits: audits.length,
-    negatives: obs.filter((o) => o.kind === 'negative' || o.kind === 'site').length,
+    negatives: obs.filter((o) => (o.kind === 'negative' || o.kind === 'site') && !onNaItem(o, items, na)).length,
     positives: obs.filter((o) => o.kind === 'positive').length,
   };
 }
@@ -130,14 +132,19 @@ function findingRateFor(repo: Repo, filter: Filter, audits: Audit[], cat: Catego
   return slots === 0 ? null : itemHits(repo, audits, cat) / slots;
 }
 
+/** True when the observation is tied to an item whose subsection is N/A (possible === 0) in its audit. */
+function onNaItem(o: Observation, items: Map<string, ChecklistItem>, na: Map<string, Set<string>>): boolean {
+  const item = o.itemCode ? items.get(o.itemCode) : undefined;
+  return !!item && isNa(item, na.get(o.auditId) ?? new Set());
+}
+
 /** negative/site observations of the category, excluding those on items whose subsection is N/A in that audit. */
 function findingsOf(repo: Repo, audits: Audit[], obs: Observation[], cat: CategoryId): Observation[] {
   const items = itemMap(repo);
   const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
   return obs.filter((o) => {
     if ((o.kind !== 'negative' && o.kind !== 'site') || o.category !== cat) return false;
-    const item = o.itemCode ? items.get(o.itemCode) : undefined;
-    return !(item && isNa(item, na.get(o.auditId) ?? new Set()));
+    return !onNaItem(o, items, na);
   });
 }
 
@@ -255,7 +262,10 @@ export function contractorInCategory(repo: Repo, filter: Filter, cat: CategoryId
 export function itemHistory(repo: Repo, contractorId: string, itemCode: string): { audit: Audit; observation: Observation | null }[] {
   const audits = repo.audits().filter((a) => a.contractorId === contractorId).sort(byDate);
   const obs = repo.observations().filter((o) => o.itemCode === itemCode);
+  const items = itemMap(repo);
   return audits.map((audit) => {
+    const item = items.get(itemCode);
+    if (item && isNa(item, naSubsections(audit))) return { audit, observation: null };
     const mine = obs.filter((o) => o.auditId === audit.id);
     return { audit, observation: mine.find((o) => o.kind === 'negative') ?? mine[0] ?? null };
   });

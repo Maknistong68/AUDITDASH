@@ -183,3 +183,20 @@ describe('N/A notes imported as negatives', () => {
       }
   });
 });
+
+describe('N/A notes excluded from summary and history', () => {
+  test('portfolio negatives exclude N/A notes', () => {
+    const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
+    const raw = repo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.kind !== 'positive');
+    const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
+    expect(na).toBeGreaterThan(0);
+    expect(portfolioSummary(repo, f).negatives).toBe(raw.length - na);
+  });
+  test('itemHistory returns null observation for N/A audit but keeps the row', () => {
+    const h = itemHistory(repo, '4800000892', 'B5.1');
+    const row = h.find((x) => x.audit.id === '4800000892-Q1-2026-20260315')!;
+    expect(row).toBeDefined();
+    expect(row.observation).toBeNull();
+    expect(h).toHaveLength(repo.audits().filter((a) => a.contractorId === '4800000892').length);
+  });
+});
