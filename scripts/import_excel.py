@@ -153,6 +153,46 @@ def _classify_kind(label):
     return None
 
 
+def _norm(t):
+    return " ".join(str(t).lower().split())
+
+
+def _summary_findings(path, checklist):
+    """(normalised comment, itemCode) rows from Part 3 of the checklist workbook's H&S sheet.
+
+    ONLY used for audit 4800001112-Q4-2025-20251015, whose results-workbook rows lost their
+    SR# codes. In the checklist sheet each row has the SR# code, or (last few rows) only the
+    question text, which is matched to a checklist question (unique match required).
+    """
+    ws = _load(path)["Health & Safety"]
+    by_question = {}
+    for i in checklist:
+        by_question.setdefault(_norm(i["question"]), []).append(i["code"])
+    out, in_part3 = [], False
+    for row in ws.iter_rows(values_only=True):
+        if isinstance(row[1], str) and row[1].strip() == "Summary of Findings":
+            in_part3 = True
+        if not in_part3 or len(row) < 7 or _empty(row[6]) or isinstance(row[6], (int, float)):
+            continue
+        code = re.sub(r"\s+", "", str(row[1])) if row[1] is not None else ""
+        if not ITEM_CODE.match(code):
+            hits = [c for q, cs in by_question.items() if not _empty(row[2]) and
+                    (q == _norm(row[2]) or q.startswith(_norm(row[2]))) for c in cs]
+            code = hits[0] if len(set(hits)) == 1 else None
+        out.append((_norm(row[6]), code))
+    return out
+
+
+def _match_comment(text, pool):
+    """Consume and return the code of the first pool entry whose comment matches `text`."""
+    t = _norm(text)
+    for idx, (c, code) in enumerate(pool):
+        if code and (c[:80] == t[:80] or (len(t) > 30 and (t[:60] in c or c[:60] in t))):
+            del pool[idx]
+            return code
+    return None
+
+
 def _match_question(notes, questions):
     n = " ".join(notes.lower().split())
     if not n:
@@ -163,7 +203,7 @@ def _match_question(notes, questions):
     return None
 
 
-def _parse_observations(rows, start, audit_id, questions=()):
+def _parse_observations(rows, start, audit_id, questions=(), findings=()):
     hdr = _find(rows, start, "SR#")
     com = _find(rows, start, "Observation/Comment", hdr[0])
     sr_col, com_col = hdr[1], com[1]
@@ -202,10 +242,12 @@ def _parse_observations(rows, start, audit_id, questions=()):
     # label. Those are findings, not positives: import them as negatives, resolving itemCode
     # by matching the row's notes text to a checklist question (None if no match).
     if any(e["kind"] == "positive" and e["numbered"] for e in entries):
+        pool = list(findings)  # codes recovered from the checklist workbook's Part 3
         for e in entries:
             if e["kind"] == "positive" and not e["numbered"]:
                 e["kind"] = "negative"
-                e["code"] = _match_question(e["notes"], questions)
+                e["code"] = (_match_question(e["notes"], questions)
+                             or _match_comment(" ".join(e["parts"]), pool))
 
     # Template rows: a checklist code with no comment and no photo is not an observation.
     entries = [e for e in entries if e["parts"] or e["photo"]]
@@ -224,9 +266,10 @@ def _parse_observations(rows, start, audit_id, questions=()):
     return out
 
 
-def parse_results(path, checklist=()):
+def parse_results(path, checklist=(), checklist_path=None):
     questions = [(" ".join(i["question"].lower().split()), i["code"]) for i in checklist]
     wb = _load(path)
+    findings = _summary_findings(checklist_path, checklist) if checklist_path else []
     contractors, audits, observations = {}, [], []
     for ws in wb.worksheets:
         if not re.search(r"SUBREGION", ws.title, re.I):
@@ -261,7 +304,7 @@ def parse_results(path, checklist=()):
             contractors.setdefault(info["contractNo"], {
                 "id": info["contractNo"], "name": info["name"],
                 "contractNo": info["contractNo"], "subregion": info["subregion"]})
-            observations.extend(_parse_observations(rows, start, audit_id, questions))
+            observations.extend(_parse_observations(rows, start, audit_id, questions, findings))
     order = {no: i for i, no in enumerate(CONTRACTS)}
     return (sorted(contractors.values(), key=lambda c: order[c["id"]]), audits, observations)
 
@@ -275,7 +318,7 @@ def main(argv=None):
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
     checklist = parse_checklist(args.checklist)
-    contractors, audits, observations = parse_results(args.results, checklist)
+    contractors, audits, observations = parse_results(args.results, checklist, args.checklist)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for name, data in (("checklist", checklist), ("contractors", contractors),

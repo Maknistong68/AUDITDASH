@@ -68,3 +68,6 @@ def test_mislabelled_audit_notes_imported_as_negatives(seed):  # 4800001112-Q4-2
     assert all(o['category'] for o in neg)
 def test_every_non_positive_has_category(seed):
     assert all(o['category'] for o in seed.observations if o['kind'] != 'positive')
+def test_mislabelled_audit_item_codes_recovered(seed):
+    neg = [o for o in seed.observations if o['auditId']=='4800001112-Q4-2025-20251015' and o['kind']=='negative']
+    assert sum(bool(o['itemCode']) for o in neg) >= 50
