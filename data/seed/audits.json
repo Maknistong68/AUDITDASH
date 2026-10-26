@@ -1,0 +1,2351 @@
+[
+  {
+    "id": "4800001134-Q4-2025-20251022",
+    "contractorId": "4800001134",
+    "quarter": "Q4-2025",
+    "date": "2025-10-22",
+    "location": "Construction & Extension of Box Culvert under H55",
+    "inspectionNo": "HSW-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.67,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 27
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 67,
+        "scored": 40
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 6
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 3
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 1,
+        "scored": 0.5
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 5
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 19.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 4.5
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 15
+      }
+    ]
+  },
+  {
+    "id": "4800000901-Q4-2025-20251020",
+    "contractorId": "4800000901",
+    "quarter": "Q4-2025",
+    "date": "2025-10-20",
+    "location": "Sub-Region 1_Dynamic Compaction, Phase 2",
+    "inspectionNo": "HSW-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.68,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 36
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 61,
+        "scored": 30.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 3
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 6,
+        "scored": 4
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 4.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 0,
+        "scored": 0
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 2
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 1,
+        "scored": 0.5
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 29
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 8
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 21
+      }
+    ]
+  },
+  {
+    "id": "4800000838-Q4-2025-20251112",
+    "contractorId": "4800000838",
+    "quarter": "Q4-2025",
+    "date": "2025-11-12",
+    "location": "South Business Community High Density Expansion",
+    "inspectionNo": "HSW-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.62,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 42,
+        "scored": 21
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 61,
+        "scored": 37.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 6,
+        "scored": 5.5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 4.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 11,
+        "scored": 0
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 3,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 7
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 28.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 8
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 20.5
+      }
+    ]
+  },
+  {
+    "id": "4800001322-Q4-2025-20251013",
+    "contractorId": "4800001322",
+    "quarter": "Q4-2025",
+    "date": "2025-10-13",
+    "location": "Sub-Region 1_(Pipe Line Project)",
+    "inspectionNo": "HSW-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.62,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 42,
+        "scored": 21
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 61,
+        "scored": 37.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 6,
+        "scored": 5.5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 4.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 11,
+        "scored": 0
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 3,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 7
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 28.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 8
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 20.5
+      }
+    ]
+  },
+  {
+    "id": "4800000838-Q4-2025-20251119",
+    "contractorId": "4800000838",
+    "quarter": "Q4-2025",
+    "date": "2025-11-19",
+    "location": "South Business Community",
+    "inspectionNo": "HSW-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.65,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 30
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 64,
+        "scored": 45
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 7
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 7.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 0,
+        "scored": 0
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 5
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 21
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 8.5
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 12.5
+      }
+    ]
+  },
+  {
+    "id": "4800001112-Q4-2025-20251015",
+    "contractorId": "4800001112",
+    "quarter": "Q4-2025",
+    "date": "2025-10-15",
+    "location": "Zone-F, Village Culvert Utility",
+    "inspectionNo": "HSW-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.620940170940171,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 25.5
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 65,
+        "scored": 44
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 4.5
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 6
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 0,
+        "scored": 0
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 11
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 24.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 7
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 17.5
+      }
+    ]
+  },
+  {
+    "id": "4800001272-Q4-2025-20251029",
+    "contractorId": "4800001272",
+    "quarter": "Q4-2025",
+    "date": "2025-10-29",
+    "location": "Sub Region 2 - Coast Guard Facilities Infrastructure and Building Work",
+    "inspectionNo": "HSW-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.71,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 30
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 69,
+        "scored": 51.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 4.5
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6.5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 7.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 6.5
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 7
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 3.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 28
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 9
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 19
+      }
+    ]
+  },
+  {
+    "id": "4800001131-Q4-2025-20251103",
+    "contractorId": "4800001131",
+    "quarter": "Q4-2025",
+    "date": "2025-11-03",
+    "location": "Sub Region 2 - Port T1 Infrastructure and Buildings Work",
+    "inspectionNo": "HSW-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.74,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 33
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 69,
+        "scored": 50.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 4.5
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 9
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 5.5
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 2.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 1.5
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 7
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 27.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 11
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 16.5
+      }
+    ]
+  },
+  {
+    "id": "4800000876-Q4-2025-20251201",
+    "contractorId": "4800000876",
+    "quarter": "Q4-2025",
+    "date": "2025-12-01",
+    "location": "Sub Region 2 - Port",
+    "inspectionNo": "HS-01",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.64,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 42,
+        "scored": 27
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 66,
+        "scored": 35.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 3
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 4
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 4.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 11,
+        "scored": 1
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 3,
+        "scored": 2.5
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 27
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 9
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 18
+      }
+    ]
+  },
+  {
+    "id": "4800001134-Q1-2026-20260310",
+    "contractorId": "4800001134",
+    "quarter": "Q1-2026",
+    "date": "2026-03-10",
+    "location": "Construction & Extension of Box Culvert",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.64,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 36,
+        "scored": 21
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 68,
+        "scored": 48
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6.5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 6
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 3.5
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 4.5
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 2
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 16.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 3.5
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 13
+      }
+    ]
+  },
+  {
+    "id": "4800001112-Q1-2026-20260308",
+    "contractorId": "4800001112",
+    "quarter": "Q1-2026",
+    "date": "2026-03-08",
+    "location": "Zone-F, Village Culvert Utility",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed",
+      "Alanoud Gh"
+    ],
+    "totalScore": 0.6,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 36,
+        "scored": 19.5
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 63,
+        "scored": 41
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 7.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 0,
+        "scored": 0
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 6
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 1.5
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 5
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 16.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 2.5
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 14
+      }
+    ]
+  },
+  {
+    "id": "4800000882-Q1-2026-20260125",
+    "contractorId": "4800000882",
+    "quarter": "Q1-2026",
+    "date": "2026-01-25",
+    "location": "South Business Community High Density Expansion",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed",
+      "Alanoud Alghamdi"
+    ],
+    "totalScore": 0.68,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 27
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 68,
+        "scored": 47.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 7.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 6.5
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 4
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 28.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 8.5
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 20
+      }
+    ]
+  },
+  {
+    "id": "4200000026-Q1-2026-20260208",
+    "contractorId": "4200000026",
+    "quarter": "Q1-2026",
+    "date": "2026-02-08",
+    "location": "WADI Jubbah Permanent Channel Phase-1",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed"
+    ],
+    "totalScore": 0.6,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 42,
+        "scored": 13.5
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 64,
+        "scored": 41
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 4.5
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 4.5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 6
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 11,
+        "scored": 2
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 1.5
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 7
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 18.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 6
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 12.5
+      }
+    ]
+  },
+  {
+    "id": "4800001322-Q1-2026-20260118",
+    "contractorId": "4800001322",
+    "quarter": "Q1-2026",
+    "date": "2026-01-18",
+    "location": "Supply & Installation of 1200 Water Pipeline - Water Supply to NGHP",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed",
+      "Alanoud Alghamdi"
+    ],
+    "totalScore": 0.76,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 30
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 65,
+        "scored": 43.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 4.5
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 6
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 11,
+        "scored": 0
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 2
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 3,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 3.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 25
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 8
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 17
+      }
+    ]
+  },
+  {
+    "id": "4800001440-Q1-2026-20260302",
+    "contractorId": "4800001440",
+    "quarter": "Q1-2026",
+    "date": "2026-03-02",
+    "location": "Southern Plots Road Network Package 1",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "J.Bernal",
+      "G. Ahmed",
+      "A. Alghamdi"
+    ],
+    "totalScore": 0.6,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 39,
+        "scored": 7.5
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 64,
+        "scored": 42
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 3
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 7.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 11,
+        "scored": 1
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 17.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 3
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 14.5
+      }
+    ]
+  },
+  {
+    "id": "4800000838-Q1-2026-20260201",
+    "contractorId": "4800000838",
+    "quarter": "Q1-2026",
+    "date": "2026-02-01",
+    "location": "Oxagon South Business Community Expansion",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed",
+      "Alanoud AlGhamdi"
+    ],
+    "totalScore": 0.72,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 45,
+        "scored": 30
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 64,
+        "scored": 49.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 7
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 7.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 0,
+        "scored": 0
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 7
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 3.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 24.5
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 9
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 15.5
+      }
+    ]
+  },
+  {
+    "id": "4800000892-Q1-2026-20260315",
+    "contractorId": "4800000892",
+    "quarter": "Q1-2026",
+    "date": "2026-03-15",
+    "location": "Highway 55 Upgrade - Cut & Cover Tunnel Earthworks",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed",
+      "Alanoud Alghamdi"
+    ],
+    "totalScore": 0.62,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 36,
+        "scored": 18
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 57,
+        "scored": 37.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 7.5
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 0,
+        "scored": 0
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 11,
+        "scored": 1
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 1,
+        "scored": 1
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 24
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 8.5
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 15.5
+      }
+    ]
+  },
+  {
+    "id": "4800001272-Q1-2026-20260223",
+    "contractorId": "4800001272",
+    "quarter": "Q1-2026",
+    "date": "2026-02-23",
+    "location": "Sub Region 2 - Coast Guard Facilities Infrastructure",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed",
+      "Alanoud Alghamdi"
+    ],
+    "totalScore": 0.65,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 40,
+        "scored": 20
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 70,
+        "scored": 49.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 6.5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 9
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 3
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 2
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 4,
+        "scored": 2
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 6
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 1.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 40,
+        "scored": 23
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 19,
+        "scored": 5
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 18
+      }
+    ]
+  },
+  {
+    "id": "4800001131-Q1-2026-20260301",
+    "contractorId": "4800001131",
+    "quarter": "Q1-2026",
+    "date": "2026-03-01",
+    "location": "Sub Region 2 - Port T1 Infrastructure and Buildings Work",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed",
+      "Alanoud Alghamdi"
+    ],
+    "totalScore": 0.85,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 36,
+        "scored": 25.5
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 69,
+        "scored": 53.5
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 6
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 5.5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 9
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 2.5
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 9.5
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 2
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 2,
+        "scored": 2
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 5
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 1.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 28
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 6.5
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 21.5
+      }
+    ]
+  },
+  {
+    "id": "4800000876-Q1-2026-20260215",
+    "contractorId": "4800000876",
+    "quarter": "Q1-2026",
+    "date": "2026-02-15",
+    "location": "Sub Region 2 - Port Design and Build for OXAGON Terminal 2 (T2) Dredging and Quay Walls-D&B",
+    "inspectionNo": "HSSEW-002",
+    "auditors": [
+      "Jeffrey Bernal",
+      "Gulzar Ahmed",
+      "Alanoud Alghamdi"
+    ],
+    "totalScore": 0.66,
+    "sections": [
+      {
+        "code": "A",
+        "label": "MANAGEMENT",
+        "possible": 42,
+        "scored": 21
+      },
+      {
+        "code": "B",
+        "label": "PROCESS AND PROCEDURES (ASSESSED ON SITE)",
+        "possible": 70,
+        "scored": 49
+      },
+      {
+        "code": "B1",
+        "label": "Risk Assessments Method Statements",
+        "possible": 6,
+        "scored": 4.5
+      },
+      {
+        "code": "B2",
+        "label": "Competent Person Designation",
+        "possible": 7,
+        "scored": 5
+      },
+      {
+        "code": "B3",
+        "label": "Emergency Response",
+        "possible": 9,
+        "scored": 9
+      },
+      {
+        "code": "B4",
+        "label": "Work Permit",
+        "possible": 4,
+        "scored": 3.5
+      },
+      {
+        "code": "B5",
+        "label": "Utility Clearance",
+        "possible": 5,
+        "scored": 5
+      },
+      {
+        "code": "B6",
+        "label": "Subcontractor Management",
+        "possible": 15,
+        "scored": 3
+      },
+      {
+        "code": "B7",
+        "label": "Training",
+        "possible": 3,
+        "scored": 2
+      },
+      {
+        "code": "B8",
+        "label": "Incident reporting",
+        "possible": 3,
+        "scored": 1.5
+      },
+      {
+        "code": "B9",
+        "label": "Fire Prevention",
+        "possible": 3,
+        "scored": 3
+      },
+      {
+        "code": "B10",
+        "label": "Personal Protective Equipment",
+        "possible": 4,
+        "scored": 4
+      },
+      {
+        "code": "B11",
+        "label": "Medical",
+        "possible": 7,
+        "scored": 7
+      },
+      {
+        "code": "B12",
+        "label": "Occupational and Health Surveillance",
+        "possible": 4,
+        "scored": 1.5
+      },
+      {
+        "code": "C",
+        "label": "PLANNING AND COMMITMENT",
+        "possible": 34,
+        "scored": 22
+      },
+      {
+        "code": "C1",
+        "label": "Leadership Engagement",
+        "possible": 13,
+        "scored": 3
+      },
+      {
+        "code": "C2",
+        "label": "Planning",
+        "possible": 21,
+        "scored": 19
+      }
+    ]
+  }
+]
