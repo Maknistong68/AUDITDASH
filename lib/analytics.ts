@@ -1,7 +1,8 @@
 import { bandFor } from './scoring';
 import type { Repo } from './data/repo';
-import type { Audit, Band, CategoryId, ChecklistItem, Contractor, Filter, Observation, Quarter } from './types';
+import type { Audit, Band, CategoryId, ChecklistItem, Contractor, Filter, Observation, Quarter, Subregion } from './types';
 import { CATEGORIES } from './categories';
+import { isHighRisk } from './highRisk';
 
 const QUARTER_ORDER: Quarter[] = ['Q4-2025', 'Q1-2026'];
 const mean = (xs: number[]): number | null => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
@@ -269,4 +270,117 @@ export function itemHistory(repo: Repo, contractorId: string, itemCode: string):
     const mine = obs.filter((o) => o.auditId === audit.id);
     return { audit, observation: mine.find((o) => o.kind === 'negative') ?? mine[0] ?? null };
   });
+}
+
+// ---------------------------------------------------------------- scoreboard, repeats, high-risk, regions, compare
+
+export interface ContractorCard {
+  contractor: Contractor; auditId: string; total: number; band: Band;
+  rings: { A: number | null; B: number | null; C: number | null }; previous: number | null; rank: number;
+}
+
+const ring = (a: Audit, code: string): number | null => {
+  const s = a.sections.find((x) => x.code === code);
+  return !s || s.possible === 0 ? null : s.scored / s.possible;
+};
+
+/** One card per contractor with a filtered audit (latest), best first; ties share a rank. */
+export function contractorCards(repo: Repo, filter: Filter): ContractorCard[] {
+  const audits = select(repo, filter);
+  const cards: ContractorCard[] = [];
+  let prevTotal: number | null = null;
+  let rank = 0;
+  league(repo, filter).forEach((row, i) => {
+    const latest = audits.filter((a) => a.contractorId === row.contractor.id).at(-1)!;
+    if (prevTotal === null || row.latest !== prevTotal) rank = i + 1;
+    prevTotal = row.latest;
+    cards.push({
+      contractor: row.contractor, auditId: latest.id, total: latest.totalScore, band: bandFor(latest.totalScore),
+      rings: { A: ring(latest, 'A'), B: ring(latest, 'B'), C: ring(latest, 'C') }, previous: row.previous, rank,
+    });
+  });
+  return cards;
+}
+
+const BANDS: Band[] = ['Excellent', 'Good', 'Partially Compliant', 'Minimally Compliant', 'Non-Compliant'];
+
+export function bandDistribution(repo: Repo, filter: Filter): Record<Band, number> {
+  const out = Object.fromEntries(BANDS.map((b) => [b, 0])) as Record<Band, number>;
+  for (const c of contractorCards(repo, filter)) out[c.band]++;
+  return out;
+}
+
+/**
+ * Items negative in a contractor's latest filtered audit AND in one of its audits in an earlier quarter
+ * (regions respected, quarter filter ignored). N/A-subsection and null-itemCode observations excluded.
+ * Worst contractor (lowest latest total) first, then itemCode.
+ */
+export function repeatFindings(repo: Repo, filter: Filter): {
+  contractor: Contractor; itemCode: string; question: string; category: CategoryId; quarters: Quarter[];
+}[] {
+  if (filter.quarter === 'Q4-2025') return [];
+  const audits = select(repo, filter);
+  const pool = select(repo, filter, 'all');
+  const items = itemMap(repo);
+  const na = new Map(pool.map((a) => [a.id, naSubsections(a)]));
+  const negs = repo.observations().filter((o) => o.kind === 'negative' && o.itemCode && na.has(o.auditId) && !onNaItem(o, items, na));
+  const rows: { total: number; row: ReturnType<typeof repeatFindings>[number] }[] = [];
+  for (const contractor of repo.contractors()) {
+    const latest = audits.filter((a) => a.contractorId === contractor.id).at(-1);
+    if (!latest) continue;
+    const lq = QUARTER_ORDER.indexOf(latest.quarter);
+    const mine = pool.filter((a) => a.contractorId === contractor.id);
+    const quartersOf = new Map<string, Set<Quarter>>();
+    const hitIn = (a: Audit) => negs.filter((o) => o.auditId === a.id).map((o) => o.itemCode!);
+    for (const a of mine) {
+      if (QUARTER_ORDER.indexOf(a.quarter) > lq) continue;
+      for (const code of hitIn(a)) (quartersOf.get(code) ?? quartersOf.set(code, new Set()).get(code)!).add(a.quarter);
+    }
+    for (const code of new Set(hitIn(latest))) {
+      const qs = quartersOf.get(code)!;
+      const item = items.get(code);
+      if (!item || qs.size < 2) continue;
+      rows.push({
+        total: latest.totalScore,
+        row: { contractor, itemCode: code, question: item.question, category: item.category, quarters: QUARTER_ORDER.filter((q) => qs.has(q)) },
+      });
+    }
+  }
+  rows.sort((a, b) => a.total - b.total || a.row.itemCode.localeCompare(b.row.itemCode, undefined, { numeric: true }));
+  return rows.map((r) => r.row);
+}
+
+/** High-risk (permits / keyword site) non-positive observations over filtered audits, N/A subsections excluded. */
+export function highRiskCount(repo: Repo, filter: Filter): number {
+  const audits = select(repo, filter);
+  const items = itemMap(repo);
+  const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
+  return obsByAudit(repo, audits).filter((o) => o.kind !== 'positive' && !onNaItem(o, items, na) && isHighRisk(o)).length;
+}
+
+/** Average totalScore per region and quarter; ignores filter.quarter, respects regions and contractorId. */
+export function regionComparison(repo: Repo, filter: Filter): { region: Subregion; byQuarter: Record<Quarter, number | null> }[] {
+  return (['SR1', 'SR2'] as Subregion[])
+    .filter((r) => filter.regions.includes(r))
+    .map((region) => ({
+      region,
+      byQuarter: Object.fromEntries(
+        QUARTER_ORDER.map((q) => [q, avg(select(repo, { ...filter, regions: [region] }, q))]),
+      ) as Record<Quarter, number | null>,
+    }));
+}
+
+export function compareContractors(repo: Repo, filter: Filter, ids: string[]): {
+  card: ContractorCard; gaps: ReturnType<typeof categoryGaps>; repeats: ReturnType<typeof repeatFindings>;
+}[] {
+  const cards = new Map(contractorCards(repo, filter).map((c) => [c.contractor.id, c]));
+  const repeats = repeatFindings(repo, filter);
+  return ids
+    .filter((id) => cards.has(id))
+    .slice(0, 3)
+    .map((id) => ({
+      card: cards.get(id)!,
+      gaps: categoryGaps(repo, { ...filter, contractorId: id }),
+      repeats: repeats.filter((r) => r.contractor.id === id),
+    }));
 }
