@@ -1,11 +1,14 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { ArrowDown, ArrowUp, ChevronRight } from 'lucide-react';
 import { CountUp } from '@/components/motion/CountUp';
 import { categoryById } from '@/lib/categories';
 import { QUARTERS } from '@/lib/filters';
 import { pct } from '@/lib/format';
+import { canHandOff, handOff } from '@/lib/handoff';
 import { itemLabel } from '@/lib/itemLabels';
 import type { CategoryId, Quarter } from '@/lib/types';
 import { SPRING } from './BentoGrid';
@@ -18,8 +21,8 @@ export interface MainProblem {
   items: { itemCode: string; question: string; hits: number; severity?: number }[];
 }
 
-const qLabel = (q: Quarter) => q.replace('-', ' ');
-const prevLabel = (q: Quarter) => {
+export const qLabel = (q: Quarter) => q.replace('-', ' ');
+export const prevLabel = (q: Quarter) => {
   const i = QUARTERS.indexOf(q);
   return i > 0 ? QUARTERS[i - 1].slice(0, 2) : null;
 };
@@ -37,13 +40,25 @@ const figureSize = (gapRate: number) =>
  * Gap % large, Δ vs previous quarter (a rising gap is bad → red; falling → green), top 3 driving items
  * (ranked by impact: audits noted × subsection score lost), each as a short plain label and "N of M audits"
  * (audits with an auditor note). No item codes here; they stay on the detail pages.
- * The whole tile opens the category details.
+ * The whole tile opens the category details; where view transitions run (and motion is allowed) the tile itself travels
+ * and shrinks into the category page's active carousel card (lib/handoff).
  */
 export function MainProblemCard({ problem, audits, query }: { problem: MainProblem; audits: number; query: string }) {
   const reduce = useReducedMotion();
   const cat = categoryById(problem.category);
+  const router = useRouter();
+  const tile = useRef<HTMLElement>(null);
+  const url = `/category/${problem.category}?${query}`;
+  // Fetch the category page ahead, so the hand-off starts without a wait.
+  useEffect(() => router.prefetch(url), [router, url]);
+  const onClick = (e: React.MouseEvent) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !tile.current || !canHandOff()) return;
+    e.preventDefault();
+    handOff(tile.current, () => router.push(url));
+  };
   return (
     <motion.section
+      ref={tile}
       data-testid="main-problem"
       aria-labelledby="mp-title"
       initial={reduce ? false : { opacity: 0, y: 22, scale: 0.985 }}
@@ -54,7 +69,8 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
       className="hero-tile lift group relative col-span-full flex min-h-0 min-w-0 rounded-[var(--radius-card)]"
     >
       <Link
-        href={`/category/${problem.category}?${query}`}
+        href={url}
+        onClick={onClick}
         aria-label={`Main problem ${qLabel(problem.quarter)}: ${cat.name}, gap ${pct(problem.gapRate)}%. Open details`}
         className="absolute inset-0 z-[2] rounded-[var(--radius-card)]"
       />

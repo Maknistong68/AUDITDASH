@@ -1,14 +1,14 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
-import { categoryCards, categoryQuarters, contractorAudits, filterAudits } from '@/lib/analytics';
+import { categoryCards, categoryQuarters, contractorAudits } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
 import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
 import { quarterLabel } from '@/lib/format';
 import { findCategory } from '@/lib/routeParams';
 import { DetailEmpty, DetailFrame } from '@/components/details/DetailFrame';
-import { CategoryCardDeck } from '@/components/details/CategoryCardDeck';
+import { CategoryCarousel } from '@/components/details/CategoryCarousel';
 import { CategorySlide } from '@/components/details/CategorySlide';
 import { CategoryTitle } from '@/components/details/CategoryTitle';
 import { AuditCarousel } from '@/components/motion/AuditCarousel';
@@ -21,8 +21,9 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 /**
- * Category details: the dashboard's Main problem card for this category, ranked by the latest quarter's gap (#1 = the
- * main problem; drag it to the next rank), then a carousel by quarter (latest first) within the filter's regions.
+ * Category details: a row of compact cards, one per category ranked by the latest quarter's gap (#1 = the main problem),
+ * this category's centred and active (drag or click to another), then a carousel by quarter (latest first) within the
+ * filter's regions.
  * Without a card (no audits, or no applicable item in the latest quarter) the plain category title stays.
  */
 export default async function CategoryPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
@@ -42,7 +43,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   return (
     <DetailFrame filter={filter} crumbs={[{ label: 'Overview', href: overview }, { label: cat.name }]} parent={overview}>
       {ranked && (
-        <CategoryCardDeck cards={cards} audits={filterAudits(repo, { ...filter, quarter: cards[0].quarter }).length} current={id} query={query} />
+        <CategoryCarousel cards={cards} current={id} query={query} />
       )}
       {quarters.length === 0 ? (
         <>
