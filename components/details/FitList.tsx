@@ -1,6 +1,6 @@
 'use client';
 import { ChevronDown } from 'lucide-react';
-import { Children, useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { Children, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 /** Height kept for the "+M more" button when not every row fits. */
 const MORE_H = 34;
@@ -25,45 +25,52 @@ export function FitList({ children, testid, className = '', label }: {
   const [fit, setFit] = useState(n);
   const [open, setOpen] = useState(false);
 
+  // Measured only while every row is rendered: the box is then as tall as the screen lets it be. Hiding rows shrinks the
+  // box (the cards size to their content), so measuring again then would cut further; a window resize starts over.
   const measure = useCallback(() => {
     const box = wrap.current;
     const ol = list.current;
-    const first = ol?.firstElementChild as HTMLElement | null;
-    if (!box || !ol || !first) return;
+    if (!box || !ol || !ol.children.length) return;
     // The box never scrolls itself (a #hash on load may have scrolled it): only the opened list does.
     box.scrollTop = 0;
-    const avail = box.clientHeight;
-    const row = first.offsetHeight;
-    const gap = parseFloat(getComputedStyle(ol).rowGap) || 0;
-    if (!row) return;
-    if (n * row + (n - 1) * gap <= avail + 0.5) setFit(n);
-    else setFit(Math.max(1, Math.floor((avail - MORE_H + gap) / (row + gap))));
-  }, [n]);
+    const bottom = box.getBoundingClientRect().bottom;
+    const ends = [...ol.children].map((li) => li.getBoundingClientRect().bottom);
+    if (ends[ends.length - 1] <= bottom + 0.5) return;
+    setFit(Math.max(1, ends.filter((e) => e <= bottom - MORE_H + 0.5).length));
+  }, []);
 
   useLayoutEffect(() => {
-    measure();
-    const ro = new ResizeObserver(measure);
-    if (wrap.current) ro.observe(wrap.current);
-    // A deep link to a row the box hides: open the list there.
+    if (fit === n && !open) measure();
+  }, [fit, n, open, measure]);
+
+  useEffect(() => {
+    const again = () => setFit(n);
+    window.addEventListener('resize', again);
+    document.fonts?.ready.then(again);
+    return () => window.removeEventListener('resize', again);
+  }, [n]);
+
+  // A deep link to a row the box hides: open the list there.
+  useLayoutEffect(() => {
     const id = decodeURIComponent(window.location.hash.slice(1));
     const target = id ? document.getElementById(id) : null;
     const li = target?.closest<HTMLElement>('[data-rank]');
-    if (target && li && list.current?.contains(li) && Number(li.dataset.rank) >= fitNow(list.current, wrap.current)) {
-      setOpen(true);
-      requestAnimationFrame(() => target.scrollIntoView({ block: 'nearest' }));
-    }
-    return () => ro.disconnect();
-  }, [measure]);
+    const box = wrap.current;
+    if (!target || !li || !box || !list.current?.contains(li)) return;
+    if (li.getBoundingClientRect().bottom <= box.getBoundingClientRect().bottom - MORE_H) return;
+    setOpen(true);
+    requestAnimationFrame(() => target.scrollIntoView({ block: 'nearest' }));
+  }, []);
 
   const shown = open ? n : fit;
   const hidden = n - fit;
   return (
-    <div ref={wrap} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+    <div ref={wrap} className="flex min-h-0 flex-auto flex-col overflow-hidden">
       <ol
         ref={list}
         data-testid={testid}
         data-open={open ? '' : undefined}
-        className={`min-h-0 ${open ? 'flex-1 overflow-y-auto overscroll-contain' : 'shrink-0'} ${className}`}
+        className={`min-h-0 flex-auto ${open ? 'overflow-y-auto overscroll-contain' : 'overflow-hidden'} ${className}`}
       >
         {rows.map((r, i) => (
           <li key={i} hidden={i >= shown} data-rank={i}>
@@ -86,15 +93,4 @@ export function FitList({ children, testid, className = '', label }: {
       )}
     </div>
   );
-}
-
-/** Rows that fit before the first measure has been applied (for the deep-link check on mount). */
-function fitNow(ol: HTMLOListElement, box: HTMLDivElement | null): number {
-  const first = ol.firstElementChild as HTMLElement | null;
-  if (!first || !box) return Infinity;
-  const gap = parseFloat(getComputedStyle(ol).rowGap) || 0;
-  const n = ol.children.length;
-  const row = first.offsetHeight;
-  if (!row || n * row + (n - 1) * gap <= box.clientHeight + 0.5) return Infinity;
-  return Math.floor((box.clientHeight - MORE_H + gap) / (row + gap));
 }

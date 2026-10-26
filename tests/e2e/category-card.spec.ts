@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
 import { categoryCards, categoryQuarters } from '../../lib/analytics';
 import { itemLabel } from '../../lib/itemLabels';
+import { cardVoids } from './voids';
 import { CATEGORIES } from '../../lib/categories';
 
 const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
@@ -360,3 +361,23 @@ test('a deep link to a driver the card hides opens the list on it', async ({ pag
   await expect(page.locator(`[id="item-${code}"]`)).toBeInViewport();
   await noPageScroll(page);
 });
+
+for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+  test(`/category cards have no empty void over 80px at ${vp.width}, and their heights align`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    for (const cat of ['subcontractor', 'documents', 'health']) {
+      await page.goto(`/category/${cat}?${Q}`);
+      await quartersReady(page);
+      await page.waitForTimeout(1200); // entrance settles
+      const voids = await cardVoids(slide(page));
+      expect(voids.map((v) => v.card)).toEqual(['slide-header', 'ranked-contractors', 'driving-items']);
+      for (const v of voids) expect(v.void, `${cat} ${v.card}`).toBeLessThanOrEqual(80);
+      const tops = await slide(page).locator('section.card').evaluateAll((els) => els.map((e) => [e.getBoundingClientRect().top, e.getBoundingClientRect().bottom]));
+      for (const [t, b] of tops) {
+        expect(Math.abs(t - tops[0][0])).toBeLessThanOrEqual(1);
+        expect(Math.abs(b - tops[0][1])).toBeLessThanOrEqual(1);
+      }
+      await noPageScroll(page);
+    }
+  });
+}

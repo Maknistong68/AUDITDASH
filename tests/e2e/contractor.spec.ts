@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
 import { auditFindings, contractorAudits } from '../../lib/analytics';
+import { cardVoids } from './voids';
 
 const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
 const ID = '4800001131';
@@ -114,3 +115,18 @@ test('reduced motion: a Contractors row still opens the contractor page', async 
   await ready(page);
   await ctx.close();
 });
+
+for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+  test(`/contractor cards have no empty void over 80px at ${vp.width}`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    for (const url of [`/contractor/${ID}`, `/contractor/${ID}?s=1`, '/contractor/4200000026']) {
+      await page.goto(url);
+      await ready(page);
+      await page.waitForTimeout(1200); // entrance settles
+      const voids = await cardVoids(active(page));
+      expect(voids.map((v) => v.card)).toEqual(['slide-header', 'category-gaps', 'findings']);
+      for (const v of voids) expect(v.void, `${url} ${v.card}`).toBeLessThanOrEqual(80);
+      await noPageScroll(page);
+    }
+  });
+}

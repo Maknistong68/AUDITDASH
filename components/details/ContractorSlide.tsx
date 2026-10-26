@@ -51,11 +51,13 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
   const most = Math.max(1, ...d.observations.map((o) => o.count));
   const inCategory = (cat: CategoryId) => href(`/category/${cat}/${d.contractorId}`, d.query, { s: d.index });
   return (
-    <div className="grid h-full grid-cols-1 gap-[var(--gap-grid)] min-[900px]:grid-cols-12 min-[900px]:grid-rows-[minmax(0,1fr)_auto]">
-      <BentoCard i={0} testid="slide-header" className={`tone-${bandTone(band)} justify-between gap-[clamp(10px,1.6svh,20px)] p-[clamp(16px,2.2svh,28px)] min-[900px]:col-span-5`}>
+    // Cards are as tall as the tallest column's content, capped at the screen (flex-initial shrinks, never grows).
+    <div className="flex h-full flex-col">
+    <div className="grid min-h-0 flex-initial grid-cols-1 gap-[var(--gap-grid)] min-[900px]:grid-cols-12 min-[900px]:grid-rows-[minmax(0,1fr)]">
+      <BentoCard i={0} testid="slide-header" className={`tone-${bandTone(band)} justify-between gap-[clamp(12px,2.2svh,26px)] p-[clamp(16px,2.2svh,28px)] min-[900px]:col-span-4`}>
         <AuditLine audit={audit} />
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
-          <p className="figure text-[clamp(56px,10svh,120px)]" data-testid="slide-score">
+          <p className="figure text-[clamp(56px,13svh,150px)]" data-testid="slide-score">
             <span style={d.landing ? { viewTransitionName: CONTRACTOR_SCORE } : undefined}>
               {pct(audit.totalScore)}
               <span className="ml-0.5 text-[0.42em] tracking-normal text-muted">%</span>
@@ -83,11 +85,9 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
         </div>
       </BentoCard>
 
-      <BentoCard i={1} testid="category-gaps" className="gap-1.5 px-[clamp(10px,1vw,18px)] py-[clamp(12px,1.8svh,22px)] min-[900px]:col-span-7">
-        <div className="flex items-baseline justify-between gap-3 px-[clamp(6px,0.6vw,10px)]">
-          <TileLabel>Score lost by category · worst first</TileLabel>
-        </div>
-        <ul className="grid flex-1 grid-cols-1 content-center gap-x-[clamp(12px,1.4vw,28px)] min-[1200px]:grid-flow-col min-[1200px]:grid-cols-2 min-[1200px]:grid-rows-4">
+      <BentoCard i={1} testid="category-gaps" className="gap-1 px-[clamp(10px,1vw,18px)] py-[clamp(12px,1.8svh,22px)] min-[900px]:col-span-4">
+        <TileLabel className="px-[clamp(6px,0.6vw,10px)] pb-1">Score lost by category · worst first</TileLabel>
+        <ul className="grid min-h-0 flex-auto content-evenly">
           {d.gaps.map((g) => {
             const c = categoryById(g.category);
             const Icon = CATEGORY_ICONS[c.icon];
@@ -96,16 +96,18 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
                 <Link
                   data-testid="category-gap-row"
                   href={inCategory(g.category)}
-                  className="group grid grid-cols-[18px_minmax(0,1fr)_minmax(48px,0.8fr)_3.2em_14px] items-center gap-2.5 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(6px,1.1svh,11px)] transition-colors hover:bg-fill-2"
+                  className="group grid gap-[clamp(4px,0.7svh,8px)] rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(4px,1.1svh,13px)] transition-colors hover:bg-fill-2"
                   title={`${c.name}: ${pct(g.gapRate)}% score lost`}
                 >
-                  {Icon && <Icon size={16} strokeWidth={2.2} className="text-muted" aria-hidden />}
-                  <span className="truncate text-[14px] font-semibold">{c.short}</span>
-                  <GapBar value={g.gapRate} />
-                  <span className="num text-right text-[15px] font-semibold">
-                    {g.gapRate === null ? <span className="font-normal text-faint">N/A</span> : <>{pct(g.gapRate)}<span className="text-[0.75em] text-muted">%</span></>}
+                  <span className="flex min-w-0 items-center gap-2.5">
+                    {Icon && <Icon size={16} strokeWidth={2.2} className="shrink-0 text-muted" aria-hidden />}
+                    <span className="min-w-0 flex-1 truncate text-[clamp(14px,1.6svh,18px)] font-semibold">{c.short}</span>
+                    <span className="num text-right text-[15px] font-semibold">
+                      {g.gapRate === null ? <span className="font-normal text-faint">N/A</span> : <>{pct(g.gapRate)}<span className="text-[0.75em] text-muted">%</span></>}
+                    </span>
+                    <ChevronRight size={14} strokeWidth={2.4} className="shrink-0 text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
                   </span>
-                  <ChevronRight size={14} strokeWidth={2.4} className="text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  <GapBar value={g.gapRate} className="!h-[clamp(7px,1.1svh,12px)]" />
                 </Link>
               </li>
             );
@@ -113,13 +115,13 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
         </ul>
       </BentoCard>
 
-      <BentoCard i={2} testid="findings" className="gap-2 px-[clamp(10px,1vw,18px)] py-[clamp(12px,1.8svh,20px)] min-[900px]:col-span-12">
-        <TileLabel className="px-[clamp(6px,0.6vw,10px)]">
+      <BentoCard i={2} testid="findings" className="gap-1 px-[clamp(10px,1vw,18px)] py-[clamp(12px,1.8svh,22px)] min-[900px]:col-span-4">
+        <TileLabel className="px-[clamp(6px,0.6vw,10px)] pb-1">
           <span data-testid="findings-total" className="num text-ink">{d.findings}</span>
           <span>{d.findings === 1 ? 'observation' : 'observations'} · by category</span>
         </TileLabel>
         {d.observations.length ? (
-          <ul className="grid grid-cols-2 gap-[clamp(6px,0.6vw,10px)] min-[900px]:grid-cols-4 min-[1200px]:grid-cols-8">
+          <ul className="grid min-h-0 flex-auto content-evenly">
             {d.observations.map((o) => {
               const c = categoryById(o.category);
               const Icon = CATEGORY_ICONS[c.icon];
@@ -132,17 +134,16 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
                     href={inCategory(o.category)}
                     aria-label={`${c.name}: ${o.count} ${o.count === 1 ? 'observation' : 'observations'}`}
                     title={`${c.name}: ${o.count} ${o.count === 1 ? 'observation' : 'observations'}`}
-                    className="flex min-w-0 flex-col gap-1.5 rounded-[14px] bg-surface-2 px-3 py-2 transition-colors hover:bg-fill-2"
+                    className="group grid gap-[clamp(4px,0.7svh,8px)] rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(4px,1.1svh,13px)] transition-colors hover:bg-fill-2"
                   >
-                    <span className="flex min-w-0 items-center gap-1.5 text-[13px] font-semibold">
-                      {Icon && <Icon size={14} strokeWidth={2.4} style={{ color: c.color }} aria-hidden />}
-                      <span className="truncate">{c.short}</span>
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      {Icon && <Icon size={16} strokeWidth={2.2} className="shrink-0" style={{ color: c.color }} aria-hidden />}
+                      <span className="min-w-0 flex-1 truncate text-[clamp(14px,1.6svh,18px)] font-semibold">{c.short}</span>
+                      <span className="num text-[15px] font-semibold">{o.count}</span>
+                      <ChevronRight size={14} strokeWidth={2.4} className="shrink-0 text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
                     </span>
-                    <span className="flex items-center gap-2">
-                      <span className="num text-[clamp(18px,2.6svh,24px)] font-semibold leading-none tracking-[-0.02em]">{o.count}</span>
-                      <span className="relative block h-[6px] flex-1 overflow-hidden rounded-full bg-fill" aria-hidden>
-                        <span className="absolute inset-y-0 left-0 rounded-full bg-[var(--muted)]" style={{ width: `${(o.count / most) * 100}%`, opacity: 0.55 }} />
-                      </span>
+                    <span className="relative block h-[clamp(7px,1.1svh,12px)] overflow-hidden rounded-full bg-fill-2" aria-hidden>
+                      <span className="absolute inset-y-0 left-0 rounded-full bg-[var(--muted)]" style={{ width: `${(o.count / most) * 100}%`, opacity: 0.55 }} />
                     </span>
                   </Link>
                 </li>
@@ -153,6 +154,7 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
           <p className="px-2 text-[15px] text-muted">No observations in this audit.</p>
         )}
       </BentoCard>
+    </div>
     </div>
   );
 }
