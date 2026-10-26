@@ -1,26 +1,150 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens. Two themes, one system:
+ *  - light "executive ledger": achromatic chrome on a blue-grey ground, white panels, ink figures;
+ *    colour only on data (category hues, band colour).
+ *  - dark "command centre": true-black ground, elevation by lightness alone (#000 / #111 / #1c1c1c),
+ *    no borders on panels; colour only on data.
+ * Band colours are an ordinal status ladder validated with the dataviz validator per mode
+ * (light vs #ffffff, dark vs #111111). They always ship with the band name or a number beside them.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --ground: #f2f4f7;
+  --surface: #ffffff;
+  --raised: #eceef1;
+  --active: #ffffff;
+  --border: #e3e6ea;
+  --rule: #eef0f3;
+  --control: #cfd4da;
+  --text: #0a0a0a;
+  --muted: #5f6368;
+  --faint: #6b6b6b;
+  --positive: #1f7a45;
+  --negative: #c4242a;
+  --track: #eceef1;
+
+  --band-excellent: #0f8a4a;
+  --band-good: #1f7fc4;
+  --band-partial: #d39b00;
+  --band-minimal: #e0483a;
+  --band-non: #a3174f;
+
+  --topbar: 56px;
+  --gap: 16px;
+  --radius-card: 8px;
+  --radius-control: 6px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #000000;
+  --surface: #111111;
+  --raised: #1c1c1c;
+  --active: #2a2a2a;
+  --border: transparent;
+  --rule: #1f1f1f;
+  --control: #3a3a3a;
+  --text: #ffffff;
+  --muted: #b4b4b4;
+  --faint: #949494;
+  --positive: #3fc07a;
+  --negative: #f06a6a;
+  --track: #222222;
+
+  --band-excellent: #1fa463;
+  --band-good: #3b93e0;
+  --band-partial: #b28d10;
+  --band-minimal: #cf3a2a;
+  --band-non: #c850b0;
 }
 
+/* No-JS fallback: follow the OS unless a light stamp is present (the inline script always stamps). */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #000000;
+    --surface: #111111;
+    --raised: #1c1c1c;
+    --active: #2a2a2a;
+    --border: transparent;
+    --rule: #1f1f1f;
+    --control: #3a3a3a;
+    --text: #ffffff;
+    --muted: #b4b4b4;
+    --faint: #949494;
+    --positive: #3fc07a;
+    --negative: #f06a6a;
+    --track: #222222;
+    --band-excellent: #1fa463;
+    --band-good: #3b93e0;
+    --band-partial: #b28d10;
+    --band-minimal: #cf3a2a;
+    --band-non: #c850b0;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-active: var(--active);
+  --color-border: var(--border);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
 }
+
+html,
+body {
+  background: var(--ground);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+/* Panels: border on light, lightness step on dark. */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+
+/* Category hue for a gap tile: light step by default, dark step under the dark theme. */
+.gap-tile {
+  --c: var(--cat-l);
+}
+:root[data-theme="dark"] .gap-tile {
+  --c: var(--cat-d);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .gap-tile {
+    --c: var(--cat-d);
+  }
+}
+
+/* Sun shows in dark (click for light), moon in light. CSS-driven so SSR markup never mismatches. */
+.theme-icon-sun { display: none; }
+:root[data-theme="dark"] .theme-icon-sun { display: block; }
+:root[data-theme="dark"] .theme-icon-moon { display: none; }
