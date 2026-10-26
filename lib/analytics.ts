@@ -3,6 +3,7 @@ import type { Repo } from './data/repo';
 import type { Audit, Band, CategoryId, ChecklistItem, Contractor, Filter, Observation, Quarter, Subregion } from './types';
 import { CATEGORIES } from './categories';
 import { isHighRisk } from './highRisk';
+import { itemLabel } from './itemLabels';
 
 const QUARTER_ORDER: Quarter[] = ['Q4-2025', 'Q1-2026'];
 const mean = (xs: number[]): number | null => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
@@ -363,6 +364,55 @@ export function repeatFindings(repo: Repo, filter: Filter): {
   }
   rows.sort((a, b) => a.total - b.total || a.row.itemCode.localeCompare(b.row.itemCode, undefined, { numeric: true }));
   return rows.map((r) => r.row);
+}
+
+export interface SystemicRepeat {
+  itemCode: string; label: string; category: CategoryId; contractors: Contractor[]; contractorCount: number;
+  eligibleContractors: number; q4Notes: number; q1Notes: number;
+  sectionScores: { contractorId: string; q4: number | null; q1: number | null }[];
+}
+
+/**
+ * Questions repeated (repeatFindings) at >= minContractors contractors, i.e. noted in the contractor's latest audit and
+ * an earlier quarter. Q4/Q1 notes count filtered contractors with an applicable negative note in that quarter. Sorted by
+ * contractorCount desc, then topIssues-style impact (hits x (1 - mean subsection score)), then code.
+ */
+export function systemicRepeats(repo: Repo, filter: Filter, minContractors = 5): SystemicRepeat[] {
+  const repeats = repeatFindings(repo, filter);
+  if (!repeats.length) return [];
+  const pool = select(repo, filter, 'all');
+  const items = itemMap(repo);
+  const quarterOf = new Map(pool.map((a) => [a.id, a.quarter]));
+  const has = (c: string, q: Quarter) => pool.some((a) => a.contractorId === c && a.quarter === q);
+  const eligibleContractors = repo.contractors().filter((c) => has(c.id, 'Q4-2025') && has(c.id, 'Q1-2026')).length;
+  const auditOf = (c: string, q: Quarter) => pool.filter((a) => a.contractorId === c && a.quarter === q).at(-1);
+  const negs = itemNegatives(pool, obsByAudit(repo, pool), items);
+  const byItem = new Map<string, Contractor[]>();
+  for (const r of repeats) (byItem.get(r.itemCode) ?? byItem.set(r.itemCode, []).get(r.itemCode)!).push(r.contractor);
+  const rows: (SystemicRepeat & { impact: number })[] = [];
+  for (const [code, list] of byItem) {
+    const contractors = [...new Map(list.map((c) => [c.id, c])).values()];
+    const item = items.get(code);
+    if (!item || contractors.length < minContractors) continue;
+    contractors.sort((a, b) => a.name.localeCompare(b.name));
+    const mine = negs.filter((o) => o.itemCode === code);
+    const notedBy = (q: Quarter) => new Set(mine.filter((o) => quarterOf.get(o.auditId) === q).map((o) => pool.find((a) => a.id === o.auditId)!.contractorId)).size;
+    const hitIds = new Set(mine.map((o) => o.auditId));
+    const ratios = pool.filter((a) => hitIds.has(a.id)).map((a) => itemRatio(a, item)).filter((x): x is number => x !== null);
+    const ratioIn = (c: string, q: Quarter) => { const a = auditOf(c, q); return a ? itemRatio(a, item) : null; };
+    rows.push({
+      itemCode: code, label: itemLabel(code, item.question), category: item.category, contractors, contractorCount: contractors.length,
+      eligibleContractors, q4Notes: notedBy('Q4-2025'), q1Notes: notedBy('Q1-2026'),
+      sectionScores: contractors.map((c) => ({ contractorId: c.id, q4: ratioIn(c.id, 'Q4-2025'), q1: ratioIn(c.id, 'Q1-2026') })),
+      impact: hitIds.size * (1 - (mean(ratios) ?? 1)),
+    });
+  }
+  rows.sort((a, b) => b.contractorCount - a.contractorCount || b.impact - a.impact || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
+  return rows.map((r) => {
+    const { impact, ...out } = r;
+    void impact;
+    return out;
+  });
 }
 
 /** High-risk (B4/B5 items, keyword site findings) non-positive observations over filtered audits, N/A subsections excluded. */
