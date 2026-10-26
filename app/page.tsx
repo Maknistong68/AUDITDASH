@@ -86,7 +86,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                 <RepeatsCard repeats={repeats ? repeats.length : null} top={topRepeats} />
                 <HighRiskCard count={highRiskCount(repo, filter)} />
                 <BandsCard bands={bandDistribution(repo, filter)} />
-                <RegionCard rows={regionComparison(repo, filter)} />
+                <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} />
               </>
             }
           />

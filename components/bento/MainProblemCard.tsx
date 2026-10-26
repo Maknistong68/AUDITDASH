@@ -41,6 +41,8 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
       initial={reduce ? false : { opacity: 0, y: 22, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ ...SPRING, delay: 0.12 }}
+      whileHover={reduce ? undefined : { y: -4, transition: { type: 'spring', stiffness: 400, damping: 28 } }}
+      whileTap={reduce ? undefined : { scale: 0.99, y: -1 }}
       className="hero-tile lift group relative col-span-full flex min-h-0 min-w-0 rounded-[var(--radius-card)]"
     >
       <Link

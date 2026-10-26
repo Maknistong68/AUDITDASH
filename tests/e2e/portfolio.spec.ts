@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { getRepo } from '../../lib/data/repo';
+import { regionComparison } from '../../lib/analytics';
+import { pct } from '../../lib/format';
 
 const hydrated = async (page: import('@playwright/test').Page) =>
   expect(page.getByTestId('contractors')).toHaveAttribute('data-hydrated', '');
@@ -55,4 +58,26 @@ test('reduced motion renders bars at their final width', async ({ browser }) => 
   const t = await page.getByTestId('contractor-row').first().locator('span[style*="width"]').first().evaluate((el) => getComputedStyle(el).transform);
   expect(t === 'none' || t === 'matrix(1, 0, 0, 1, 0, 0)').toBe(true);
   await ctx.close();
+});
+test('region tile follows the quarter filter', async ({ page }) => {
+  const filter = { quarter: 'Q4-2025' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
+  const expected = regionComparison(getRepo(), filter).map((r) => ({ region: r.region, v: pct(r.byQuarter['Q4-2025']) }));
+  expect(expected.map((e) => e.v)).toEqual(['64', '70']);
+  await page.goto('/?q=Q4-2025&r=SR1,SR2');
+  const tile = page.getByTestId('region-compare');
+  for (const e of expected) {
+    await expect(tile.locator(`[data-testid="region-row"][data-region="${e.region}"]`).getByTestId('region-value')).toHaveText(`${e.v}%`);
+  }
+  await expect(tile.getByTestId('region-scope')).toHaveText('Q4 2025');
+  await page.goto('/?q=Q1-2026&r=SR1,SR2');
+  await expect(tile.getByTestId('region-scope')).toHaveText('Q1 2026 · Δ vs Q4');
+  await expect(tile.locator('[data-region="SR1"]').getByTestId('region-value')).toHaveText(`${pct(regionComparison(getRepo(), { ...filter, quarter: 'Q1-2026' })[0].byQuarter['Q1-2026'])}%`);
+});
+test('main problem tile lifts on hover', async ({ page }) => {
+  await page.goto('/'); await expect(page.getByTestId('contractors')).toHaveAttribute('data-hydrated', '');
+  const mp = page.getByTestId('main-problem');
+  await page.waitForTimeout(1200); // entrance done
+  const y0 = (await mp.boundingBox())!.y;
+  await mp.hover();
+  await expect.poll(async () => y0 - (await mp.boundingBox())!.y).toBeGreaterThan(2);
 });

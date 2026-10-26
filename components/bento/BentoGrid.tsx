@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 export const SPRING = { type: 'spring', stiffness: 240, damping: 28, mass: 0.9 } as const;
 
 /**
- * One bento tile: a single rounded surface with one job. Rises in on a stagger (index), lifts on hover.
+ * One bento tile: a single rounded surface with one job. Rises in on a stagger (index).
  * `tone` adds a band/status tone class; `dark` makes it the inverted Apple tile (the screen's hero tile).
  */
 export function BentoCard({
