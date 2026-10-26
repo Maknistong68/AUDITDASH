@@ -221,9 +221,14 @@ export function topIssues(repo: Repo, filter: Filter, n = 6): {
   return unique.slice(0, n);
 }
 
+/**
+ * Contractors ranked by score-based gap, and the category's driving items. An item's `hits` = audits with an
+ * applicable note on it (auditors annotate compliant items too, so a note is not a failure); `severity` =
+ * 1 − mean official subsection score over those audits; ranked by `impact` = hits × severity (as topIssues).
+ */
 export function categoryDetail(repo: Repo, filter: Filter, cat: CategoryId): {
   contractors: { contractor: Contractor; gapRate: number; findings: number }[];
-  items: { itemCode: string; question: string; hits: number }[];
+  items: { itemCode: string; question: string; hits: number; severity: number; impact: number }[];
 } {
   const audits = select(repo, filter);
   const obs = obsByAudit(repo, audits);
@@ -242,9 +247,14 @@ export function categoryDetail(repo: Repo, filter: Filter, cat: CategoryId): {
     (hitsByCode.get(o.itemCode!) ?? hitsByCode.set(o.itemCode!, new Set()).get(o.itemCode!)!).add(o.auditId);
   }
   const items = itemsOf(repo, cat)
-    .map((i) => ({ itemCode: i.code, question: i.question, hits: hitsByCode.get(i.code)?.size ?? 0 }))
+    .map((i) => {
+      const hit = hitsByCode.get(i.code) ?? new Set<string>();
+      const ratios = audits.filter((a) => hit.has(a.id)).map((a) => itemRatio(a, i)).filter((x): x is number => x !== null);
+      const severity = 1 - (mean(ratios) ?? 1);
+      return { itemCode: i.code, question: i.question, hits: hit.size, severity, impact: hit.size * severity };
+    })
     .filter((i) => i.hits > 0)
-    .sort((a, b) => b.hits - a.hits || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
+    .sort((a, b) => b.impact - a.impact || b.hits - a.hits || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
   return { contractors, items };
 }
 
@@ -399,11 +409,11 @@ export function compareContractors(repo: Repo, filter: Filter, ids: string[]): {
 /**
  * The quarter's main problem: worst category by score-based gap on the LATEST quarter present in the filtered
  * audits. prevGapRate = the same category's gap in the previous quarter (same regions/contractor) or null.
- * items = that quarter's top 3 driving items by audits hit. Null when the filter has no audits.
+ * items = that quarter's top 3 driving items by impact (audits noted × subsection score lost). Null when the filter has no audits.
  */
 export function mainProblem(repo: Repo, filter: Filter): {
   category: CategoryId; gapRate: number; prevGapRate: number | null; quarter: Quarter;
-  items: { itemCode: string; question: string; hits: number }[];
+  items: { itemCode: string; question: string; hits: number; severity: number; impact: number }[];
 } | null {
   const audits = select(repo, filter);
   if (!audits.length) return null;
@@ -463,7 +473,7 @@ export interface CategoryQuarter {
   /** Gap of the chronologically previous quarter that has audits (same regions); null when none. */
   prevGapRate: number | null;
   contractors: { contractor: Contractor; gapRate: number; findings: number }[];
-  items: { itemCode: string; question: string; hits: number }[];
+  items: { itemCode: string; question: string; hits: number; severity: number; impact: number }[];
 }
 
 /** One entry per quarter with audits in the filter's regions (quarter filter ignored), LATEST FIRST. */
@@ -481,17 +491,39 @@ export function categoryQuarters(repo: Repo, filter: Filter, cat: CategoryId): C
   return out.reverse();
 }
 
-export type ItemState = 'finding' | 'clear' | 'na';
+/**
+ * Neutral item state for one audit: "noted" = an applicable auditor note on the item (not a pass/fail verdict:
+ * auditors annotate compliant items too), "none" = no note, "na" = subsection scored N/A (possible 0).
+ */
+export type ItemState = 'noted' | 'none' | 'na';
 
-/** The category's checklist items for one audit: finding (applicable negative note) / clear / N/A (subsection possible 0). */
-export function auditItemStates(repo: Repo, audit: Audit, cat: CategoryId): { item: ChecklistItem; state: ItemState; observation: Observation | null }[] {
+export interface ItemInAudit {
+  item: ChecklistItem;
+  state: ItemState;
+  observation: Observation | null;
+  /** Official subsection (A items: section) score scored/possible for this audit; null when N/A. Severity = 1 − ratio. */
+  ratio: number | null;
+}
+
+/** The state of each given item in one audit (one place for the items slide and the item page). */
+function itemStatesIn(repo: Repo, audit: Audit, items: ChecklistItem[]): ItemInAudit[] {
   const na = naSubsections(audit);
   const negs = itemNegatives([audit], obsByAudit(repo, [audit]), itemMap(repo));
-  return itemsOf(repo, cat).map((item) => {
-    if (isNa(item, na)) return { item, state: 'na' as const, observation: null };
+  return items.map((item) => {
+    if (isNa(item, na)) return { item, state: 'na', observation: null, ratio: null };
     const o = negs.find((x) => x.itemCode === item.code) ?? null;
-    return { item, state: o ? ('finding' as const) : ('clear' as const), observation: o };
+    return { item, state: o ? 'noted' : 'none', observation: o, ratio: itemRatio(audit, item) };
   });
+}
+
+/** The category's checklist items for one audit. */
+export function auditItemStates(repo: Repo, audit: Audit, cat: CategoryId): ItemInAudit[] {
+  return itemStatesIn(repo, audit, itemsOf(repo, cat));
+}
+
+/** One item across a contractor's audits (filter regions respected, quarter ignored), LATEST FIRST. */
+export function itemTimeline(repo: Repo, filter: Filter, contractorId: string, item: ChecklistItem): ({ audit: Audit } & ItemInAudit)[] {
+  return contractorAudits(repo, filter, contractorId).map(({ audit }) => ({ audit, ...itemStatesIn(repo, audit, [item])[0] }));
 }
 
 /** True when the observation sits on an item whose subsection is N/A in its audit (such notes are not findings). */

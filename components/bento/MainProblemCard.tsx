@@ -14,7 +14,7 @@ export interface MainProblem {
   gapRate: number;
   prevGapRate: number | null;
   quarter: Quarter;
-  items: { itemCode: string; question: string; hits: number }[];
+  items: { itemCode: string; question: string; hits: number; severity?: number }[];
 }
 
 const qLabel = (q: Quarter) => q.replace('-', ' ');
@@ -26,7 +26,8 @@ const whole = (n: number) => String(Math.round(n));
 
 /**
  * L tile, the right side's hero: this quarter's worst category by score-based gap. Inverted (dark) Apple tile.
- * Gap % large, Δ vs previous quarter (a rising gap is bad → red; falling → green), top 3 driving items.
+ * Gap % large, Δ vs previous quarter (a rising gap is bad → red; falling → green), top 3 driving items
+ * (ranked by impact: audits noted × subsection score lost; "noted N/M" = audits with an auditor note).
  * The whole tile opens the category details.
  */
 export function MainProblemCard({ problem, audits, query }: { problem: MainProblem; audits: number; query: string }) {
@@ -92,13 +93,13 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
           </p>
           <ol className="flex flex-col gap-[clamp(6px,1.3svh,14px)]">
             {problem.items.map((it) => (
-              <li key={it.itemCode} className="grid grid-cols-[3.2em_minmax(0,1fr)_auto] items-baseline gap-2.5" title={it.question}>
+              <li key={it.itemCode} className="grid grid-cols-[3.2em_minmax(0,1fr)_auto] items-baseline gap-2.5" title={`${it.question} (noted in ${it.hits} of ${audits} audits)`}>
                 <span className="num rounded-md px-1.5 py-[1px] text-center text-[12px] font-semibold" style={{ background: 'var(--hero-chip)', color: 'var(--hero-muted)' }}>
                   {it.itemCode}
                 </span>
                 <span className="line-clamp-2 text-[clamp(13px,1.55svh,15px)] leading-snug">{it.question}</span>
                 <span className="num whitespace-nowrap text-[13px]" style={{ color: 'var(--hero-muted)' }}>
-                  <span className="font-semibold" style={{ color: 'var(--hero-text)' }}>{it.hits}</span>/{audits}
+                  noted <span className="font-semibold" style={{ color: 'var(--hero-text)' }}>{it.hits}</span>/{audits}
                 </span>
               </li>
             ))}

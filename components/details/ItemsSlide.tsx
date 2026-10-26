@@ -1,17 +1,17 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
-import { auditCompliance, type ItemState } from '@/lib/analytics';
+import { auditCompliance, type ItemInAudit, type ItemState } from '@/lib/analytics';
 import { bandShort, bandTone, dateLabel, pct } from '@/lib/format';
 import { bandFor } from '@/lib/scoring';
-import type { Audit, ChecklistItem, Observation } from '@/lib/types';
+import type { Audit } from '@/lib/types';
 import { AuditLine } from './ContractorSlide';
-import { AuditDelta, CodeChip, GapBar, StatePill } from './parts';
+import { AuditDelta, CodeChip, GapBar, SectionGap, StatePill } from './parts';
 
 export interface ItemsSlideData {
   audit: Audit;
   previous: Audit | null;
-  rows: { item: ChecklistItem; state: ItemState; observation: Observation | null }[];
+  rows: ItemInAudit[];
   itemHref: (code: string) => string;
   categoryName: string;
   /** This category's gap in each of the contractor's audits (latest first), to read this slide against. */
@@ -60,7 +60,7 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
         )}
         </div>
         <dl className="grid grid-cols-3 gap-2 text-center">
-          {(['finding', 'clear', 'na'] as ItemState[]).map((s) => (
+          {(['noted', 'none', 'na'] as ItemState[]).map((s) => (
             <div key={s} className="flex flex-col items-center gap-1">
               <dt><StatePill state={s} /></dt>
               <dd className="num text-[22px] font-semibold">{count(s)}</dd>
@@ -70,7 +70,11 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
       </BentoCard>
 
       <BentoCard i={1} testid="items" className="gap-2 px-[clamp(10px,1vw,18px)] py-[clamp(14px,2svh,24px)] min-[900px]:col-span-8">
-        <TileLabel className="px-[clamp(6px,0.6vw,10px)]">Checklist items · this audit</TileLabel>
+        <div className="grid grid-cols-[3.4em_minmax(0,1fr)_minmax(64px,7.5em)_5.2em_14px] items-end gap-3 px-[clamp(6px,0.6vw,10px)]">
+          <TileLabel className="col-span-2">Checklist items · this audit</TileLabel>
+          <span className="text-[12px] text-muted" title="Share of the item's official subsection score lost in this audit">Section gap</span>
+          <span className="text-[12px] text-muted">Note</span>
+        </div>
         <ul className="grid">
           {rows.map((r) => (
             <li key={r.item.code}>
@@ -78,7 +82,7 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
                 data-testid="item-row"
                 data-state={r.state}
                 href={d.itemHref(r.item.code)}
-                className="group grid grid-cols-[3.4em_minmax(0,1fr)_auto_14px] items-center gap-3 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(7px,1.2svh,11px)] transition-colors hover:bg-fill-2"
+                className="group grid grid-cols-[3.4em_minmax(0,1fr)_minmax(64px,7.5em)_5.2em_14px] items-center gap-3 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(7px,1.2svh,11px)] transition-colors hover:bg-fill-2"
               >
                 <CodeChip code={r.item.code} />
                 <span className="flex min-w-0 flex-col gap-0.5">
@@ -87,7 +91,8 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
                     <span className="truncate text-[13px] text-muted">{r.observation.text.replace(/\s+/g, ' ')}</span>
                   )}
                 </span>
-                <StatePill state={r.state} />
+                <SectionGap ratio={r.ratio} code={r.item.subsection ?? r.item.section} />
+                <span><StatePill state={r.state} /></span>
                 <ChevronRight size={14} strokeWidth={2.4} className="text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
               </Link>
             </li>

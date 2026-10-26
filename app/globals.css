@@ -278,3 +278,29 @@ html.js [data-countup]:not([data-ready]) {
   color: var(--hero-text);
   box-shadow: var(--shadow-card);
 }
+
+/*
+ * Reduced motion, globally: every CSS transition/animation becomes instant and hover/press transforms are
+ * dropped (dot widths, chevron nudges, active:scale presses, and anything added later). framer-motion is
+ * handled separately by MotionConfig reducedMotion="user".
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  /* Tailwind v4 writes its translate and scale utilities to the individual `translate`/`scale` properties; framer writes
+     `transform`, so this leaves framer alone. */
+  :hover,
+  :active,
+  .group:hover * {
+    translate: none !important;
+    scale: none !important;
+  }
+}

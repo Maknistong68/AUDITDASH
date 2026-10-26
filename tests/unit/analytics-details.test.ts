@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { getRepo } from '@/lib/data/repo';
 import {
-  auditFindings, auditGaps, auditItemStates, categoryQuarters, contractorAudits, isNaObservation, sectionRatios,
+  auditFindings, auditGaps, auditItemStates, categoryQuarters, itemTimeline, contractorAudits, isNaObservation, sectionRatios,
 } from '@/lib/analytics';
 import type { Filter } from '@/lib/types';
 
@@ -74,7 +74,37 @@ describe('auditItemStates', () => {
     const b = repo.audits()[0];
     const rows = auditItemStates(repo, b, 'subcontractor');
     expect(rows.length).toBeGreaterThan(0);
-    for (const r of rows) expect(r.state === 'finding').toBe(r.observation !== null);
+    for (const r of rows) {
+      expect(r.state === 'noted').toBe(r.observation !== null);
+      expect(r.state === 'na').toBe(r.ratio === null);
+      if (r.ratio !== null) expect(r.ratio >= 0 && r.ratio <= 1).toBe(true);
+    }
+  });
+});
+
+describe('itemTimeline', () => {
+  it('is latest first, matches auditItemStates per audit, and respects regions', () => {
+    const item = repo.checklist().find((i) => i.code === 'B6.1')!;
+    const t = itemTimeline(repo, ALL, '4800001131', item);
+    expect(t.map((x) => x.audit.quarter)).toEqual(['Q1-2026', 'Q4-2025']);
+    for (const e of t) {
+      const s = auditItemStates(repo, e.audit, 'subcontractor').find((r) => r.item.code === 'B6.1')!;
+      expect(e.state).toBe(s.state);
+      expect(e.ratio).toBe(s.ratio);
+    }
+    expect(itemTimeline(repo, { ...ALL, regions: ['SR1'] }, '4800001131', item)).toEqual([]);
+  });
+});
+
+describe('driving items by impact', () => {
+  it('ranks by hits x (1 - mean subsection score) and keeps severity in 0..1', () => {
+    const q = categoryQuarters(repo, ALL, 'subcontractor')[0];
+    const imp = q.items.map((i) => i.impact);
+    expect(imp).toEqual([...imp].sort((a, b) => b - a));
+    for (const i of q.items) {
+      expect(i.severity >= 0 && i.severity <= 1).toBe(true);
+      expect(i.impact).toBeCloseTo(i.hits * i.severity, 10);
+    }
   });
 });
 

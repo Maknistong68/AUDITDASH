@@ -1,11 +1,22 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo } from '@/lib/data/repo';
+import { getRepo, type Repo } from '@/lib/data/repo';
 import {
   applicableSlots, auditCompliance, categoryDetail, categoryGaps, contractorInCategory, filterAudits, itemHistory, league, portfolioSummary, topIssues,
 } from '@/lib/analytics';
 import type { Filter } from '@/lib/types';
 
 const repo = getRepo();
+
+// The importer drops "Not Applicable" notes, so the seed no longer has notes on N/A subsections.
+// The analytics guard still matters (data from other sources), so inject one on TDP's N/A B5 subsection.
+const NA_AUDIT = '4800000892-Q1-2026-20260315';
+const naRepo: Repo = {
+  ...repo,
+  observations: () => [
+    ...repo.observations(),
+    { id: `${NA_AUDIT}-na`, auditId: NA_AUDIT, itemCode: 'B5.1', kind: 'negative', text: 'Utility clearance permit for excavation not seen', category: 'permits', hasPhoto: false },
+  ],
+};
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 
 describe('portfolio', () => {
@@ -88,10 +99,10 @@ describe('score-based gap', () => {
   test('findingRate present and bounded', () => categoryGaps(repo, ALL).forEach((x) => { expect(x.findingRate!).toBeGreaterThanOrEqual(0); expect(x.findingRate!).toBeLessThanOrEqual(1); }));
   test('findings exclude N/A-subsection negatives', () => {
     const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
-    const raw = repo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.category === 'permits' && o.kind !== 'positive');
+    const raw = naRepo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.category === 'permits' && o.kind !== 'positive');
     const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
     expect(na).toBeGreaterThan(0);
-    expect(categoryGaps(repo, f).find((x) => x.category === 'permits')!.findings).toBe(raw.length - na);
+    expect(categoryGaps(naRepo, f).find((x) => x.category === 'permits')!.findings).toBe(raw.length - na);
   });
 });
 
@@ -187,10 +198,10 @@ describe('N/A notes imported as negatives', () => {
 describe('N/A notes excluded from summary and history', () => {
   test('portfolio negatives exclude N/A notes', () => {
     const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
-    const raw = repo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.kind !== 'positive');
+    const raw = naRepo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.kind !== 'positive');
     const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
     expect(na).toBeGreaterThan(0);
-    expect(portfolioSummary(repo, f).negatives).toBe(raw.length - na);
+    expect(portfolioSummary(naRepo, f).negatives).toBe(raw.length - na);
   });
   test('itemHistory returns null observation for N/A audit but keeps the row', () => {
     const h = itemHistory(repo, '4800000892', 'B5.1');

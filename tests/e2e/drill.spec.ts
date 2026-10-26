@@ -165,3 +165,31 @@ test('category rows on a contractor slide open that audit in the category', asyn
   const href = await active(page).getByTestId('category-gap-row').first().getAttribute('href');
   expect(href).toMatch(/^\/category\/[a-z]+\/4800001131\?q=all&r=SR1%2CSR2&s=1$/);
 });
+
+test('item states are neutral notes with a score-based section gap, never pass/fail', async ({ page }) => {
+  await page.goto('/category/subcontractor/4800001131');
+  await ready(page);
+  const rows = active(page).getByTestId('item-row');
+  expect(await rows.count()).toBeGreaterThan(0);
+  for (const s of await rows.evaluateAll((els) => els.map((e) => e.getAttribute('data-state')))) expect(['noted', 'none', 'na']).toContain(s);
+  await expect(rows.first().getByTestId('section-gap')).toBeVisible();
+  await expect(page.getByTestId('details')).not.toContainText(/fail|Finding/i);
+  await page.goto('/category/subcontractor/4800001131/B6.1');
+  await expect(page.getByTestId('item-summary')).toContainText('Noted in');
+  await expect(page.getByTestId('details')).not.toContainText(/failed/i);
+});
+
+test('reduced motion zeroes CSS transitions and press transforms', async ({ browser }) => {
+  const ctx = await browser.newContext({ reducedMotion: 'reduce' });
+  const page = await ctx.newPage();
+  await page.goto('/contractor/4800001131');
+  await ready(page);
+  const dot = page.getByRole('button', { name: /Mar 2026/ }).locator('span');
+  expect(await dot.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s');
+  const btn = page.getByRole('button', { name: 'Previous audit' });
+  await btn.hover();
+  await page.mouse.down();
+  expect(await btn.evaluate((el) => getComputedStyle(el).scale)).toBe('none');
+  await page.mouse.up();
+  await ctx.close();
+});

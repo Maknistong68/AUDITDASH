@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo } from '@/lib/data/repo';
+import { getRepo, type Repo } from '@/lib/data/repo';
 import {
   bandDistribution, categoryDetail, categoryGaps, compareContractors, mainProblem, contractorCards, filterAudits, highRiskCount, regionComparison, repeatFindings,
 } from '@/lib/analytics';
@@ -7,6 +7,17 @@ import { isHighRisk } from '@/lib/highRisk';
 import type { Filter, Observation } from '@/lib/types';
 
 const repo = getRepo();
+
+// The importer drops "Not Applicable" notes, so the seed no longer has notes on N/A subsections.
+// The analytics guard still matters (data from other sources), so inject one on TDP's N/A B5 subsection.
+const NA_AUDIT = '4800000892-Q1-2026-20260315';
+const naRepo: Repo = {
+  ...repo,
+  observations: () => [
+    ...repo.observations(),
+    { id: `${NA_AUDIT}-na`, auditId: NA_AUDIT, itemCode: 'B5.1', kind: 'negative', text: 'Utility clearance permit for excavation not seen', category: 'permits', hasPhoto: false },
+  ],
+};
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const NONE: Filter = { quarter: 'all', regions: [] };
 const obs = (text: string, kind: Observation['kind'], category: Observation['category'] = null): Observation =>
@@ -83,10 +94,10 @@ describe('high risk', () => {
   });
   test('N/A permits notes excluded', () => {
     const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
-    const raw = repo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.kind !== 'positive' && isHighRisk(o));
+    const raw = naRepo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.kind !== 'positive' && isHighRisk(o));
     const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
     expect(na).toBeGreaterThan(0);
-    expect(highRiskCount(repo, f)).toBe(raw.length - na);
+    expect(highRiskCount(naRepo, f)).toBe(raw.length - na);
   });
 });
 
@@ -139,6 +150,22 @@ describe('mainProblem', () => {
     expect(m.prevGapRate).toBeCloseTo(q4.gapRate!, 10);
     expect(m.items.length).toBeLessThanOrEqual(3);
     expect(m.items).toEqual(categoryDetail(repo, { ...ALL, quarter: 'Q1-2026' }, m.category).items.slice(0, 3));
+  });
+  test('driving items are ranked by impact = audits noted x mean subsection score lost', () => {
+    const m = mainProblem(repo, ALL)!;
+    const q1 = repo.audits().filter((a) => a.quarter === 'Q1-2026');
+    for (const it of m.items) {
+      const item = repo.checklist().find((i) => i.code === it.itemCode)!;
+      const sub = item.subsection ?? item.section;
+      const hit = q1.filter((a) => repo.observations().some((o) => o.auditId === a.id && o.itemCode === it.itemCode && o.kind === 'negative'));
+      expect(it.hits).toBe(hit.length);
+      const ratios = hit.map((a) => a.sections.find((x) => x.code === sub)!).filter((x) => x.possible > 0).map((x) => x.scored / x.possible);
+      const severity = 1 - ratios.reduce((s, r) => s + r, 0) / ratios.length;
+      expect(it.severity).toBeCloseTo(severity, 10);
+      expect(it.impact).toBeCloseTo(it.hits * severity, 10);
+    }
+    const imp = m.items.map((i) => i.impact);
+    expect(imp).toEqual([...imp].sort((a, b) => b - a));
   });
   test('first quarter has no previous', () => {
     const m = mainProblem(repo, { ...ALL, quarter: 'Q4-2025' })!;

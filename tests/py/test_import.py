@@ -71,3 +71,26 @@ def test_every_non_positive_has_category(seed):
 def test_mislabelled_audit_item_codes_recovered(seed):
     neg = [o for o in seed.observations if o['auditId']=='4800001112-Q4-2025-20251015' and o['kind']=='negative']
     assert sum(bool(o['itemCode']) for o in neg) >= 50
+
+
+@pytest.mark.parametrize("text,expected", [
+    ("Not Applicable.\nThere were no Oxy-Fuel rigs at site", True),
+    ("• not applicable - no excavation", True),
+    ("* N/A - no hot work", True),
+    ("NA - no confined space", True),
+    ("NA-no lifting", True),
+    ("N/A", True),
+    ("  - Not applicable", True),
+    ("NAZ Steel subcontractor approved", False),
+    ("Nail guns were stored safely", False),
+    ("Yes, there is a medical facility", False),
+    ("", False),
+])
+def test_is_na_note(text, expected):
+    assert import_excel.is_na_note(text) is expected
+
+
+def test_no_na_notes_in_seed(seed):
+    assert not any(import_excel.is_na_note(o["text"]) for o in seed.observations)
+    ids = [o["id"] for o in seed.observations]
+    assert len(ids) == len(set(ids))

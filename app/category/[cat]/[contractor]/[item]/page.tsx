@@ -2,20 +2,19 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { getRepo } from '@/lib/data/repo';
-import { auditItemStates, contractorAudits, itemHistory, type ItemState } from '@/lib/analytics';
+import { auditItemStates, itemTimeline, type ItemState } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
 import { detailContext, href, type SP } from '@/lib/details';
 import { dateLabel, quarterLabel } from '@/lib/format';
 import { findCategory, findContractor, findItem } from '@/lib/routeParams';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
 import { DetailFrame } from '@/components/details/DetailFrame';
-import { CategoryChip, CodeChip, StatePill } from '@/components/details/parts';
+import { CategoryChip, CodeChip, SectionGap, StatePill } from '@/components/details/parts';
 
 type Params = { cat: string; contractor: string; item: string };
 
-const DOT: Record<ItemState | 'positive', string> = {
-  finding: 'var(--non-dot)', clear: 'var(--good-dot)', na: 'var(--control)', positive: 'var(--good-dot)',
-};
+/** Neutral rail dots: a note is not a verdict (severity is the section gap beside each entry). */
+const DOT: Record<ItemState, string> = { noted: 'var(--text)', none: 'var(--faint)', na: 'var(--control)' };
 
 /** One checklist item across the contractor's audits: a vertical timeline, newest first. */
 export default async function ItemPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
@@ -27,15 +26,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
   if (!cat || !contractor || !item) notFound();
   const { filter, query } = detailContext(await searchParams);
   const c = categoryById(cat);
-  const naCodes = (a: { sections: { code: string; possible: number }[] }) => new Set(a.sections.filter((s) => s.possible === 0).map((s) => s.code));
-  const entries = itemHistory(repo, contractor.id, item.code)
-    .filter(() => filter.regions.includes(contractor.subregion))
-    .map(({ audit, observation }) => {
-      const na = naCodes(audit).has(item.subsection ?? item.section);
-      const state: ItemState = na ? 'na' : observation && observation.kind !== 'positive' ? 'finding' : 'clear';
-      return { audit, observation, state };
-    })
-    .reverse();
+  const entries = itemTimeline(repo, filter, contractor.id, item);
   const parent = href(`/category/${cat}/${contractor.id}`, query);
   const crumbs = [
     { label: 'Overview', href: `/?${query}` },
@@ -44,7 +35,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
     { label: item.code },
   ];
   // The category's other items, as they stood in the contractor's latest audit (within the filter).
-  const latest = filter.regions.includes(contractor.subregion) ? contractorAudits(repo, filter, contractor.id)[0]?.audit : undefined;
+  const latest = entries[0]?.audit;
   const siblings = latest ? auditItemStates(repo, latest, cat) : [];
   const sectionCode = item.subsection ?? item.section;
   const n = (s: ItemState) => entries.filter((e) => e.state === s).length;
@@ -67,7 +58,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
             <p className="text-[15px] text-muted">No audits match this filter.</p>
           ) : (
             <ol className="relative grid gap-[clamp(14px,2.2svh,24px)]">
-              {entries.map(({ audit, observation, state }, i) => (
+              {entries.map(({ audit, observation, state, ratio }, i) => (
                 <li key={audit.id} data-testid="timeline-entry" data-state={state} className="relative grid grid-cols-[18px_minmax(0,1fr)] gap-x-4">
                   <span aria-hidden className="relative flex justify-center">
                     <span className="mt-[5px] size-3 rounded-full" style={{ background: DOT[state] }} />
@@ -78,8 +69,9 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
                       <span className="font-semibold">{dateLabel(audit.date)}</span>
                       <span className="text-muted">· {quarterLabel(audit.quarter)} · Inspection {audit.inspectionNo}</span>
                       <StatePill state={state} />
+                      <span className="w-[min(12em,40vw)]"><SectionGap ratio={ratio} code={sectionCode} /></span>
                     </div>
-                    {observation && state !== 'na' ? (
+                    {observation ? (
                       <>
                         <p className="line-clamp-4 whitespace-pre-line break-words text-[15px] leading-relaxed">{observation.text}</p>
                         <Link
@@ -91,7 +83,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
                         </Link>
                       </>
                     ) : (
-                      <p className="text-[14px] text-muted">{state === 'na' ? 'Not applicable in this audit.' : 'No finding recorded.'}</p>
+                      <p className="text-[14px] text-muted">{state === 'na' ? 'Not applicable in this audit.' : 'No auditor note on this item.'}</p>
                     )}
                   </div>
                 </li>
@@ -102,10 +94,10 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
 
         <BentoCard i={1} testid="item-summary" className="justify-between gap-4 p-[clamp(16px,2.2svh,26px)] min-[1100px]:col-span-4">
           <div className="flex flex-col gap-4">
-          <TileLabel>Across {entries.length} {entries.length === 1 ? 'audit' : 'audits'}</TileLabel>
-          <p className="figure text-[clamp(56px,9svh,96px)]">
-            {n('finding')}
-            <span className="ml-2 text-[0.3em] font-semibold tracking-normal text-muted">of {entries.length - n('na')} failed</span>
+          <TileLabel>Noted in</TileLabel>
+          <p className="figure text-[clamp(56px,9svh,96px)]" data-testid="noted-count">
+            {n('noted')}
+            <span className="ml-2 text-[0.3em] font-semibold tracking-normal text-muted">of {entries.length - n('na')} {entries.length - n('na') === 1 ? 'audit' : 'audits'}</span>
           </p>
           <div className="flex flex-col gap-1.5" data-testid="section-history">
             <p className="text-[13px] text-muted">Section {sectionCode} score per audit · item weight {item.weight}</p>
@@ -127,7 +119,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
           </div>
           </div>
           <dl className="grid grid-cols-3 gap-2 text-center">
-            {(['finding', 'clear', 'na'] as ItemState[]).map((s) => (
+            {(['noted', 'none', 'na'] as ItemState[]).map((s) => (
               <div key={s} className="flex flex-col items-center gap-1">
                 <dt><StatePill state={s} /></dt>
                 <dd className="num text-[22px] font-semibold">{n(s)}</dd>
@@ -150,10 +142,11 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
                     <Link
                       href={href(`/category/${cat}/${contractor.id}/${encodeURIComponent(r.item.code)}`, query)}
                       aria-current={current ? 'page' : undefined}
-                      className={`grid grid-cols-[3.4em_minmax(0,1fr)_auto] items-center gap-3 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(6px,1svh,9px)] transition-colors hover:bg-fill-2 ${current ? 'bg-fill-2' : ''}`}
+                      className={`grid grid-cols-[3.4em_minmax(0,1fr)_auto_auto] items-center gap-3 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(6px,1svh,9px)] transition-colors hover:bg-fill-2 ${current ? 'bg-fill-2' : ''}`}
                     >
                       <CodeChip code={r.item.code} />
                       <span className={`truncate text-[14px] ${current ? 'font-semibold' : ''}`} title={r.item.question}>{r.item.question}</span>
+                      <span className="w-[7em]"><SectionGap ratio={r.ratio} code={r.item.subsection ?? r.item.section} /></span>
                       <StatePill state={r.state} />
                     </Link>
                   </li>

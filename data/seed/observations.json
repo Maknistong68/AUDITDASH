@@ -1602,15 +1602,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800000838-Q4-2025-20251112-47",
-    "auditId": "4800000838-Q4-2025-20251112",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "Not Applicable.\nThere were no Oxy-Fuel rigs at site",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
     "id": "4800000838-Q4-2025-20251112-48",
     "auditId": "4800000838-Q4-2025-20251112",
     "itemCode": "B9.3",
@@ -2547,33 +2538,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800000838-Q4-2025-20251119-31",
-    "auditId": "4800000838-Q4-2025-20251119",
-    "itemCode": "B5.1",
-    "kind": "negative",
-    "text": "NA - Auditte replied that as per scope of work there is no excavation activties.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000838-Q4-2025-20251119-32",
-    "auditId": "4800000838-Q4-2025-20251119",
-    "itemCode": "B5.2",
-    "kind": "negative",
-    "text": "NA - Auditte replied that as per scope of work there is no excavation activties.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000838-Q4-2025-20251119-33",
-    "auditId": "4800000838-Q4-2025-20251119",
-    "itemCode": "B5.3",
-    "kind": "negative",
-    "text": "NA - Auditte replied that as per scope of work there is no excavation activties.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
     "id": "4800000838-Q4-2025-20251119-34",
     "auditId": "4800000838-Q4-2025-20251119",
     "itemCode": "B6.1",
@@ -2687,15 +2651,6 @@
     "itemCode": "B9.1",
     "kind": "negative",
     "text": "• Fire extinguishers & firefighting equipment’s were provided at both site and office areas\n• During site audit inspection it was observed that fire extinguishers internal inspections were carried out with tag displayed, however there is no supplier/competent person (3rd party inspections). Auditee replied these are also highlighted by site consultant team",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000838-Q4-2025-20251119-47",
-    "auditId": "4800000838-Q4-2025-20251119",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "Not Applicable.\nThere were no Oxy-Fuel rigs at site",
     "category": "site",
     "hasPhoto": false
   },
@@ -5706,15 +5661,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800001134-Q1-2026-20260310-40",
-    "auditId": "4800001134-Q1-2026-20260310",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "NA - There were no Oxy-Acetylene rigs at site.",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
     "id": "4800001134-Q1-2026-20260310-41",
     "auditId": "4800001134-Q1-2026-20260310",
     "itemCode": "B9.3",
@@ -5729,15 +5675,6 @@
     "itemCode": "B10.1",
     "kind": "negative",
     "text": "Abyatona 1134 has a documented written PPE Policy in place this was shown as evidence.\nDuring the site inspection almost all the workers were wearing the mandatory PPE, Safety signs on PPE displayed on notice boards and site supervisor and safety officer are ensuring it",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800001134-Q1-2026-20260310-43",
-    "auditId": "4800001134-Q1-2026-20260310",
-    "itemCode": "B10.2",
-    "kind": "negative",
-    "text": "NA",
     "category": "site",
     "hasPhoto": false
   },
@@ -6237,15 +6174,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800001112-Q1-2026-20260308-26",
-    "auditId": "4800001112-Q1-2026-20260308",
-    "itemCode": "B5.3",
-    "kind": "negative",
-    "text": "Not applicable because excavation works were carried out by previous contractor and not Abyatona",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
     "id": "4800001112-Q1-2026-20260308-27",
     "auditId": "4800001112-Q1-2026-20260308",
     "itemCode": "B6.1",
@@ -6363,15 +6291,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800001112-Q1-2026-20260308-40",
-    "auditId": "4800001112-Q1-2026-20260308",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "NA- There were no Oxy-Acetylene rigs at site.",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
     "id": "4800001112-Q1-2026-20260308-41",
     "auditId": "4800001112-Q1-2026-20260308",
     "itemCode": "B9.3",
@@ -6386,15 +6305,6 @@
     "itemCode": "B10.1",
     "kind": "negative",
     "text": "• Abyatona 1112 has a documented written PPE Policy in place which was shown as evidence.\n• During the site inspection almost all the workers were wearing the mandatory PPE, Safety signs on PPE displayed on notice boards and site supervisor and safety officer are ensuring it",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800001112-Q1-2026-20260308-43",
-    "auditId": "4800001112-Q1-2026-20260308",
-    "itemCode": "B10.2",
-    "kind": "negative",
-    "text": "NA",
     "category": "site",
     "hasPhoto": false
   },
@@ -7038,15 +6948,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800000882-Q1-2026-20260125-47",
-    "auditId": "4800000882-Q1-2026-20260125",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "NA",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
     "id": "4800000882-Q1-2026-20260125-48",
     "auditId": "4800000882-Q1-2026-20260125",
     "itemCode": "B9.3",
@@ -7061,15 +6962,6 @@
     "itemCode": "B10.1",
     "kind": "negative",
     "text": "During the site audit inspection, it was observed that workers were wearing the mandatory PPE for the project,\nContractor has developed a PPE Policy, evidence was shown.",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000882-Q1-2026-20260125-50",
-    "auditId": "4800000882-Q1-2026-20260125",
-    "itemCode": "B10.2",
-    "kind": "negative",
-    "text": "NA",
     "category": "site",
     "hasPhoto": false
   },
@@ -7839,15 +7731,6 @@
     "hasPhoto": true
   },
   {
-    "id": "4200000026-Q1-2026-20260208-45",
-    "auditId": "4200000026-Q1-2026-20260208",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "NA- There were no Oxy-Acetylene rigs at site.",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
     "id": "4200000026-Q1-2026-20260208-46",
     "auditId": "4200000026-Q1-2026-20260208",
     "itemCode": "B9.3",
@@ -7862,15 +7745,6 @@
     "itemCode": "B10.1",
     "kind": "negative",
     "text": "As per auditee Contractor NBC doesn’t have a documented PPE policy in place. NBC to develop & implement a PPE Policy which should include NEOM 5 point PPE as per NEOM Construction standards.\nDuring the site audit inspection, it was observed that workers were wearing mandatory PPE on the project site",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4200000026-Q1-2026-20260208-48",
-    "auditId": "4200000026-Q1-2026-20260208",
-    "itemCode": "B10.2",
-    "kind": "negative",
-    "text": "NA",
     "category": "site",
     "hasPhoto": false
   },
@@ -8096,15 +7970,6 @@
     "itemCode": "C2.14",
     "kind": "negative",
     "text": "No, there is currently no Temporary Electrical Management Safety Plan for the project",
-    "category": "plans",
-    "hasPhoto": false
-  },
-  {
-    "id": "4200000026-Q1-2026-20260208-74",
-    "auditId": "4200000026-Q1-2026-20260208",
-    "itemCode": "C2.15",
-    "kind": "negative",
-    "text": "NA",
     "category": "plans",
     "hasPhoto": false
   },
@@ -9378,15 +9243,6 @@
     "hasPhoto": true
   },
   {
-    "id": "4800001440-Q1-2026-20260302-47",
-    "auditId": "4800001440-Q1-2026-20260302",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "NA- There were no Oxy-Acetylene rigs at site.",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
     "id": "4800001440-Q1-2026-20260302-48",
     "auditId": "4800001440-Q1-2026-20260302",
     "itemCode": "B9.3",
@@ -9401,15 +9257,6 @@
     "itemCode": "B10.1",
     "kind": "negative",
     "text": "During the site audit inspection, it was observed that workers were wearing the mandatory PPE for the project site\nAlso, RPCO has a documented written PPE Policy in place.",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800001440-Q1-2026-20260302-50",
-    "auditId": "4800001440-Q1-2026-20260302",
-    "itemCode": "B10.2",
-    "kind": "negative",
-    "text": "NA",
     "category": "site",
     "hasPhoto": false
   },
@@ -9972,33 +9819,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800000838-Q1-2026-20260201-31",
-    "auditId": "4800000838-Q1-2026-20260201",
-    "itemCode": "B5.1",
-    "kind": "negative",
-    "text": "NA- Auditee replied that as per scope of work there is no excavation activities.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000838-Q1-2026-20260201-32",
-    "auditId": "4800000838-Q1-2026-20260201",
-    "itemCode": "B5.2",
-    "kind": "negative",
-    "text": "NA- Auditee replied that as per scope of work there is no excavation activities.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000838-Q1-2026-20260201-33",
-    "auditId": "4800000838-Q1-2026-20260201",
-    "itemCode": "B5.3",
-    "kind": "negative",
-    "text": "NA- Auditee replied that as per scope of work there is no excavation activities.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
     "id": "4800000838-Q1-2026-20260201-34",
     "auditId": "4800000838-Q1-2026-20260201",
     "itemCode": "B6.1",
@@ -10112,15 +9932,6 @@
     "itemCode": "B9.1",
     "kind": "negative",
     "text": "• Fire extinguishers & firefighting equipment’s were provided at both site and office areas\n• During site audit inspection it was observed that fire extinguishers internal inspections were carried out with tag displayed, however there is no supplier/competent person (3rd party inspections). Auditee replied these are also highlighted by site consultant team",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000838-Q1-2026-20260201-47",
-    "auditId": "4800000838-Q1-2026-20260201",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "NA- There were no Oxy-Acetylene rigs at site.",
     "category": "site",
     "hasPhoto": false
   },
@@ -10575,15 +10386,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800000892-Q1-2026-20260315-7",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "A7",
-    "kind": "negative",
-    "text": "N/A - No incident till date as per audittee",
-    "category": "incident",
-    "hasPhoto": false
-  },
-  {
     "id": "4800000892-Q1-2026-20260315-8",
     "auditId": "4800000892-Q1-2026-20260315",
     "itemCode": "A8",
@@ -10626,15 +10428,6 @@
     "kind": "negative",
     "text": "• Auditee replied there is no schedule for internal safety meetings, no steering committee meeting, no safety forum by contractor, senior managers (PM,CM) are not involved in such safety meeting or safety forum, and auditee could not produce any evidence of Minutes of meeting with action points.\n• Evidence confirms that the Contractor’s CEO conducted a meeting attended by the project management (PM, CM) and HSE teams during a project site visit and a record of minutes of meeting (MoM) was shown as evidence which is a pert of NEOM KPI to attend 2 meetings per year. (Positive)\n• Contractor management (PM, CM) attends NEOM Oxagon Projects organized scheduled weekly progress meeting in which safety is covered in one section.",
     "category": "leadership",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000892-Q1-2026-20260315-13",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "A13",
-    "kind": "negative",
-    "text": "N/A - Covered under section B6",
-    "category": "plans",
     "hasPhoto": false
   },
   {
@@ -10701,15 +10494,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800000892-Q1-2026-20260315-21",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "B2.4",
-    "kind": "negative",
-    "text": "N/A – No activities at the site",
-    "category": "competence",
-    "hasPhoto": false
-  },
-  {
     "id": "4800000892-Q1-2026-20260315-22",
     "auditId": "4800000892-Q1-2026-20260315",
     "itemCode": "B3.1",
@@ -10751,33 +10535,6 @@
     "itemCode": "B4.2",
     "kind": "negative",
     "text": "Contractors had specific permits like Excavation permit, lifting permit, cold work permit etc.\n• Upon review of few filled permits, it was observed that the permits were not verified and closed once the activity is completed and closed. Also, TDP-0892 has not maintained a PTW register.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000892-Q1-2026-20260315-27",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "B5.1",
-    "kind": "negative",
-    "text": "N/A - Contractor safety manager stated that the current Variation order is only removal of soil from one area filling at embankment with compaction. And not excavating below GL.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000892-Q1-2026-20260315-28",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "B5.2",
-    "kind": "negative",
-    "text": "N/A - Contractor safety manager stated that the current Variation order is only removal of soil from one area filling at embankment with compaction. And not excavating below GL.",
-    "category": "permits",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000892-Q1-2026-20260315-29",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "B5.3",
-    "kind": "negative",
-    "text": "N/A - Contractor safety manager stated that the current Variation order is only removal of soil from one area filling at embankment with compaction. And not excavating below GL.",
     "category": "permits",
     "hasPhoto": false
   },
@@ -10899,38 +10656,11 @@
     "hasPhoto": false
   },
   {
-    "id": "4800000892-Q1-2026-20260315-43",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "NA",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000892-Q1-2026-20260315-44",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "B9.3",
-    "kind": "negative",
-    "text": "NA",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
     "id": "4800000892-Q1-2026-20260315-45",
     "auditId": "4800000892-Q1-2026-20260315",
     "itemCode": "B10.1",
     "kind": "negative",
     "text": "• During the site audit inspection, it was observed that workers were wearing the mandatory PPE for the project site.\n• Contractor TDP-0892 has a PPE Policy this was shown as evidence.",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000892-Q1-2026-20260315-46",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "B10.2",
-    "kind": "negative",
-    "text": "NA",
     "category": "site",
     "hasPhoto": false
   },
@@ -11022,15 +10752,6 @@
     "kind": "negative",
     "text": "• Photo evidence shown that the contractor’s CEO attended a site walkthrough on Nov 2025 which a part of KPI. The site observations are entered into minutes of meeting for one visit which was shown as evidence.",
     "category": "leadership",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000892-Q1-2026-20260315-57",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "C1.6",
-    "kind": "negative",
-    "text": "N/A – See point C1.4 covered here, till date there was no internal safety audit.",
-    "category": "monitoring",
     "hasPhoto": false
   },
   {
@@ -11142,15 +10863,6 @@
     "hasPhoto": false
   },
   {
-    "id": "4800000892-Q1-2026-20260315-70",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "C2.9",
-    "kind": "negative",
-    "text": "NA- Safety Manager stated that they don’t have sub-contractor, supplier, service providers all are from TDP -0892, if there are any future sub-contractor, service provider they will submit the sub-contractor management plan.",
-    "category": "plans",
-    "hasPhoto": false
-  },
-  {
     "id": "4800000892-Q1-2026-20260315-71",
     "auditId": "4800000892-Q1-2026-20260315",
     "itemCode": "C2.10",
@@ -11192,15 +10904,6 @@
     "itemCode": "C2.14",
     "kind": "negative",
     "text": "contractor has recently submitted  Temporary Electrical Management Safety Plan for revew and approval on aconex.\n03-140000-\n4800000892-TDP-HSEPLN-",
-    "category": "plans",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000892-Q1-2026-20260315-76",
-    "auditId": "4800000892-Q1-2026-20260315",
-    "itemCode": "C2.15",
-    "kind": "negative",
-    "text": "NA",
     "category": "plans",
     "hasPhoto": false
   },
@@ -11617,15 +11320,6 @@
     "text": "• Fire extinguishers were inspected and updated on the tag, Fire extinguisher register maintained.\n• Smoke detector checks are not carried out and no inspection checks done, no checklist.\n• During audit site verification it was observed that fire extinguishers were not provided on first floor.",
     "category": "site",
     "hasPhoto": true
-  },
-  {
-    "id": "4800001272-Q1-2026-20260223-43",
-    "auditId": "4800001272-Q1-2026-20260223",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "NA- There were no Oxy-fuel rigs at the time of audit",
-    "category": "site",
-    "hasPhoto": false
   },
   {
     "id": "4800001272-Q1-2026-20260223-44",
@@ -12380,15 +12074,6 @@
     "itemCode": "B9.1",
     "kind": "negative",
     "text": "Fire extinguishers & firefighting equipment’s were provided at both site and office areas and these were  inspected.\nAlso Smoke dector inspections completed and the inspection log was shown as evidence.",
-    "category": "site",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800001131-Q1-2026-20260301-42",
-    "auditId": "4800001131-Q1-2026-20260301",
-    "itemCode": "B9.2",
-    "kind": "negative",
-    "text": "Not Applicable.\nThere were no Oxy-Fuel rigs at site during the site audit inspection/verification",
     "category": "site",
     "hasPhoto": false
   },
@@ -13163,15 +12848,6 @@
     "itemCode": "C2.14",
     "kind": "negative",
     "text": "On the day of Audit Temporary Electrical Management Safety Plan has been recently submitted on Aconex for review and approval 11th Feb 2026.\n03-120001-4800000876-ARD-HSE-PLN-000009",
-    "category": "plans",
-    "hasPhoto": false
-  },
-  {
-    "id": "4800000876-Q1-2026-20260215-67",
-    "auditId": "4800000876-Q1-2026-20260215",
-    "itemCode": "C2.15",
-    "kind": "negative",
-    "text": "NA",
     "category": "plans",
     "hasPhoto": false
   },

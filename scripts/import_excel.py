@@ -250,6 +250,7 @@ def _parse_observations(rows, start, audit_id, questions=(), findings=()):
                              or _match_comment(" ".join(e["parts"]), pool))
 
     # Template rows: a checklist code with no comment and no photo is not an observation.
+    # Ids are numbered before dropping "Not Applicable" notes, so ids stay stable (gaps allowed).
     entries = [e for e in entries if e["parts"] or e["photo"]]
     out = []
     for n, e in enumerate(entries, 1):
@@ -263,7 +264,19 @@ def _parse_observations(rows, start, audit_id, questions=(), findings=()):
             "category": category_for(e["code"], e["kind"], text),
             "hasPhoto": e["photo"],
         })
-    return out
+    return [o for o in out if not is_na_note(o["text"])]
+
+
+_NA_NOTE = re.compile(r"^(not\s+applicable|n/a|na[ -])", re.I)
+
+
+def is_na_note(text):
+    """True for auditor notes that only say the item did not apply ("Not Applicable...", "N/A", "NA - ...").
+
+    Leading bullets, asterisks, dashes and whitespace are ignored. Such notes are not observations.
+    """
+    t = re.sub(r"^[\s\u2022\u00b7*\-\u2013\u2014]+", "", text or "")
+    return bool(_NA_NOTE.match(t)) or t.strip().lower() in ("n/a", "na", "not applicable")
 
 
 def parse_results(path, checklist=(), checklist_path=None):

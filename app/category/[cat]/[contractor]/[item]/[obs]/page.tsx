@@ -13,7 +13,8 @@ import { CategoryChip } from '@/components/details/parts';
 
 type Params = { cat: string; contractor: string; item: string; obs: string };
 
-const KIND = { negative: 'Finding', site: 'Site finding', positive: 'Positive note' } as const;
+/** The organisation's own terms; neutral styling (a note on an item is not a pass/fail verdict). */
+const KIND = { negative: 'Negative observation', site: 'Site observation', positive: 'Positive observation' } as const;
 
 /** The observation in full: the only level with long text. */
 export default async function ObservationPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
@@ -37,7 +38,6 @@ export default async function ObservationPage({ params, searchParams }: { params
     { label: item.code, href: itemHref },
     { label: `${dateLabel(audit.date)} observation` },
   ];
-  const tone = obs.kind === 'positive' ? 'tone-good' : 'tone-non';
 
   return (
     <DetailFrame filter={filter} crumbs={crumbs} parent={itemHref}>
@@ -45,8 +45,8 @@ export default async function ObservationPage({ params, searchParams }: { params
         <BentoCard i={0} testid="observation" className="min-w-0 gap-[clamp(14px,2.2svh,24px)] p-[clamp(18px,2.6svh,36px)] min-[1100px]:col-span-8">
           <div className="flex flex-col gap-1.5">
             <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[22px] min-[900px]:text-[clamp(22px,3.2svh,30px)] font-semibold leading-[1.1] tracking-[-0.03em]">
-              <span className={`${tone} badge px-3 py-[3px] text-[0.6em]`}>{KIND[obs.kind]}</span>
               <span>Item {item.code}</span>
+              <span className="rounded-full bg-fill px-3 py-[3px] text-[13px] font-semibold tracking-normal text-muted">{KIND[obs.kind]}</span>
             </h1>
             <p className="text-[14px] text-muted">{dateLabel(audit.date)} · {quarterLabel(audit.quarter)} · Inspection {audit.inspectionNo}</p>
           </div>

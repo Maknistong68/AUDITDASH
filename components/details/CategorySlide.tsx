@@ -82,12 +82,12 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
                   data-testid="contractor-row"
                   href={d.contractorHref(r.contractor.id)}
                   className="group grid grid-cols-[1.4em_minmax(0,1.4fr)_minmax(40px,1fr)_3.2em_14px] items-center gap-2.5 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(6px,1.1svh,10px)] transition-colors hover:bg-fill-2"
-                  title={`${r.contractor.name}: gap ${pct(r.gapRate)}%, ${r.findings} findings`}
+                  title={`${r.contractor.name}: gap ${pct(r.gapRate)}%, ${r.findings} negative observations`}
                 >
                   <span className="num text-[13px] font-semibold text-faint">{rank}</span>
                   <span className="flex min-w-0 flex-col">
                     <span className="truncate text-[15px] font-semibold leading-tight tracking-[-0.015em]">{r.contractor.name}</span>
-                    <span className="text-[12px] leading-tight text-muted">{r.contractor.subregion} · {r.findings} {r.findings === 1 ? 'finding' : 'findings'}</span>
+                    <span className="text-[12px] leading-tight text-muted">{r.contractor.subregion} · {r.findings} {r.findings === 1 ? 'note' : 'notes'}</span>
                   </span>
                   <GapBar value={r.gapRate} />
                   <span className="num text-right text-[16px] font-semibold">{pct(r.gapRate)}<span className="text-[0.72em] text-muted">%</span></span>
@@ -100,7 +100,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
       </BentoCard>
 
       <BentoCard i={2} testid="driving-items" className="gap-2 px-[clamp(10px,1vw,18px)] py-[clamp(14px,2svh,24px)] min-[900px]:col-span-12">
-        <TileLabel className="px-[clamp(6px,0.6vw,10px)]">Driven by · audits with a finding on the item</TileLabel>
+        <TileLabel className="px-[clamp(6px,0.6vw,10px)]">Driven by · noted audits × subsection score lost</TileLabel>
         {q.items.length ? (
           <ol
             className="grid grid-cols-1 gap-x-[clamp(16px,2vw,40px)] min-[1200px]:grid-flow-col min-[1200px]:grid-cols-2 min-[1200px]:[grid-template-rows:repeat(var(--rows),auto)]"
@@ -111,19 +111,19 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
                 key={it.itemCode}
                 id={d.anchors ? `item-${it.itemCode}` : undefined}
                 data-testid="driving-item"
-                className="grid scroll-mt-24 grid-cols-[3.4em_minmax(0,1fr)_minmax(64px,0.28fr)_3.6em] items-center gap-2.5 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(6px,1svh,9px)] target:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
+                className="grid scroll-mt-24 grid-cols-[3.4em_minmax(0,1fr)_minmax(64px,0.28fr)_5.6em] items-center gap-2.5 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(6px,1svh,9px)] target:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)]"
               >
                 <CodeChip code={it.itemCode} />
                 <span className="line-clamp-2 text-[14px] leading-snug" title={it.question}>{it.question}</span>
-                <GapBar value={it.hits / q.audits} />
-                <span className="num text-right text-[13px] text-muted">
-                  <span className="text-[15px] font-semibold text-ink">{it.hits}</span>/{q.audits}
+                <span title={`${pct(it.severity)}% of the subsection score lost, on average, in the audits that noted it`}><GapBar value={it.severity} /></span>
+                <span className="num whitespace-nowrap text-right text-[13px] text-muted">
+                  noted <span className="text-[15px] font-semibold text-ink">{it.hits}</span>/{q.audits}
                 </span>
               </li>
             ))}
           </ol>
         ) : (
-          <p className="px-2 text-[15px] text-muted">No item-level findings this quarter.</p>
+          <p className="px-2 text-[15px] text-muted">No item-level notes this quarter.</p>
         )}
       </BentoCard>
     </div>

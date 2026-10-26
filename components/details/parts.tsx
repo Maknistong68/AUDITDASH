@@ -37,15 +37,29 @@ export function AuditDelta({ audit, previous }: { audit: Audit; previous: Audit 
 }
 
 const STATE: Record<ItemState, { label: string; cls: string }> = {
-  finding: { label: 'Finding', cls: 'tone-non badge' },
-  clear: { label: 'Clear', cls: 'tone-good badge' },
-  na: { label: 'N/A', cls: 'badge bg-fill-2 text-muted' },
+  noted: { label: 'Noted', cls: 'bg-fill text-ink' },
+  none: { label: 'No note', cls: 'bg-fill-2 text-muted' },
+  na: { label: 'N/A', cls: 'bg-fill-2 text-faint' },
 };
 
-/** Finding / Clear / N/A pill. Only "Clear" is green. */
+/**
+ * Noted / No note / N/A. Deliberately neutral: auditors annotate compliant items too, so a note is not a
+ * failure. Severity is shown separately, from the official subsection score (SectionGap).
+ */
 export function StatePill({ state }: { state: ItemState }) {
   const s = STATE[state];
-  return <span data-state={state} className={`${s.cls} px-2 py-[2px] text-[12px]`} style={state === 'na' ? { background: 'var(--fill-2)', color: 'var(--muted)' } : undefined}>{s.label}</span>;
+  return <span data-state={state} className={`${s.cls} inline-flex items-center whitespace-nowrap rounded-full px-2 py-[2px] text-[12px] font-semibold`}>{s.label}</span>;
+}
+
+/** Score lost in the item's official subsection for one audit (1 − scored/possible), in the single gap hue. */
+export function SectionGap({ ratio, code }: { ratio: number | null; code: string }) {
+  const gap = ratio === null ? null : 1 - ratio;
+  return (
+    <span className="grid grid-cols-[minmax(0,1fr)_3ch] items-center gap-2" data-testid="section-gap" title={gap === null ? `Section ${code} not applicable` : `Section ${code}: ${Math.round(gap * 100)}% of its score lost in this audit`}>
+      <GapBar value={gap} />
+      <span className="num text-right text-[13px] font-semibold">{gap === null ? <span className="font-normal text-faint">—</span> : Math.round(gap * 100)}</span>
+    </span>
+  );
 }
 
 /** A gap bar on 0–100% in the single severity hue. */
