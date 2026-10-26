@@ -369,6 +369,8 @@ export function repeatFindings(repo: Repo, filter: Filter): {
 export interface SystemicRepeat {
   itemCode: string; label: string; category: CategoryId; contractors: Contractor[]; contractorCount: number;
   eligibleContractors: number; q4Notes: number; q1Notes: number;
+  /** Audits (within the filter's regions) with an applicable note on this question, per quarter. */
+  q4Audits: number; q1Audits: number;
   sectionScores: { contractorId: string; q4: number | null; q1: number | null }[];
 }
 
@@ -406,11 +408,13 @@ export function rankedSystemicRepeats(repo: Repo, filter: Filter, minContractors
     const mine = negs.filter((o) => o.itemCode === code);
     const notedBy = (q: Quarter) => new Set(mine.filter((o) => quarterOf.get(o.auditId) === q).map((o) => pool.find((a) => a.id === o.auditId)!.contractorId)).size;
     const hitIds = new Set(mine.map((o) => o.auditId));
+    const auditsIn = (q: Quarter) => [...hitIds].filter((id) => quarterOf.get(id) === q).length;
     const ratios = pool.filter((a) => hitIds.has(a.id)).map((a) => itemRatio(a, item)).filter((x): x is number => x !== null);
     const ratioIn = (c: string, q: Quarter) => { const a = auditOf(c, q); return a ? itemRatio(a, item) : null; };
     rows.push({
       itemCode: code, label: itemLabel(code, item.question), category: item.category, contractors, contractorCount: contractors.length,
       eligibleContractors, q4Notes: notedBy('Q4-2025'), q1Notes: notedBy('Q1-2026'),
+      q4Audits: auditsIn('Q4-2025'), q1Audits: auditsIn('Q1-2026'),
       sectionScores: contractors.map((c) => ({ contractorId: c.id, q4: ratioIn(c.id, 'Q4-2025'), q1: ratioIn(c.id, 'Q1-2026') })),
       impact: hitIds.size * (1 - (mean(ratios) ?? 1)),
     });

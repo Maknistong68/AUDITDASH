@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
-import { repeatContractors, repeatSpread, systemicRepeats } from '@/lib/analytics';
+import { filterAudits, repeatContractors, repeatSpread, systemicRepeats } from '@/lib/analytics';
 import { detailContext, href, type SP } from '@/lib/details';
 import { DetailFrame } from '@/components/details/DetailFrame';
 import { RepeatsView, type RepeatCol, type RepeatRow } from '@/components/details/RepeatsView';
@@ -38,8 +38,8 @@ export default async function RepeatsPage({ searchParams }: { searchParams: Prom
     key: r.itemCode,
     label: r.label,
     reach: r.contractorCount,
-    q4: r.q4Notes,
-    q1: r.q1Notes,
+    q4: r.q4Audits,
+    q1: r.q1Audits,
     href: href(`/category/${r.category}`, query, { hash: `item-${r.itemCode}` }),
     cells: cols.map((c) => {
       if (!r.contractors.some((x) => x.id === c.id)) return null;
@@ -52,6 +52,8 @@ export default async function RepeatsPage({ searchParams }: { searchParams: Prom
       };
     }),
   }));
+  // Audits per quarter within the filter's regions: the denominators, so a quarter with more audits does not read as a rise.
+  const audits = { q4: filterAudits(repo, { ...filter, quarter: 'Q4-2025' }).length, q1: filterAudits(repo, { ...filter, quarter: 'Q1-2026' }).length };
   const empty = twoQuarters ? (repeats.length ? null : 'No questions repeating') : 'Needs an earlier quarter';
 
   return (
@@ -59,7 +61,8 @@ export default async function RepeatsPage({ searchParams }: { searchParams: Prom
       <RepeatsView
         count={twoQuarters ? repeats.length : null}
         spread={repeatSpread(repeats)}
-        notes={{ q4: repeats.reduce((s, r) => s + r.q4Notes, 0), q1: repeats.reduce((s, r) => s + r.q1Notes, 0) }}
+        notes={{ q4: repeats.reduce((s, r) => s + r.q4Audits, 0), q1: repeats.reduce((s, r) => s + r.q1Audits, 0) }}
+        audits={audits}
         rows={rows}
         cols={cols}
         empty={empty}

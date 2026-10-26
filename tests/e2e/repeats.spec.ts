@@ -1,11 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { repeatContractors, systemicRepeats } from '../../lib/analytics';
+import { filterAudits, repeatContractors, systemicRepeats } from '../../lib/analytics';
 
 const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
 const Q = 'q=all&r=SR1%2CSR2';
 const ROWS = systemicRepeats(getRepo(), ALL);
 const COLS = repeatContractors(getRepo(), ALL);
+const AUDITS = { q4: filterAudits(getRepo(), { ...ALL, quarter: 'Q4-2025' }).length, q1: filterAudits(getRepo(), { ...ALL, quarter: 'Q1-2026' }).length };
 const CODE = /\b[ABC]\d+(\.\d+)?\b/;
 
 /** Wrap startViewTransition: count hand-offs and, once each is running, record its pseudo-element animation durations. */
@@ -119,7 +120,8 @@ test('/repeats: a row shows its Q4 → Q1 notes on hover; dot, label and column 
   await expect(trend).toHaveCSS('opacity', '0');
   await row.hover();
   await expect(trend).toHaveCSS('opacity', '1');
-  await expect(trend).toHaveText(`${ROWS[0].q4Notes}→${ROWS[0].q1Notes}`);
+  await expect(trend).toHaveText(`${ROWS[0].q4Audits} of ${AUDITS.q4}→${ROWS[0].q1Audits} of ${AUDITS.q1}audits`);
+  await expect(trend).toHaveAttribute('aria-label', `Noted at ${ROWS[0].q4Audits} of ${AUDITS.q4} audits in Q4, ${ROWS[0].q1Audits} of ${AUDITS.q1} audits in Q1`);
   // focus shows it too
   await page.mouse.move(0, 0);
   await page.getByTestId('repeats-row').nth(1).getByTestId('repeats-label').focus();
@@ -188,4 +190,35 @@ test('/repeats on a short screen: top rows + "+M more" that expands in place; th
   await page.getByTestId('repeats-row').last().scrollIntoViewIfNeeded();
   await expect(page.getByTestId('repeats-row').last()).toBeInViewport();
   await noPageScroll(page);
+});
+
+test('/repeats header: Q4 → Q1 as notes per audit, so extra Q1 audits do not read as a rise', async ({ page }) => {
+  await page.goto(`/repeats?${Q}`);
+  const notes = page.getByTestId('repeats-notes');
+  await expect(notes).toContainText('per audit');
+  await expect(notes).not.toContainText('contractor notes');
+  const sum = (k: 'q4Audits' | 'q1Audits') => ROWS.reduce((s, r) => s + r[k], 0);
+  expect(AUDITS.q4).toBeGreaterThan(0);
+  expect(AUDITS.q1).toBeGreaterThan(0);
+  await expect(page.getByTestId('repeats-notes-count')).toHaveText([
+    (sum('q4Audits') / AUDITS.q4).toFixed(1),
+    (sum('q1Audits') / AUDITS.q1).toFixed(1),
+  ]);
+});
+
+test('/repeats dark theme: every dot tint is at least 3:1 against the dark card', async ({ browser }) => {
+  const ctx = await browser.newContext({ colorScheme: 'dark', viewport: { width: 1920, height: 1080 } });
+  const page = await ctx.newPage();
+  await page.goto(`/repeats?${Q}`);
+  await expect(page.getByTestId('repeats-matrix')).toBeVisible();
+  const ratios = await page.evaluate(() => {
+    const cv = document.createElement('canvas').getContext('2d')!;
+    const rgb = (c: string) => { cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); return [...cv.getImageData(0, 0, 1, 1).data].slice(0, 3); };
+    const lum = (c: number[]) => { const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+    const card = lum(rgb(getComputedStyle(document.querySelector('[data-testid="repeats-matrix"]')!).backgroundColor));
+    const root = getComputedStyle(document.documentElement);
+    return [0, 1, 2, 3].map((k) => { const l = lum(rgb(root.getPropertyValue(`--rp-${k}`).trim())); return (Math.max(l, card) + 0.05) / (Math.min(l, card) + 0.05); });
+  });
+  for (const r of ratios) expect(r).toBeGreaterThanOrEqual(3);
+  await ctx.close();
 });

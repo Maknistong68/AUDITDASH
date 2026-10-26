@@ -10,29 +10,27 @@ export interface RepeatCol { id: string; name: string; base: string; qual: strin
 export interface RepeatCell { step: number; lost: number | null; href: string }
 export interface RepeatRow { key: string; label: string; reach: number; q4: number; q1: number; href: string; cells: (RepeatCell | null)[] }
 
-/** Dot tint by score lost in the contractor's latest audit: one warm hue, darker = more lost. */
-const TINT = [
-  'color-mix(in oklab, var(--minimal-dot) 42%, var(--surface))',
-  'var(--minimal-dot)',
-  'color-mix(in oklab, var(--minimal-dot), black 30%)',
-  'color-mix(in oklab, var(--minimal-dot), black 55%)',
-];
+/** Dot tint by score lost in the contractor's latest audit: one warm hue, darker = more lost (tokens in globals.css). */
+const TINT = ['var(--rp-0)', 'var(--rp-1)', 'var(--rp-2)', 'var(--rp-3)'];
 /** Smallest row (px) before the matrix falls back to "top N + more"; space between reach groups. */
 const ROW_MIN = 16;
 const GROUP_GAP = 6;
 
 /**
  * The /repeats screen under the breadcrumb. Header strip (the landing of the dashboard card's hand-off): the figure,
- * the reach bar, Q4 → Q1 notes. Then the issues × contractors matrix: worst reach first, a filled dot where the question
- * repeats at that contractor (tint = score lost there), empty otherwise. Hover or focus a row for its Q4 → Q1 notes;
+ * the reach bar, Q4 → Q1 notes per audit. Then the issues × contractors matrix: worst reach first, a filled dot where the question
+ * repeats at that contractor (tint = score lost there), empty otherwise. Hover or focus a row for its Q4 → Q1 "noted at X of Y audits";
  * a dot opens the item's history, a label the item in its category, a column head the contractor.
  * Rows share the height left; if they cannot all fit at ROW_MIN, the top N show with a "+M more" row that expands in
  * place inside the matrix's own scroll area. The page itself never scrolls.
  */
-export function RepeatsView({ count, spread, notes, rows, cols, empty }: {
+export function RepeatsView({ count, spread, notes, audits, rows, cols, empty }: {
   count: number | null;
   spread: { reach: number; of: number; questions: number }[];
+  /** Audits noted on these questions, summed, per quarter. */
   notes: { q4: number; q1: number };
+  /** Audits in the filter per quarter: the denominators. */
+  audits: { q4: number; q1: number };
   rows: RepeatRow[];
   cols: RepeatCol[];
   empty: string | null;
@@ -40,21 +38,27 @@ export function RepeatsView({ count, spread, notes, rows, cols, empty }: {
   return (
     <div className="tone-minimal flex min-h-0 flex-1 flex-col gap-[var(--gap-grid)] px-[var(--gutter)]">
       <HandoffLanding />
-      <Header count={count} spread={spread} notes={notes} />
+      <Header count={count} spread={spread} notes={notes} audits={audits} />
       {empty ? (
         <section data-testid="empty-state" className="card flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
           <p className="figure text-[clamp(56px,10svh,112px)] text-faint" aria-hidden>{count === null ? '—' : '0'}</p>
           <h2 className="text-[21px] font-semibold tracking-[-0.02em]">{empty}</h2>
         </section>
       ) : (
-        <Matrix rows={rows} cols={cols} />
+        <Matrix rows={rows} cols={cols} audits={audits} />
       )}
     </div>
   );
 }
 
-function Header({ count, spread, notes }: { count: number | null; spread: { reach: number; of: number; questions: number }[]; notes: { q4: number; q1: number } }) {
-  const max = Math.max(1, notes.q4, notes.q1);
+/** Notes per audit (a quarter with more audits must not read as a rise); null without audits. */
+const perAudit = (n: number, audits: number) => (audits > 0 ? n / audits : null);
+
+function Header({ count, spread, notes, audits }: {
+  count: number | null; spread: { reach: number; of: number; questions: number }[]; notes: { q4: number; q1: number }; audits: { q4: number; q1: number };
+}) {
+  const rates = { q4: perAudit(notes.q4, audits.q4), q1: perAudit(notes.q1, audits.q1) };
+  const max = Math.max(1e-9, rates.q4 ?? 0, rates.q1 ?? 0);
   return (
     <section
       data-testid="repeats-header"
@@ -78,13 +82,13 @@ function Header({ count, spread, notes }: { count: number | null; spread: { reac
         <div
           data-testid="repeats-notes"
           role="img"
-          aria-label={`Contractor notes on these questions: Q4 ${notes.q4}, Q1 ${notes.q1}`}
+          aria-label={`Notes on these questions per audit: Q4 ${rates.q4?.toFixed(1) ?? 'none'}, Q1 ${rates.q1?.toFixed(1) ?? 'none'}`}
           className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5"
         >
-          {([['Q4', notes.q4, 'color-mix(in srgb, var(--muted) 40%, transparent)'], ['Q1', notes.q1, 'var(--tone-dot)']] as const).map(([q, n, bg], k) => (
-            <NoteBar key={q} q={q} n={n} max={max} bg={bg} k={k} />
+          {([['Q4', rates.q4, 'color-mix(in srgb, var(--muted) 40%, transparent)'], ['Q1', rates.q1, 'var(--tone-dot)']] as const).map(([q, r, bg], k) => (
+            <NoteBar key={q} q={q} rate={r} max={max} bg={bg} k={k} />
           ))}
-          <span className="col-start-2 col-end-4 text-[11px] leading-none text-muted">contractor notes</span>
+          <span className="col-start-2 col-end-4 text-[11px] leading-none text-muted">per audit</span>
         </div>
       ) : (
         <div />
@@ -93,7 +97,7 @@ function Header({ count, spread, notes }: { count: number | null; spread: { reac
   );
 }
 
-function NoteBar({ q, n, max, bg, k }: { q: string; n: number; max: number; bg: string; k: number }) {
+function NoteBar({ q, rate, max, bg, k }: { q: string; rate: number | null; max: number; bg: string; k: number }) {
   return (
     <>
       <span className="num text-[12px] leading-none text-muted">{q}</span>
@@ -101,15 +105,15 @@ function NoteBar({ q, n, max, bg, k }: { q: string; n: number; max: number; bg: 
         <span
           data-testid="repeats-notes-bar"
           className="rp-grow block h-full rounded-full"
-          style={{ width: `${(n / max) * 100}%`, background: bg, ['--d' as string]: `${300 + k * 90}ms` }}
+          style={{ width: `${((rate ?? 0) / max) * 100}%`, background: bg, ['--d' as string]: `${300 + k * 90}ms` }}
         />
       </span>
-      <span data-testid="repeats-notes-count" className="num text-[13px] font-semibold leading-none">{n}</span>
+      <span data-testid="repeats-notes-count" className="num text-[13px] font-semibold leading-none">{rate === null ? '—' : rate.toFixed(1)}</span>
     </>
   );
 }
 
-function Matrix({ rows, cols }: { rows: RepeatRow[]; cols: RepeatCol[] }) {
+function Matrix({ rows, cols, audits }: { rows: RepeatRow[]; cols: RepeatCol[]; audits: { q4: number; q1: number } }) {
   const body = useRef<HTMLDivElement>(null);
   // How many rows fit at ROW_MIN (null until measured: the server renders them all).
   const [fit, setFit] = useState<number | null>(null);
@@ -148,7 +152,7 @@ function Matrix({ rows, cols }: { rows: RepeatRow[]; cols: RepeatCol[] }) {
 
   const clipped = !open && fit !== null && fit < rows.length;
   const shown = clipped ? rows.slice(0, fit) : rows;
-  const cssCols = `clamp(220px, 19vw, 360px) repeat(${cols.length}, minmax(0, 1fr)) clamp(64px, 6vw, 110px)`;
+  const cssCols = `clamp(220px, 19vw, 360px) repeat(${cols.length}, minmax(0, 1fr)) clamp(150px, 12vw, 210px)`;
 
   return (
     <section
@@ -182,7 +186,7 @@ function Matrix({ rows, cols }: { rows: RepeatRow[]; cols: RepeatCol[] }) {
             </Link>
           </div>
         ))}
-        <div role="columnheader" className="px-2 text-right text-[11px] leading-none text-muted">Q4 → Q1</div>
+        <div role="columnheader" className="px-2 text-right text-[11px] leading-none text-muted">noted at · Q4 → Q1</div>
       </div>
 
       <div
@@ -201,6 +205,7 @@ function Matrix({ rows, cols }: { rows: RepeatRow[]; cols: RepeatCol[] }) {
             cssCols={cssCols}
             gap={i > 0 && r.reach !== shown[i - 1].reach}
             open={open}
+            audits={audits}
             labelRef={open && fit !== null && i === fit ? (el) => { firstHidden.current = el; } : undefined}
           />
         ))}
@@ -226,8 +231,8 @@ function Matrix({ rows, cols }: { rows: RepeatRow[]; cols: RepeatCol[] }) {
   );
 }
 
-function Row({ row, index, cols, cssCols, gap, open, labelRef }: {
-  row: RepeatRow; index: number; cols: RepeatCol[]; cssCols: string; gap: boolean; open: boolean;
+function Row({ row, index, cols, cssCols, gap, open, audits, labelRef }: {
+  row: RepeatRow; index: number; cols: RepeatCol[]; cssCols: string; gap: boolean; open: boolean; audits: { q4: number; q1: number };
   labelRef?: (el: HTMLAnchorElement | null) => void;
 }) {
   return (
@@ -282,12 +287,13 @@ function Row({ row, index, cols, cssCols, gap, open, labelRef }: {
       <div
         role="cell"
         data-testid="repeats-trend"
-        aria-label={`Noted at ${row.q4} contractors in Q4, ${row.q1} in Q1`}
+        aria-label={`Noted at ${row.q4} of ${audits.q4} audits in Q4, ${row.q1} of ${audits.q1} audits in Q1`}
         className="num flex items-center justify-end gap-1 px-2 text-[12px] opacity-0 transition-opacity duration-200 group-hover/row:opacity-100 group-focus-within/row:opacity-100"
       >
-        <span className="text-muted">{row.q4}</span>
+        <span className="whitespace-nowrap text-muted">{row.q4} of {audits.q4}</span>
         <span className="text-muted">→</span>
-        <span className="font-semibold text-ink">{row.q1}</span>
+        <span className="whitespace-nowrap font-semibold text-ink">{row.q1} of {audits.q1}</span>
+        <span className="text-muted">audits</span>
       </div>
     </div>
   );

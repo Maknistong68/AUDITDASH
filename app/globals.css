@@ -33,6 +33,8 @@
   --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
   --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
   --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #ff8a1f;
+  /* /repeats dot tint by score lost (darker = more lost), RepeatsView */
+  --rp-0: #ffd0ae; --rp-1: #ff8a1f; --rp-2: #9e530f; --rp-3: #552a04;
   --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
   --up: #1f7a36;
   --down: #c0141c;
@@ -92,6 +94,8 @@
   --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
   --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
   --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
+  /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
+  --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18;
   --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
   --up: #4fdc78;
   --down: #ff7b72;
@@ -131,6 +135,8 @@
     --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
     --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
     --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
+    /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
+    --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18;
     --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
     --up: #4fdc78;
     --down: #ff7b72;
@@ -452,6 +458,8 @@ html.js [data-countup]:not([data-ready]) {
     --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
     --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
     --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #ff8a1f;
+    /* /repeats dot tint by score lost (darker = more lost), RepeatsView */
+    --rp-0: #ffd0ae; --rp-1: #ff8a1f; --rp-2: #9e530f; --rp-3: #552a04;
     --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
     --up: #1f7a36;
     --down: #c0141c;
