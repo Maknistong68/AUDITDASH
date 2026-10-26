@@ -395,3 +395,31 @@ export function compareContractors(repo: Repo, filter: Filter, ids: string[]): {
       };
     });
 }
+
+/**
+ * The quarter's main problem: worst category by score-based gap on the LATEST quarter present in the filtered
+ * audits. prevGapRate = the same category's gap in the previous quarter (same regions/contractor) or null.
+ * items = that quarter's top 3 driving items by audits hit. Null when the filter has no audits.
+ */
+export function mainProblem(repo: Repo, filter: Filter): {
+  category: CategoryId; gapRate: number; prevGapRate: number | null; quarter: Quarter;
+  items: { itemCode: string; question: string; hits: number }[];
+} | null {
+  const audits = select(repo, filter);
+  if (!audits.length) return null;
+  const quarter = QUARTER_ORDER.filter((q) => audits.some((a) => a.quarter === q)).at(-1)!;
+  const qf: Filter = { ...filter, quarter };
+  let worst: { category: CategoryId; gapRate: number } | null = null;
+  for (const g of categoryGaps(repo, qf)) {
+    if (g.gapRate !== null && (!worst || g.gapRate > worst.gapRate)) worst = { category: g.category, gapRate: g.gapRate };
+  }
+  if (!worst) return null;
+  const qi = QUARTER_ORDER.indexOf(quarter);
+  const prevAudits = qi > 0 ? select(repo, filter, QUARTER_ORDER[qi - 1]) : [];
+  return {
+    ...worst,
+    prevGapRate: prevAudits.length ? scoreGap(repo, prevAudits, worst.category) : null,
+    quarter,
+    items: categoryDetail(repo, qf, worst.category).items.slice(0, 3),
+  };
+}

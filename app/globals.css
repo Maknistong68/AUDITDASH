@@ -7,10 +7,8 @@
  * Depth: soft layered shadows on cards (user brief asks for premium depth), frosted glass on the bar and
  * the compare sheet. Colour lives on data: the three ring hues and the honest band/status tones.
  *
- * Ring hues (A Management / B Site processes / C Planning) were validated with the dataviz skill's
- * validate_palette.js (--pairs all): light #e5649c,#2b6be8,#0a9fc0 on #fff and dark #dc5d90,#3d72ec,#0d9cb8
- * on #1c1c1e pass lightness band, chroma floor, CVD (>=8.4 / 8.8) and normal-vision floors, contrast >= 3:1.
- * Ring position (outer/middle/inner) and the printed values are the secondary encoding.
+ * Data colour: one bar hue (--bar) for neutral magnitudes (A/B/C section bars); band tones for scores;
+ * --gap for gap severity. The main-problem tile is the inverted Apple tile (--hero-*), dark in both themes.
  */
 :root {
   color-scheme: light;
@@ -28,10 +26,9 @@
   --accent: #0071e3;
   --on-accent: #ffffff;
 
-  --ring-a: #e5649c;  --ring-a-end: #ff8cc0;
-  --ring-b: #2b6be8;  --ring-b-end: #5fa0ff;
-  --ring-c: #0a9fc0;  --ring-c-end: #3fd2e8;
-  --ring-track: 0.15;
+  --bar: #2f6fe0;
+  --hero-bg: #1d1d1f; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.12);
+  --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
 
   --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
   --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
@@ -88,10 +85,9 @@
   --faint: #8e8e93;
   --accent: #2997ff;
   --on-accent: #ffffff;
-  --ring-a: #dc5d90;  --ring-a-end: #ff7fb3;
-  --ring-b: #3d72ec;  --ring-b-end: #6fa6ff;
-  --ring-c: #0d9cb8;  --ring-c-end: #3fd6ea;
-  --ring-track: 0.24;
+  --bar: #5b8cff;
+  --hero-bg: #2c2c2e; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.1);
+  --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
   --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
   --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
   --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
@@ -127,10 +123,9 @@
     --muted: #a1a1a6;
     --faint: #8e8e93;
     --accent: #2997ff;
-    --ring-a: #dc5d90;  --ring-a-end: #ff7fb3;
-    --ring-b: #3d72ec;  --ring-b-end: #6fa6ff;
-    --ring-c: #0d9cb8;  --ring-c-end: #3fd6ea;
-    --ring-track: 0.24;
+    --bar: #5b8cff;
+    --hero-bg: #2c2c2e; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.1);
+    --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
     --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
     --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
     --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
@@ -281,4 +276,11 @@ html.js [data-countup]:not([data-ready]) {
   background: color-mix(in srgb, var(--surface) 88%, transparent);
   -webkit-backdrop-filter: saturate(160%) blur(40px);
   backdrop-filter: saturate(160%) blur(40px);
+}
+
+/* The inverted Apple tile: the right side's hero (main problem). */
+.hero-tile {
+  background: var(--hero-bg);
+  color: var(--hero-text);
+  box-shadow: var(--shadow-card);
 }

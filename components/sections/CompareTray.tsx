@@ -2,13 +2,13 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
-import { ActivityRings } from '@/components/charts/ActivityRings';
+import { SectionBars } from '@/components/charts/SectionBars';
 import { categoryById } from '@/lib/categories';
 import { bestWorst, MAX_COMPARE } from '@/lib/compare';
 import { bandShort, bandTone, pct, prevQuarterShort } from '@/lib/format';
 import type { ContractorCard as Card } from '@/lib/analytics';
 import type { CategoryId } from '@/lib/types';
-import { Delta } from './ContractorCard';
+import { Delta } from '@/components/bento/ContractorsCard';
 
 export interface CompareEntry {
   card: Card;
@@ -33,8 +33,8 @@ function Trend({ card }: { card: Card }) {
     <div className="flex items-center gap-3">
       <svg viewBox="0 0 84 34" className="h-[34px] w-[84px] shrink-0 overflow-visible" aria-hidden>
         <line x1="6" x2="78" y1={y(previous)} y2={y(total)} strokeWidth="2.5" strokeLinecap="round" style={{ stroke: color }} />
-        <circle cx="6" cy={y(previous)} r="3.5" style={{ fill: 'var(--surface)', stroke: color }} strokeWidth="2" />
-        <circle cx="78" cy={y(total)} r="4" style={{ fill: color }} />
+        <rect x="2.5" y={y(previous) - 3.5} width="7" height="7" rx="3.5" style={{ fill: 'var(--surface)', stroke: color }} strokeWidth="2" />
+        <rect x="74" y={y(total) - 4} width="8" height="8" rx="4" style={{ fill: color }} />
       </svg>
       <p className="num text-[13px] text-muted">
         {vs ?? 'Prev'} {pct(previous)} → <span className="font-semibold text-ink">{pct(total)}</span>
@@ -47,7 +47,7 @@ const ROWS = 'grid-rows-[auto_auto_auto_repeat(10,auto)_auto_auto_auto_auto]';
 
 /**
  * Compare sheet: frosted, slides up when 2–3 contractors are selected. One CSS grid with subgrid columns,
- * so every row (rings, trend, ten category gaps, repeat issues) lines up across contractors.
+ * so every row (score + A/B/C section bars, trend, ten category gaps, repeat issues) lines up across contractors.
  * Gap bars use one severity hue; in each row the worst contractor is full strength, the best gets a check.
  */
 export function CompareTray({
@@ -222,42 +222,35 @@ export function CompareTray({
 function Header({ entry, onRemove }: { entry: CompareEntry; onRemove: () => void }) {
   const { contractor, rings, total, band, previous, auditId, rank } = entry.card;
   return (
-    <div className="flex min-w-0 items-center gap-[clamp(10px,1vw,18px)] border-b border-hairline pb-[clamp(8px,1.4svh,14px)]">
-      <ActivityRings rings={rings} delay={0.15} className="aspect-square h-[clamp(72px,11svh,120px)] shrink-0" />
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="flex min-w-0 items-start gap-1.5">
-          <span className="num pt-[2px] text-[13px] font-semibold text-faint">{rank}</span>
-          <h3 className="line-clamp-2 text-[clamp(15px,1.9svh,19px)] font-semibold leading-tight tracking-[-0.02em]" title={contractor.name}>
-            {contractor.name}
-          </h3>
-          <button
-            type="button"
-            onClick={onRemove}
-            aria-label={`Remove ${contractor.name} from compare`}
-            className="ml-auto grid size-6 shrink-0 place-items-center rounded-full text-faint hover:bg-fill hover:text-ink"
-          >
-            <X size={13} strokeWidth={2.6} aria-hidden />
-          </button>
-        </div>
-        <div className="flex items-end gap-3">
-          <p className="figure text-[clamp(32px,5svh,52px)]">
-            {pct(total)}
-            <span className="ml-0.5 text-[0.5em] tracking-normal text-muted">%</span>
-          </p>
-          <div className="flex flex-col items-start gap-1 pb-0.5">
-            <span className={`badge tone-${bandTone(band)} px-2 py-[2px] text-[13px]`} title={band}>
-              {bandShort(band)}
-            </span>
-            <Delta total={total} previous={previous} auditId={auditId} size={13} />
-          </div>
-        </div>
-        <p className="num flex gap-3 text-[13px] text-muted">
-          <span className="font-medium">{contractor.subregion}</span>
-          <span><span className="font-semibold" style={{ color: 'var(--ring-a)' }}>A</span> {pct(rings.A)}</span>
-          <span><span className="font-semibold" style={{ color: 'var(--ring-b)' }}>B</span> {pct(rings.B)}</span>
-          <span><span className="font-semibold" style={{ color: 'var(--ring-c)' }}>C</span> {pct(rings.C)}</span>
-        </p>
+    <div className="flex min-w-0 flex-col gap-[clamp(6px,1svh,10px)] border-b border-hairline pb-[clamp(8px,1.4svh,14px)]">
+      <div className="flex min-w-0 items-start gap-1.5">
+        <span className="num pt-[2px] text-[13px] font-semibold text-faint">{rank}</span>
+        <h3 className="line-clamp-2 text-[clamp(15px,1.9svh,19px)] font-semibold leading-tight tracking-[-0.02em]" title={contractor.name}>
+          {contractor.name}
+        </h3>
+        <span className="mt-[2px] shrink-0 rounded-full bg-fill px-1.5 py-[1px] text-[12px] font-medium text-muted">{contractor.subregion}</span>
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`Remove ${contractor.name} from compare`}
+          className="ml-auto grid size-6 shrink-0 place-items-center rounded-full text-faint hover:bg-fill hover:text-ink"
+        >
+          <X size={13} strokeWidth={2.6} aria-hidden />
+        </button>
       </div>
+      <div className="flex items-end gap-3">
+        <p className="figure text-[clamp(32px,5svh,52px)]">
+          {pct(total)}
+          <span className="ml-0.5 text-[0.5em] tracking-normal text-muted">%</span>
+        </p>
+        <div className="flex flex-col items-start gap-1 pb-0.5">
+          <span className={`badge tone-${bandTone(band)} px-2 py-[2px] text-[13px]`} title={band}>
+            {bandShort(band)}
+          </span>
+          <Delta total={total} previous={previous} auditId={auditId} size={13} />
+        </div>
+      </div>
+      <SectionBars rings={rings} delay={0.15} />
     </div>
   );
 }

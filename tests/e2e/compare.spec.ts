@@ -5,7 +5,7 @@ const compare = (name: string) => ({ name: `Compare ${name}`, exact: true });
 test('selecting two cards opens the tray with two columns', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 }); await page.goto('/');
   await expect(page.getByTestId('compare-tray')).toHaveCount(0);
-  await expect(page.getByTestId('scoreboard')).toHaveAttribute('data-hydrated', '');
+  await expect(page.getByTestId('contractors')).toHaveAttribute('data-hydrated', '');
   await page.getByRole('button', compare('JV-ECH (Port T1)')).click();
   await expect(page.getByTestId('compare-tray')).toHaveCount(0);
   await page.getByRole('button', compare('PPCO')).click();

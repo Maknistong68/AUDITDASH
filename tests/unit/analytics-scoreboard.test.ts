@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { getRepo } from '@/lib/data/repo';
 import {
-  bandDistribution, categoryGaps, compareContractors, contractorCards, filterAudits, highRiskCount, regionComparison, repeatFindings,
+  bandDistribution, categoryDetail, categoryGaps, compareContractors, mainProblem, contractorCards, filterAudits, highRiskCount, regionComparison, repeatFindings,
 } from '@/lib/analytics';
 import { isHighRisk } from '@/lib/highRisk';
 import type { Filter, Observation } from '@/lib/types';
@@ -125,4 +125,25 @@ describe('compareContractors', () => {
   });
   test('empty -> []', () => expect(compareContractors(repo, NONE, ['4800001131'])).toEqual([]));
   test('sanity: filterAudits unaffected', () => expect(filterAudits(repo, ALL)).toHaveLength(20));
+});
+
+describe('mainProblem', () => {
+  test('filter all -> latest quarter Q1-2026, worst category of that quarter', () => {
+    const m = mainProblem(repo, ALL)!;
+    expect(m.quarter).toBe('Q1-2026');
+    const q1 = categoryGaps(repo, { ...ALL, quarter: 'Q1-2026' });
+    const worst = q1.filter((g) => g.gapRate !== null).sort((a, b) => b.gapRate! - a.gapRate!)[0];
+    expect(m.category).toBe(worst.category);
+    expect(m.gapRate).toBeCloseTo(worst.gapRate!, 10);
+    const q4 = categoryGaps(repo, { ...ALL, quarter: 'Q4-2025' }).find((g) => g.category === m.category)!;
+    expect(m.prevGapRate).toBeCloseTo(q4.gapRate!, 10);
+    expect(m.items.length).toBeLessThanOrEqual(3);
+    expect(m.items).toEqual(categoryDetail(repo, { ...ALL, quarter: 'Q1-2026' }, m.category).items.slice(0, 3));
+  });
+  test('first quarter has no previous', () => {
+    const m = mainProblem(repo, { ...ALL, quarter: 'Q4-2025' })!;
+    expect(m.quarter).toBe('Q4-2025');
+    expect(m.prevGapRate).toBeNull();
+  });
+  test('empty filter -> null', () => expect(mainProblem(repo, NONE)).toBeNull());
 });
