@@ -60,3 +60,10 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
 - Rename "Site & PPE" → **Site Compliance** (PPE items stay in it; "PPE" dropped from the name).
 - Combine all document categories into one: **Documents** = Permits + RAMS + Plans & Documentation.
 - H&S categories become 8: Leadership · Documents · Competence · Subcontractors · Monitoring · Emergency · Site Compliance · Health.
+
+## 16. Problem deck (owner, 2026-10-26 — supersedes §6–8 card layout)
+- The category/controller page (e.g. "Subcontractor Control") becomes the **entirety of the issue view**: a deck of ranked problem cards —
+  **1st, 2nd, 3rd, …** — one card per category in "Where it fails" order (worst gap first).
+- The active card is full and prominent; the following cards peek behind it with a **fading gradient**; the deck is **swipeable** (drag/swipe, arrows, keys).
+- Each card holds that problem's full information (gap & trend, contractors worst-first, driving items, repeat findings, actions).
+- **Remove "Where it fails" from the main dashboard** — the ranking now lives in this deck.
