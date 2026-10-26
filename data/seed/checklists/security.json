@@ -1,0 +1,676 @@
+{
+  "type": "security",
+  "sections": [
+    {
+      "code": "A",
+      "title": "Documentation",
+      "category": "security:A"
+    },
+    {
+      "code": "B",
+      "title": "Reporting Requirements",
+      "category": "security:B"
+    },
+    {
+      "code": "C",
+      "title": "Site Security",
+      "category": "security:C"
+    },
+    {
+      "code": "D",
+      "title": "CCTV",
+      "category": "security:D"
+    },
+    {
+      "code": "E",
+      "title": "Guard Post",
+      "category": "security:E"
+    },
+    {
+      "code": "F",
+      "title": "Communications",
+      "category": "security:F"
+    },
+    {
+      "code": "G",
+      "title": "Access Control-Personnel",
+      "category": "security:G"
+    },
+    {
+      "code": "H",
+      "title": "Access Control-Vehicles",
+      "category": "security:H"
+    },
+    {
+      "code": "I",
+      "title": "Security Control Room",
+      "category": "security:I"
+    },
+    {
+      "code": "J",
+      "title": "Laydown Yard/Warehouse Protection",
+      "category": "security:J"
+    },
+    {
+      "code": "K",
+      "title": "Personnel Security",
+      "category": "security:K"
+    },
+    {
+      "code": "L",
+      "title": "Training, Awareness and Exercises",
+      "category": "security:L"
+    },
+    {
+      "code": "M",
+      "title": "Security Vehicles",
+      "category": "security:M"
+    },
+    {
+      "code": "N",
+      "title": "Emergency and Incident Management",
+      "category": "security:N"
+    },
+    {
+      "code": "O",
+      "title": "Photography",
+      "category": "security:O"
+    },
+    {
+      "code": "P",
+      "title": "Information Security",
+      "category": "security:P"
+    },
+    {
+      "code": "Q",
+      "title": "Mass Notification",
+      "category": "security:Q"
+    }
+  ],
+  "items": [
+    {
+      "code": "A1",
+      "section": "A",
+      "subsection": null,
+      "question": "Approved Security Risk Assessment (SRA)",
+      "weight": 1,
+      "category": "security:A"
+    },
+    {
+      "code": "A2",
+      "section": "A",
+      "subsection": null,
+      "question": "Approved Security Management Plan (SMP)",
+      "weight": 1,
+      "category": "security:A"
+    },
+    {
+      "code": "A3",
+      "section": "A",
+      "subsection": null,
+      "question": "Approved Site Security Instructions (SSI)",
+      "weight": 1,
+      "category": "security:A"
+    },
+    {
+      "code": "A4",
+      "section": "A",
+      "subsection": null,
+      "question": "Approved Emergency Response Plan (ERP)",
+      "weight": 1,
+      "category": "security:A"
+    },
+    {
+      "code": "B1",
+      "section": "B",
+      "subsection": null,
+      "question": "Daily Reports",
+      "weight": 1,
+      "category": "security:B"
+    },
+    {
+      "code": "B2",
+      "section": "B",
+      "subsection": null,
+      "question": "Weekly Reports",
+      "weight": 1,
+      "category": "security:B"
+    },
+    {
+      "code": "B3",
+      "section": "B",
+      "subsection": null,
+      "question": "Monthly Reports",
+      "weight": 1,
+      "category": "security:B"
+    },
+    {
+      "code": "C1",
+      "section": "C",
+      "subsection": null,
+      "question": "Supplier is a NEOM approved KSA Security Provider",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C2",
+      "section": "C",
+      "subsection": null,
+      "question": "Operates 24/7/365",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C3",
+      "section": "C",
+      "subsection": null,
+      "question": "Zoned areas, mapping provided",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C4",
+      "section": "C",
+      "subsection": null,
+      "question": "Continuous 2.4m chain link fence around site with 3/6 strand barbed wire",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C5",
+      "section": "C",
+      "subsection": null,
+      "question": "Perimeter and access/egress points illuminated uniformly",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C6",
+      "section": "C",
+      "subsection": null,
+      "question": "Is lighting enhanced at ingress/egress points (min 50 lux)",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C7",
+      "section": "C",
+      "subsection": null,
+      "question": "Entry/Exit guard posts with shade for vehicle searches provided",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C8",
+      "section": "C",
+      "subsection": null,
+      "question": "Patrolling compliancy to Schedule S",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C9",
+      "section": "C",
+      "subsection": null,
+      "question": "Guard Tour audit system",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "C10",
+      "section": "C",
+      "subsection": null,
+      "question": "Is there a rejection lane on access/egress points",
+      "weight": 1,
+      "category": "security:C"
+    },
+    {
+      "code": "D1",
+      "section": "D",
+      "subsection": null,
+      "question": "CCTV coverage of perimeter @ 62ppm",
+      "weight": 1,
+      "category": "security:D"
+    },
+    {
+      "code": "D2",
+      "section": "D",
+      "subsection": null,
+      "question": "CCTV coverage of every access/egress point @ 125ppm",
+      "weight": 1,
+      "category": "security:D"
+    },
+    {
+      "code": "D3",
+      "section": "D",
+      "subsection": null,
+      "question": "Digitally recorded images for 90 days",
+      "weight": 1,
+      "category": "security:D"
+    },
+    {
+      "code": "D4",
+      "section": "D",
+      "subsection": null,
+      "question": "Sensitive locations separately",
+      "weight": 1,
+      "category": "security:D"
+    },
+    {
+      "code": "D5",
+      "section": "D",
+      "subsection": null,
+      "question": "covered, i.e. Med Centre, ATMs.",
+      "weight": 1,
+      "category": "security:D"
+    },
+    {
+      "code": "D6",
+      "section": "D",
+      "subsection": null,
+      "question": "Dedicated and access-controlled CCTV Monitoring Station",
+      "weight": 1,
+      "category": "security:D"
+    },
+    {
+      "code": "E1",
+      "section": "E",
+      "subsection": null,
+      "question": "AC Power, including lighting",
+      "weight": 1,
+      "category": "security:E"
+    },
+    {
+      "code": "E2",
+      "section": "E",
+      "subsection": null,
+      "question": "Appropriate furniture",
+      "weight": 1,
+      "category": "security:E"
+    },
+    {
+      "code": "E3",
+      "section": "E",
+      "subsection": null,
+      "question": "WC/washing facility",
+      "weight": 1,
+      "category": "security:E"
+    },
+    {
+      "code": "E4",
+      "section": "E",
+      "subsection": null,
+      "question": "Maintained inside and out",
+      "weight": 1,
+      "category": "security:E"
+    },
+    {
+      "code": "E5",
+      "section": "E",
+      "subsection": null,
+      "question": "Sufficient for No of Guards",
+      "weight": 1,
+      "category": "security:E"
+    },
+    {
+      "code": "E6",
+      "section": "E",
+      "subsection": null,
+      "question": "WIFI available",
+      "weight": 1,
+      "category": "security:E"
+    },
+    {
+      "code": "F1",
+      "section": "F",
+      "subsection": null,
+      "question": "Radios in place at all duty stations",
+      "weight": 1,
+      "category": "security:F"
+    },
+    {
+      "code": "F2",
+      "section": "F",
+      "subsection": null,
+      "question": "Sufficient radios for all security staff on duty",
+      "weight": 1,
+      "category": "security:F"
+    },
+    {
+      "code": "F3",
+      "section": "F",
+      "subsection": null,
+      "question": "Channels for routine Ops, 2 x minor & 1 x major incident, Emergency standby channel & management channel",
+      "weight": 1,
+      "category": "security:F"
+    },
+    {
+      "code": "F4",
+      "section": "F",
+      "subsection": null,
+      "question": "Sufficient chargers, batteries",
+      "weight": 1,
+      "category": "security:F"
+    },
+    {
+      "code": "F5",
+      "section": "F",
+      "subsection": null,
+      "question": "1 x radio, spare battery and charger provided to fire",
+      "weight": 1,
+      "category": "security:F"
+    },
+    {
+      "code": "F6",
+      "section": "F",
+      "subsection": null,
+      "question": "2 x radios, spare batteries and charger provided to med centre",
+      "weight": 1,
+      "category": "security:F"
+    },
+    {
+      "code": "F7",
+      "section": "F",
+      "subsection": null,
+      "question": "Secondary comms with pre-programmed numbers",
+      "weight": 1,
+      "category": "security:F"
+    },
+    {
+      "code": "F8",
+      "section": "F",
+      "subsection": null,
+      "question": "Mass notification procedure in place",
+      "weight": 1,
+      "category": "security:F"
+    },
+    {
+      "code": "G1",
+      "section": "G",
+      "subsection": null,
+      "question": "NEOM approved biometrics/face recognition in place",
+      "weight": 1,
+      "category": "security:G"
+    },
+    {
+      "code": "G2",
+      "section": "G",
+      "subsection": null,
+      "question": "Security guards verify the IDs of all personnel entering the site",
+      "weight": 1,
+      "category": "security:G"
+    },
+    {
+      "code": "G3",
+      "section": "G",
+      "subsection": null,
+      "question": "Visitors Pass process in place",
+      "weight": 1,
+      "category": "security:G"
+    },
+    {
+      "code": "G4",
+      "section": "G",
+      "subsection": null,
+      "question": "Have the search procedures been activated",
+      "weight": 1,
+      "category": "security:G"
+    },
+    {
+      "code": "G5",
+      "section": "G",
+      "subsection": null,
+      "question": "Visitors are always accompanied by the contractor’s staff",
+      "weight": 1,
+      "category": "security:G"
+    },
+    {
+      "code": "G6",
+      "section": "G",
+      "subsection": null,
+      "question": "ID cards have all the required information displayed on them",
+      "weight": 1,
+      "category": "security:G"
+    },
+    {
+      "code": "H1",
+      "section": "H",
+      "subsection": null,
+      "question": "Material Pass system in place for equipment leaving site",
+      "weight": 1,
+      "category": "security:H"
+    },
+    {
+      "code": "H2",
+      "section": "H",
+      "subsection": null,
+      "question": "Personal equipment registration in place",
+      "weight": 1,
+      "category": "security:H"
+    },
+    {
+      "code": "H3",
+      "section": "H",
+      "subsection": null,
+      "question": "Vehicle permit system in place",
+      "weight": 1,
+      "category": "security:H"
+    },
+    {
+      "code": "H4",
+      "section": "H",
+      "subsection": null,
+      "question": "Vehicle Management Plan indication internal/external parking areas",
+      "weight": 1,
+      "category": "security:H"
+    },
+    {
+      "code": "H5",
+      "section": "H",
+      "subsection": null,
+      "question": "Vehicle access minimized",
+      "weight": 1,
+      "category": "security:H"
+    },
+    {
+      "code": "H6",
+      "section": "H",
+      "subsection": null,
+      "question": "Deliveries checked against schedule",
+      "weight": 1,
+      "category": "security:H"
+    },
+    {
+      "code": "H7",
+      "section": "H",
+      "subsection": null,
+      "question": "Sufficient space for min 3 vehicle searches",
+      "weight": 1,
+      "category": "security:H"
+    },
+    {
+      "code": "H8",
+      "section": "H",
+      "subsection": null,
+      "question": "Rejection Lanes in place",
+      "weight": 1,
+      "category": "security:H"
+    },
+    {
+      "code": "I1",
+      "section": "I",
+      "subsection": null,
+      "question": "Designated and access-controlled room",
+      "weight": 1,
+      "category": "security:I"
+    },
+    {
+      "code": "I2",
+      "section": "I",
+      "subsection": null,
+      "question": "Provision and space for Supervisor & 2 x CCTV operators",
+      "weight": 1,
+      "category": "security:I"
+    },
+    {
+      "code": "I3",
+      "section": "I",
+      "subsection": null,
+      "question": "WC and washing facilities available",
+      "weight": 1,
+      "category": "security:I"
+    },
+    {
+      "code": "J1",
+      "section": "J",
+      "subsection": null,
+      "question": "Sufficient for the value and sensitivity of the equipment stored",
+      "weight": 1,
+      "category": "security:J"
+    },
+    {
+      "code": "K1",
+      "section": "K",
+      "subsection": null,
+      "question": "Accommodation secured",
+      "weight": 1,
+      "category": "security:K"
+    },
+    {
+      "code": "K2",
+      "section": "K",
+      "subsection": null,
+      "question": "Appropriate measures employed for protection of personal equipment",
+      "weight": 1,
+      "category": "security:K"
+    },
+    {
+      "code": "L1",
+      "section": "L",
+      "subsection": null,
+      "question": "Is there a record of all training",
+      "weight": 1,
+      "category": "security:L"
+    },
+    {
+      "code": "L2",
+      "section": "L",
+      "subsection": null,
+      "question": "Is CPD recorded and relevant",
+      "weight": 1,
+      "category": "security:L"
+    },
+    {
+      "code": "L3",
+      "section": "L",
+      "subsection": null,
+      "question": "Are exercises held and results recorded",
+      "weight": 1,
+      "category": "security:L"
+    },
+    {
+      "code": "L4",
+      "section": "L",
+      "subsection": null,
+      "question": "Are all security staff trained on SMP, SSI, Site familiarization, CoC etc",
+      "weight": 1,
+      "category": "security:L"
+    },
+    {
+      "code": "L5",
+      "section": "L",
+      "subsection": null,
+      "question": "Are all guards issued and wearing uniform",
+      "weight": 1,
+      "category": "security:L"
+    },
+    {
+      "code": "L6",
+      "section": "L",
+      "subsection": null,
+      "question": "Are Toolbox Talks occurring and recorded",
+      "weight": 1,
+      "category": "security:L"
+    },
+    {
+      "code": "M1",
+      "section": "M",
+      "subsection": null,
+      "question": "Are sufficient security vehicles allocated in proportion to security officers",
+      "weight": 1,
+      "category": "security:M"
+    },
+    {
+      "code": "M2",
+      "section": "M",
+      "subsection": null,
+      "question": "Are security vehicles appropriately marked",
+      "weight": 1,
+      "category": "security:M"
+    },
+    {
+      "code": "M3",
+      "section": "M",
+      "subsection": null,
+      "question": "Do security vehicles carry the right equipment",
+      "weight": 1,
+      "category": "security:M"
+    },
+    {
+      "code": "N1",
+      "section": "N",
+      "subsection": null,
+      "question": "Is there an approved ERP",
+      "weight": 1,
+      "category": "security:N"
+    },
+    {
+      "code": "N2",
+      "section": "N",
+      "subsection": null,
+      "question": "Have all managers and supervisors read the ERP",
+      "weight": 1,
+      "category": "security:N"
+    },
+    {
+      "code": "N3",
+      "section": "N",
+      "subsection": null,
+      "question": "Are all security staff familiar with their role in the event of an incident",
+      "weight": 1,
+      "category": "security:N"
+    },
+    {
+      "code": "O1",
+      "section": "O",
+      "subsection": null,
+      "question": "Is there a POC for photography requests",
+      "weight": 1,
+      "category": "security:O"
+    },
+    {
+      "code": "O2",
+      "section": "O",
+      "subsection": null,
+      "question": "Is there a photography authorization form",
+      "weight": 1,
+      "category": "security:O"
+    },
+    {
+      "code": "P1",
+      "section": "P",
+      "subsection": null,
+      "question": "Are there facilities to dispose of secure waste/sensitive information",
+      "weight": 1,
+      "category": "security:P"
+    },
+    {
+      "code": "Q1",
+      "section": "Q",
+      "subsection": null,
+      "question": "Mass notification system is demonstrably in place",
+      "weight": 1,
+      "category": "security:Q"
+    }
+  ]
+}

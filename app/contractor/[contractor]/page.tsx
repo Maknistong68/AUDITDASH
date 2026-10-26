@@ -16,7 +16,7 @@ type Params = { contractor: string };
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { contractor: id } = await params;
   const c = getRepo().contractors().find((x) => x.id === id);
-  return { title: c ? `${c.name} · HSE Audits` : 'Not found · HSE Audits' };
+  return { title: c ? c.name : 'Not found' };
 }
 
 /** Contractor details: a swipeable history of its audits (latest first) within the filter's regions. */

@@ -3,6 +3,7 @@ import { getRepo, type Repo } from '@/lib/data/repo';
 import {
   bandDistribution, categoryDetail, categoryGaps, compareContractors, mainProblem, contractorCards, filterAudits, highRiskCount, regionComparison, repeatFindings,
 } from '@/lib/analytics';
+import { CATEGORIES } from '@/lib/categories';
 import { isHighRisk } from '@/lib/highRisk';
 import type { Filter, Observation } from '@/lib/types';
 
@@ -15,13 +16,13 @@ const naRepo: Repo = {
   ...repo,
   observations: () => [
     ...repo.observations(),
-    { id: `${NA_AUDIT}-na`, auditId: NA_AUDIT, itemCode: 'B5.1', kind: 'negative', text: 'Utility clearance permit for excavation not seen', category: 'permits', hasPhoto: false },
+    { id: `${NA_AUDIT}-na`, auditId: NA_AUDIT, itemCode: 'B5.1', kind: 'negative', text: 'Utility clearance permit for excavation not seen', category: 'documents', hasPhoto: false },
   ],
 };
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const NONE: Filter = { quarter: 'all', regions: [] };
-const obs = (text: string, kind: Observation['kind'], category: Observation['category'] = null): Observation =>
-  ({ id: 'x', auditId: 'a', itemCode: null, kind, text, category, hasPhoto: false });
+const obs = (text: string, kind: Observation['kind'], category: Observation['category'] = null, itemCode: string | null = null): Observation =>
+  ({ id: 'x', auditId: 'a', itemCode, kind, text, category, hasPhoto: false });
 
 describe('contractorCards', () => {
   test('JV-ECH card', () => {
@@ -85,7 +86,7 @@ describe('high risk', () => {
     expect(isHighRisk(obs('Tower light found operational without earthing', 'site'))).toBe(true);
     expect(isHighRisk(obs('Mosquito presence', 'site'))).toBe(false);
     expect(isHighRisk(obs('Mobile CRANES operating', 'site'))).toBe(true);
-    expect(isHighRisk(obs('anything', 'negative', 'permits'))).toBe(true);
+    expect(isHighRisk(obs('anything', 'negative', 'documents', 'B4.1'))).toBe(true);
   });
   test('count', () => {
     expect(highRiskCount(repo, ALL)).toBeGreaterThan(0);
@@ -119,7 +120,7 @@ describe('compareContractors', () => {
     const ids = contractorCards(repo, ALL).map((c) => c.contractor.id);
     const out = compareContractors(repo, ALL, [ids[2], 'nope', ids[0], ids[1], ids[3]]);
     expect(out.map((x) => x.card.contractor.id)).toEqual([ids[2], ids[0], ids[1]]);
-    out.forEach((x) => { expect(x.gaps).toHaveLength(10); x.repeats.forEach((r) => expect(r.contractor.id).toBe(x.card.contractor.id)); });
+    out.forEach((x) => { expect(x.gaps).toHaveLength(CATEGORIES.length); x.repeats.forEach((r) => expect(r.contractor.id).toBe(x.card.contractor.id)); });
   });
   test('gaps come from the latest audit only (same scope as rings and total)', () => {
     const id = '4800001131'; // JV-ECH: audited in Q4 2025 and Q1 2026

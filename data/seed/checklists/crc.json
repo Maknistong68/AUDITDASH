@@ -1,0 +1,116 @@
+{
+  "type": "crc",
+  "sections": [
+    {
+      "code": "A",
+      "title": "Critical Risk Control Inspections",
+      "category": "crc:A"
+    }
+  ],
+  "items": [
+    {
+      "code": "CRC1",
+      "section": "A",
+      "subsection": null,
+      "question": "Confined Space",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC2",
+      "section": "A",
+      "subsection": null,
+      "question": "Breaking Ground & Excavation",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC3",
+      "section": "A",
+      "subsection": null,
+      "question": "Driving",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC4",
+      "section": "A",
+      "subsection": null,
+      "question": "Energized System",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC5",
+      "section": "A",
+      "subsection": null,
+      "question": "Hot Work",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC6",
+      "section": "A",
+      "subsection": null,
+      "question": "Lifting",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC7",
+      "section": "A",
+      "subsection": null,
+      "question": "Mobile Plant and Equipment",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC8",
+      "section": "A",
+      "subsection": null,
+      "question": "Working on or Near Live road",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC9",
+      "section": "A",
+      "subsection": null,
+      "question": "Working in the Heat",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC10",
+      "section": "A",
+      "subsection": null,
+      "question": "Work at Height",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC11",
+      "section": "A",
+      "subsection": null,
+      "question": "Piling",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC12",
+      "section": "A",
+      "subsection": null,
+      "question": "Temporary Works",
+      "weight": 1,
+      "category": "crc:A"
+    },
+    {
+      "code": "CRC13",
+      "section": "A",
+      "subsection": null,
+      "question": "Working in the Heat",
+      "weight": 1,
+      "category": "crc:A"
+    }
+  ]
+}

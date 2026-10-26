@@ -15,8 +15,8 @@ const inter = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'HSE Audit Dashboard',
-  description: 'Health & Safety audit scores across contractors',
+  title: { default: 'Audits Only', template: '%s · Audits Only' },
+  description: 'Audit scores across contractors: H&S, Security, Environmental, Welfare and CRC',
   // The mock data is real audit data: keep every page out of search engines.
   robots: { index: false, follow: false },
 };

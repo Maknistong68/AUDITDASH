@@ -3,6 +3,7 @@ import { getRepo, type Repo } from '@/lib/data/repo';
 import {
   applicableSlots, auditCompliance, categoryDetail, categoryGaps, contractorInCategory, filterAudits, itemHistory, league, portfolioSummary, topIssues,
 } from '@/lib/analytics';
+import { CATEGORIES } from '@/lib/categories';
 import type { Filter } from '@/lib/types';
 
 const repo = getRepo();
@@ -14,7 +15,7 @@ const naRepo: Repo = {
   ...repo,
   observations: () => [
     ...repo.observations(),
-    { id: `${NA_AUDIT}-na`, auditId: NA_AUDIT, itemCode: 'B5.1', kind: 'negative', text: 'Utility clearance permit for excavation not seen', category: 'permits', hasPhoto: false },
+    { id: `${NA_AUDIT}-na`, auditId: NA_AUDIT, itemCode: 'B5.1', kind: 'negative', text: 'Utility clearance permit for excavation not seen', category: 'documents', hasPhoto: false },
   ],
 };
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
@@ -47,9 +48,9 @@ describe('portfolio', () => {
 });
 
 describe('categoryGaps', () => {
-  test('ten gaps, rates in [0,1] or null', () => {
+  test('one gap per category, rates in [0,1] or null', () => {
     const g = categoryGaps(repo, ALL);
-    expect(g).toHaveLength(10);
+    expect(g).toHaveLength(CATEGORIES.length);
     g.forEach((x) => {
       if (x.gapRate !== null) { expect(x.gapRate).toBeGreaterThanOrEqual(0); expect(x.gapRate).toBeLessThanOrEqual(1); }
       expect(x.prevGapRate).toBeNull();
@@ -69,24 +70,24 @@ describe('categoryGaps', () => {
     const f: Filter = { quarter: audit.quarter, regions: ['SR1', 'SR2'], contractorId: audit.contractorId };
     const filtered = filterAudits(repo, f);
     expect(filtered).toHaveLength(1);
-    const permitItems = repo.checklist().filter((i) => i.category === 'permits');
+    const permitItems = repo.checklist().filter((i) => i.category === 'documents');
     const b5 = permitItems.filter((i) => i.subsection === 'B5').length;
     expect(b5).toBeGreaterThan(0);
-    expect(applicableSlots(repo, f, 'permits')).toBe(permitItems.length - b5);
+    expect(applicableSlots(repo, f, 'documents')).toBe(permitItems.length - b5);
   });
 });
 
 describe('score-based gap', () => {
   const gap = (c: string, f: Filter = ALL) => categoryGaps(repo, f).find((x) => x.category === c)!;
-  test('hand-computed permits compliance 4800001272-Q4', () => {
+  test('hand-computed permit-subsection compliance 4800001272-Q4', () => {
     const a = repo.audits().find((x) => x.id === '4800001272-Q4-2025-20251029')!;
-    const items = repo.checklist().filter((i) => i.category === 'permits');
+    const items = repo.checklist().filter((i) => i.category === 'documents' && ['B4', 'B5'].includes(i.subsection));
     expect(auditCompliance(a, items)).toBeCloseTo((3 * 0.5 + 1 * 0.5 + 3 + 1 + 1) / 9, 10);
     expect(auditCompliance(a, items)).toBeCloseTo(0.7778, 4);
   });
   test('N/A subsection excluded from compliance', () => {
     const a = repo.audits().find((x) => x.id === '4800001112-Q4-2025-20251015')!;
-    const permits = repo.checklist().filter((i) => i.category === 'permits');
+    const permits = repo.checklist().filter((i) => i.category === 'documents' && ['B4', 'B5'].includes(i.subsection));
     const b4 = a.sections.find((s) => s.code === 'B4')!;
     expect(auditCompliance(a, permits)).toBeCloseTo(b4.scored / b4.possible, 10);
   });
@@ -95,14 +96,14 @@ describe('score-based gap', () => {
     rates.forEach((r) => { expect(r).toBeGreaterThanOrEqual(0); expect(r).toBeLessThanOrEqual(1); });
     expect(Math.max(...rates) - Math.min(...rates)).toBeGreaterThanOrEqual(0.15);
   });
-  test('permits gap > health gap for all', () => expect(gap('permits').gapRate!).toBeGreaterThan(gap('health').gapRate!));
+  test('documents gap > health gap for all', () => expect(gap('documents').gapRate!).toBeGreaterThan(gap('health').gapRate!));
   test('findingRate present and bounded', () => categoryGaps(repo, ALL).forEach((x) => { expect(x.findingRate!).toBeGreaterThanOrEqual(0); expect(x.findingRate!).toBeLessThanOrEqual(1); }));
   test('findings exclude N/A-subsection negatives', () => {
     const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
-    const raw = naRepo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.category === 'permits' && o.kind !== 'positive');
+    const raw = naRepo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.category === 'documents' && o.kind !== 'positive');
     const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
     expect(na).toBeGreaterThan(0);
-    expect(categoryGaps(naRepo, f).find((x) => x.category === 'permits')!.findings).toBe(raw.length - na);
+    expect(categoryGaps(naRepo, f).find((x) => x.category === 'documents')!.findings).toBe(raw.length - na);
   });
 });
 
@@ -162,15 +163,15 @@ describe('drill selectors', () => {
     expect(h.map((x) => x.audit.date)).toEqual([...h.map((x) => x.audit.date)].sort());
   });
   test('categoryDetail', () => {
-    const d = categoryDetail(repo, ALL, 'permits');
+    const d = categoryDetail(repo, ALL, 'documents');
     expect(d.contractors.length).toBeGreaterThan(0);
     d.contractors.forEach((c) => { expect(c.gapRate).toBeGreaterThanOrEqual(0); expect(c.gapRate).toBeLessThanOrEqual(1); });
     expect(d.items.every((i) => i.hits > 0)).toBe(true);
   });
   test('contractorInCategory', () => {
-    const r = contractorInCategory(repo, ALL, 'permits', '4800001272');
+    const r = contractorInCategory(repo, ALL, 'documents', '4800001272');
     expect(r.audits.length).toBeGreaterThan(0);
-    const permits = repo.checklist().filter((i) => i.category === 'permits');
+    const permits = repo.checklist().filter((i) => i.category === 'documents');
     expect(r.items.map((i) => i.item.code)).toEqual(permits.map((i) => i.code));
     r.items.forEach((i) => expect(Object.keys(i.hitsByAudit).sort()).toEqual(r.audits.map((a) => a.id).sort()));
   });
@@ -180,17 +181,17 @@ describe('N/A notes imported as negatives', () => {
   test('negatives on N/A subsections do not inflate gaps or issues', () => {
     // audit 4800000892-Q1 has B5 possible 0 but three "N/A -" negatives on B5.x
     const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
-    const g = categoryGaps(repo, f).find((x) => x.category === 'permits')!;
+    const g = categoryGaps(repo, f).find((x) => x.category === 'documents')!;
     expect(g.gapRate).toBeLessThanOrEqual(1);
     expect(topIssues(repo, f, 99).some((t) => t.itemCode.startsWith('B5.'))).toBe(false);
-    expect(categoryDetail(repo, f, 'permits').items.some((i) => i.itemCode.startsWith('B5.'))).toBe(false);
+    expect(categoryDetail(repo, f, 'documents').items.some((i) => i.itemCode.startsWith('B5.'))).toBe(false);
   });
   test('all gap rates and contractor rates within [0,1] for every filter', () => {
     for (const quarter of ['all', 'Q4-2025', 'Q1-2026'] as const)
       for (const regions of [['SR1'], ['SR2'], ['SR1', 'SR2']] as const) {
         const f: Filter = { quarter, regions: [...regions] };
         categoryGaps(repo, f).forEach((x) => x.gapRate === null || (expect(x.gapRate).toBeLessThanOrEqual(1), expect(x.prevGapRate ?? 0).toBeLessThanOrEqual(1)));
-        categoryDetail(repo, f, 'permits').contractors.forEach((c) => expect(c.gapRate).toBeLessThanOrEqual(1));
+        categoryDetail(repo, f, 'documents').contractors.forEach((c) => expect(c.gapRate).toBeLessThanOrEqual(1));
       }
   });
 });

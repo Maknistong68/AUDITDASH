@@ -3,7 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { Check, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { SectionBars } from '@/components/charts/SectionBars';
-import { categoryById } from '@/lib/categories';
+import { CATEGORIES, categoryById } from '@/lib/categories';
 import { bestWorst, MAX_COMPARE } from '@/lib/compare';
 import { bandShort, bandTone, pct, prevQuarterShort } from '@/lib/format';
 import type { ContractorCard as Card } from '@/lib/analytics';
@@ -43,11 +43,11 @@ function Trend({ card }: { card: Card }) {
   );
 }
 
-const ROWS = 'grid-rows-[auto_auto_auto_repeat(10,auto)_auto_auto_auto_auto]';
+const ROWS = `auto auto auto repeat(${CATEGORIES.length}, auto) auto auto auto auto`;
 
 /**
  * Compare sheet: frosted, slides up when 2–3 contractors are selected. One CSS grid with subgrid columns,
- * so every row (score + A/B/C section bars, trend, ten category gaps, repeat issues) lines up across contractors.
+ * so every row (score + A/B/C section bars, trend, the category gaps, repeat issues) lines up across contractors.
  * Gap bars use one severity hue; in each row the worst contractor is full strength, the best gets a check.
  */
 export function CompareTray({
@@ -129,8 +129,8 @@ export function CompareTray({
 
             <div className="overflow-x-auto">
               <div
-                className={`grid min-w-[720px] gap-x-[clamp(12px,1.4vw,24px)] ${ROWS}`}
-                style={{ gridTemplateColumns: `clamp(116px,10vw,170px) repeat(${entries.length}, minmax(0, 1fr))${slots ? ' minmax(150px, 0.55fr)' : ''}` }}
+                className={`grid min-w-[720px] gap-x-[clamp(12px,1.4vw,24px)]`}
+                style={{ gridTemplateRows: ROWS, gridTemplateColumns: `clamp(116px,10vw,170px) repeat(${entries.length}, minmax(0, 1fr))${slots ? ' minmax(150px, 0.55fr)' : ''}` }}
               >
                 {/* Label column */}
                 <div className="row-span-full grid grid-rows-subgrid text-[13px] text-muted">

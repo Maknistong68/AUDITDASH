@@ -94,8 +94,8 @@ test('unknown ids and mismatched paths are 404', async ({ page }) => {
   for (const url of [
     '/contractor/nope',
     '/category/nope',
-    '/category/rams/nope',
-    '/category/rams/4800001131/B6.1',
+    '/category/documents/nope',
+    '/category/documents/4800001131/B6.1',
     '/category/subcontractor/4800001131/ZZ9',
     '/category/subcontractor/4800001131/B6.1/nope',
     '/category/monitoring/4800001131/A4/4800000876-Q1-2026-20260215-9',
@@ -104,7 +104,7 @@ test('unknown ids and mismatched paths are 404', async ({ page }) => {
     expect(res?.status(), url).toBe(404);
   }
   // A malformed escape is refused by the server, never a crash.
-  const bad = await page.goto('/category/rams/4800001131/%E0%A4%A');
+  const bad = await page.goto('/category/documents/4800001131/%E0%A4%A');
   expect([400, 404]).toContain(bad?.status());
 });
 
@@ -128,7 +128,7 @@ test('the longest observation stays inside its card at 1366', async ({ page }) =
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
   test(`details pages have no horizontal scroll at ${vp.width}`, async ({ page }) => {
     await page.setViewportSize(vp);
-    for (const url of ['/contractor/4800000838', '/category/subcontractor', '/category/permits/4800001134', '/category/subcontractor/4800001131/B6.1']) {
+    for (const url of ['/contractor/4800000838', '/category/subcontractor', '/category/documents/4800001134', '/category/subcontractor/4800001131/B6.1']) {
       await page.goto(url);
       await expect(page.getByTestId('breadcrumb')).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), url).toBe(true);

@@ -361,3 +361,49 @@ Routes: `/contractor/[contractor]` (carousel of that contractor's audits within 
 
 ### Task 7r: Audit report
 `/audit/[audit]` as original Task 7's report (header, score, SectionBars, observations filterable by category chips, Positives tab, print stylesheet), Apple style. Tests: `/audit/4800001272-Q4-2025-20251029` shows 71% and "Partially Compliant", Positives tab lists 14, category chip filters, unknown id 404.
+
+---
+
+## Amendment 3 (2026-10-26) — follows spec Revision 3 ("Audits Only" v2)
+Order: 9 → 10 → 11 → 12 → 13 → 14 → 15. Each task keeps all existing tests green and adds its own.
+
+### Task 9: Audit types, checklists and type-aware data
+- Importer: parse `Health & Safety`, `Security`, `Environment`, `Worker Welfare` sheets (same layout: section letter rows, item code | question | weight)
+  and `CRC` (13 risk areas, weight 1) into `data/seed/checklists/{hs,security,environmental,welfare,crc}.json` (keep `data/seed/checklist.json` for H&S).
+  pytest: counts per type > 0, codes unique per type, weights numeric, CRC has 13 items.
+- `lib/types.ts`: `AuditType = 'hs'|'security'|'environmental'|'welfare'|'crc'`; `Filter.type` (default 'hs'); `Audit.type` (seed audits 'hs').
+- `lib/auditTypes.ts`: labels, short labels ("H&S"), checklist loader, per-type categories (H&S = existing 10; others = their sections).
+- `lib/scoring.ts`: `scoreAppAudit(type, items, answers)` per spec (Compliant 1 / Observation 0.5 / Non-Compliant 0 / N/A excluded; H&S formula; others mean of sections). Vitest incl. H&S fixture 0.6276 via mapped answers.
+- `lib/filters.ts`: `t` param round-trip; invalid → 'hs'.
+
+### Task 10: Header, tabs, + New Audit, dashboard regrid, empty tabs
+- Rename to "Audits Only". Type tabs (testid `type-tabs`, buttons "H&S", "Security", "Environmental", "Welfare", "CRC"), same style as quarter tabs.
+  `+ New Audit` button (testid `new-audit`) top right → `/audits/new?type=<t>`.
+- Regrid the hero per spec Revision 3 (Contractors · Main Problem · Audit Overview · Audit Trends · Findings/Open Actions); no large empty areas;
+  fits 1366×768 & 1920×1080, no horizontal scroll. Non-H&S tab with no audits → empty state with + New Audit.
+- e2e: tabs switch `t=` and highlight; new-audit visible on every tab; empty state on Security; hero fit; inspector no FAILs.
+
+### Task 11: Main Problem card + Driven By categories
+- `gapContribution(repo, filter)` → `{ category, gapRate, share }[]` (share of total lost score, sums to ~1) for the latest quarter; vitest.
+- Card titled "Main Problem – <quarter label>", strongest visual weight; Driven By = top 4 categories with share % + severity bar, links to each category;
+  clicking the card animates into the controller view (shared `layoutId` / View Transitions API with fallback). e2e: title text, 4 driver rows, click → `/category/<id>`.
+
+### Task 12: Controller view — progressive slide-down cards
+- `/category/[cat]` becomes four stacked cards per spec (testids `controller-card-1..4`, `aria-expanded`); card 1 open; activating card N opens it with a
+  slide-down spring and fades others; keyboard (Enter/Space, ↓/↑); reduced motion instant. Quarter switch inside card 1 (keeps `?s=`/quarter rules).
+- `recommendedActions(repo, filter, cat)` extracts action sentences from notes (patterns: "contractor to", "recommend", "shall", "should", "to be"), dedupes, max 8; vitest.
+- e2e: card 1 open, 2–4 collapsed+faded; click card 2 → expanded; contractor rows link to `/category/[cat]/[contractor]`; actions list non-empty for subcontractor.
+
+### Task 13: New Audit wizard (browser storage)
+- `/audits/new` + `/audits/[localId]/edit`: 4 steps with progress header, per-step validation, autosave draft (localStorage `audits-only:audits:v1`, try/catch),
+  photos in IndexedDB (resized ≤1600px), Save Draft / Submit; submit computes score via `scoreAppAudit`. `lib/localAudits.ts` (pure serialise/validate + storage adapter).
+- Contractor list from seed + free text; checklist from Task 9 per type; findings editor; review totals.
+- e2e: create H&S draft → reload → draft restored; fill Security audit → submit → appears in My audits with score; validation blocks empty step 1.
+
+### Task 14: My audits + client dashboards for entered audits
+- "My audits" strip (drafts with Resume, submitted with score) on every tab; `/audits/local/[id]` report view (client) reusing the report layout.
+- Non-H&S tabs: client-side dashboard from submitted browser audits using the same analytics over a `LocalRepo`; Findings/Open Actions card counts app findings by status.
+- e2e: submit Welfare audit → Welfare tab shows score and Main Problem from it; H&S tab shows it in My audits.
+
+### Task 15: Verification gate
+Full chain green; maturity-assessor (milestone `v2`) ≥4 on scored dimensions; final whole-branch review; one fix wave; screenshots + motion video refreshed.

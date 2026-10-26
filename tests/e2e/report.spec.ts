@@ -33,19 +33,19 @@ test('the Positive observations tab lists 14', async ({ page }) => {
   await expect(page.getByTestId('panel-negative')).toBeHidden();
 });
 
-test('the Permits chip filters the list to permits only and sets cat=permits', async ({ page }) => {
+test('the Site chip filters the list to site findings only and sets cat=site', async ({ page }) => {
   await page.goto(REPORT);
   const panel = page.getByTestId('panel-negative');
   await expect(panel.getByTestId('report-group').filter({ visible: true })).not.toHaveCount(1);
-  await page.locator('[data-testid="cat-chip"][data-cat="permits"]').click();
-  await expect(page).toHaveURL(/[?&]cat=permits(&|$)/);
+  await page.locator('[data-testid="cat-chip"][data-cat="site"]').click();
+  await expect(page).toHaveURL(/[?&]cat=site(&|$)/);
   const groups = panel.getByTestId('report-group').filter({ visible: true });
   await expect(groups).toHaveCount(1);
-  await expect(groups).toHaveAttribute('data-category', 'permits');
+  await expect(groups).toHaveAttribute('data-category', 'site');
   const entries = panel.getByTestId('report-entry').filter({ visible: true });
-  await expect(entries).toHaveCount(5);
-  for (const cat of await entries.evaluateAll((els) => els.map((e) => e.getAttribute('data-category')))) expect(cat).toBe('permits');
-  await expect(page.locator('[data-testid="cat-chip"][data-cat="permits"]')).toHaveAttribute('aria-current', 'true');
+  await expect(entries).toHaveCount(6);
+  for (const cat of await entries.evaluateAll((els) => els.map((e) => e.getAttribute('data-category')))) expect(cat).toBe('site');
+  await expect(page.locator('[data-testid="cat-chip"][data-cat="site"]')).toHaveAttribute('aria-current', 'true');
 });
 
 test('an unknown audit id returns 404', async ({ page }) => {

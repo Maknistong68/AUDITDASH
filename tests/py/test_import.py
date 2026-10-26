@@ -66,7 +66,7 @@ def test_checklist_weights(seed):
     assert sum(v for k,v in w.items() if k.startswith('A')) == 45 and w['B2.2'] == 2 and w['C2.17'] == 3
 def test_every_item_has_category(seed): assert all(i['category'] for i in seed.checklist)
 def test_no_phone_numbers(seed_text): assert '055-' not in seed_text
-def test_site_keywords(): assert category_for(None,'site','Tower light found operational without earthing') == 'permits'
+def test_site_keywords(): assert category_for(None,'site','Tower light found operational without earthing') == 'site'
 def test_site_keywords_health(): assert category_for(None,'site','Mosquito presence was observed') == 'health'
 def test_site_default(): assert category_for(None,'site','Parking area requires expansion') == 'site'
 def test_positive_has_no_category(): assert category_for(None,'positive','Neat offices') is None
@@ -104,3 +104,74 @@ def test_no_na_notes_in_seed(seed):
     assert not any(import_excel.is_na_note(o["text"]) for o in seed.observations)
     ids = [o["id"] for o in seed.observations]
     assert len(ids) == len(set(ids))
+
+
+# --------------------------------------------------------------------------- five audit types (Task 9)
+TYPES = ("hs", "security", "environmental", "welfare", "crc")
+
+
+@pytest.fixture(scope="session")
+def typed(seed_dir):
+    return {t: json.loads((seed_dir / "checklists" / f"{t}.json").read_text()) for t in TYPES}
+
+
+def test_checklists_written_for_every_type(typed):
+    for t in TYPES:
+        assert typed[t]["type"] == t and len(typed[t]["items"]) > 0 and len(typed[t]["sections"]) > 0
+
+
+def test_codes_unique_per_type_and_weights_numeric(typed):
+    for t in TYPES:
+        codes = [i["code"] for i in typed[t]["items"]]
+        assert len(codes) == len(set(codes)), t
+        assert all(isinstance(i["weight"], (int, float)) and not isinstance(i["weight"], bool) and i["weight"] > 0
+                   for i in typed[t]["items"]), t
+
+
+def test_hs_typed_matches_legacy_checklist(typed, seed):
+    assert typed["hs"]["items"] == seed.checklist
+
+
+def test_item_counts(typed):
+    assert len(typed["hs"]["items"]) == len(import_excel.parse_checklist(CHECKLIST))
+    assert len(typed["security"]["items"]) == 73
+    assert len(typed["environmental"]["items"]) == 76 and len(typed["welfare"]["items"]) == 118
+
+
+def test_non_hs_category_is_section_slug(typed):
+    for t in ("security", "environmental", "welfare", "crc"):
+        sec_ids = {s["category"] for s in typed[t]["sections"]}
+        assert sec_ids == {f"{t}:{s['code']}" for s in typed[t]["sections"]}
+        for i in typed[t]["items"]:
+            assert i["category"] == f"{t}:{i['section']}" and i["category"] in sec_ids
+        assert all(s["title"] for s in typed[t]["sections"])
+
+
+def test_security_sections_a_to_q(typed):
+    assert [s["code"] for s in typed["security"]["sections"]] == list("ABCDEFGHIJKLMNOPQ")
+    assert typed["security"]["sections"][0]["title"] == "Documentation"
+
+
+def test_environment_subheaders_not_items(typed):
+    codes = {i["code"] for i in typed["environmental"]["items"]}
+    assert "G1.1" in codes and "G1" not in codes and "H3.4" in codes
+    assert next(i for i in typed["environmental"]["items"] if i["code"] == "G1.1")["subsection"] == "G1"
+
+
+def test_welfare_missing_weight_defaults_to_one(typed):
+    w = {i["code"]: i["weight"] for i in typed["welfare"]["items"]}
+    assert w["E1"] == 1 and w["E2"] == 1
+
+
+def test_crc_thirteen_areas(typed):
+    items = typed["crc"]["items"]
+    assert len(items) == 13
+    assert [i["code"] for i in items] == [f"CRC{n}" for n in range(1, 14)]
+    assert all(i["weight"] == 1 and i["section"] == "A" and i["category"] == "crc:A" for i in items)
+    assert items[0]["question"] == "Confined Space"
+    assert items[8]["question"] == items[12]["question"] == "Working in the Heat"
+
+
+def test_lifting_site_finding_maps_to_site():
+    assert category_for(None, 'site', 'Lifting operation without a lift plan') == 'site'
+    assert category_for('B4.1', 'negative', 'x') == 'documents'

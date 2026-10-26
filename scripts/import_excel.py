@@ -79,6 +79,101 @@ def parse_checklist(path):
     return items
 
 
+# --------------------------------------------------------------------------- five audit types
+
+TYPE_SHEETS = {"security": "Security", "environmental": "Environment", "welfare": "Worker Welfare"}
+SECTION_CODE = re.compile(r"^[A-Z]$")
+TYPED_ITEM_CODE = re.compile(r"^[A-Z]\d+(\.\d+)?$")
+SUBHEADER_CODE = re.compile(r"^[A-Z]\d+$")
+HS_SECTION_TITLES = {"A": "Documentation & Management", "B": "Operational Controls", "C": "Safety Culture & Performance"}
+
+
+def parse_typed_checklist(path, kind):
+    """Checklist for security / environmental / welfare: {"type", "sections", "items"}.
+
+    Layout per section: a letter row (letter | title | ... | "Weight" | "Compliance"), then item rows
+    (code | question | ... | weight | Full/Partial/No/N/A). Environmental also has sub-header rows
+    (G1 | title | weight, no compliance) whose code becomes the `subsection` of the G1.x items.
+    Items without a numeric weight (welfare E1, E2) default to 1. `category` is the slug `<type>:<letter>`.
+    """
+    ws = _load(path)[TYPE_SHEETS[kind]]
+    sections, items, section, subsection = [], [], None, None
+    for row in ws.iter_rows(values_only=True):
+        code = re.sub(r"\s+", "", str(row[1])) if row[1] is not None else ""
+        if code.startswith("InspectionScoreSummary") or code == "PART2":
+            break
+        if SECTION_CODE.match(code) and isinstance(row[2], str) and str(row[8]).strip().lower() == "weight":
+            section, subsection = code, None
+            sections.append({"code": code, "title": " ".join(row[2].split()), "category": f"{kind}:{code}"})
+            continue
+        if section is None or not TYPED_ITEM_CODE.match(code):
+            continue
+        compliance = str(row[9]).strip().lower() if row[9] is not None else ""
+        if code[0] != section:
+            # Workbook typo: welfare section D's items are labelled C1..C6. Re-letter to the section.
+            code = section + code[1:]
+        if compliance in COMPLIANCE:
+            weight = _num(row[8] if not isinstance(row[8], str) else _to_number(row[8]))
+            items.append({
+                "code": code,
+                "section": section,
+                "subsection": subsection if "." in code else None,
+                "question": " ".join(str(row[2]).split()),
+                "weight": weight if weight is not None else 1,
+                "category": f"{kind}:{section}",
+            })
+        elif SUBHEADER_CODE.match(code):
+            subsection = code
+    return {"type": kind, "sections": sections, "items": items}
+
+
+def _to_number(v):
+    try:
+        return float(v.strip())
+    except ValueError:
+        return None
+
+
+def parse_crc(path):
+    """CRC: 13 inspection program areas (numbered rows), weight 1, one section 'A'. Codes CRC1..CRC13."""
+    ws = _load(path)["CRC"]
+    items, started = [], False
+    for row in ws.iter_rows(values_only=True):
+        if isinstance(row[1], str) and row[1].strip() == "Inspection Program Areas":
+            started = True
+            continue
+        if not started:
+            continue
+        n = str(row[1]).strip() if row[1] is not None else ""
+        if not n.isdigit():
+            break
+        items.append({
+            "code": f"CRC{n}", "section": "A", "subsection": None,
+            "question": " ".join(str(row[3]).split()), "weight": 1, "category": "crc:A",
+        })
+    return {"type": "crc",
+            "sections": [{"code": "A", "title": "Critical Risk Control Inspections", "category": "crc:A"}],
+            "items": items}
+
+
+def parse_hs_typed(path, items):
+    ws = _load(path)["Health & Safety"]
+    titles = dict(HS_SECTION_TITLES)
+    for row in ws.iter_rows(values_only=True):
+        code = str(row[1]).strip() if row[1] is not None else ""
+        if code in titles and isinstance(row[2], str) and str(row[8]).strip().lower() == "weight":
+            titles[code] = " ".join(row[2].split())
+    return {"type": "hs",
+            "sections": [{"code": c, "title": t, "category": None} for c, t in titles.items()],
+            "items": items}
+
+
+def parse_all_checklists(path, hs_items):
+    return {"hs": parse_hs_typed(path, hs_items),
+            **{k: parse_typed_checklist(path, k) for k in TYPE_SHEETS},
+            "crc": parse_crc(path)}
+
+
 # --------------------------------------------------------------------------- results
 
 def _block_cells(row, start):
@@ -337,6 +432,10 @@ def main(argv=None):
     for name, data in (("checklist", checklist), ("contractors", contractors),
                        ("audits", audits), ("observations", observations)):
         (out / f"{name}.json").write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (out / "checklists").mkdir(exist_ok=True)
+    for kind, doc in parse_all_checklists(args.checklist, checklist).items():
+        (out / "checklists" / f"{kind}.json").write_text(
+            json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"{len(contractors)} contractors, {len(audits)} audits, "
           f"{len(observations)} observations, {len(checklist)} checklist items")
 

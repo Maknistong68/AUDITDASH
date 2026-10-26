@@ -29,7 +29,7 @@ function findAudit(raw: string) {
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { audit, contractor } = findAudit((await params).audit);
-  return { title: audit && contractor ? `${contractor.name} · ${dateLabel(audit.date)} audit · HSE Audits` : 'Not found · HSE Audits' };
+  return { title: audit && contractor ? `${contractor.name} · ${dateLabel(audit.date)} audit` : 'Not found' };
 }
 
 /** "4.5" / "6": official section points as recorded (half points kept). */

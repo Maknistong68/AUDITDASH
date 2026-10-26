@@ -48,6 +48,8 @@ export function scoreResponses(
   return { score: mean(parts), possible, scored };
 }
 
+/** App-entered audits are scored in lib/appScoring.ts (kept apart so client bundles never pull the checklist JSON). */
+
 /** Score as a fraction (0..1). Bands: ≥90 Excellent, ≥80 Good, ≥70 Partially, ≥60 Minimally, else Non-Compliant. */
 export function bandFor(score: number): Band {
   const pct = score * 100;
