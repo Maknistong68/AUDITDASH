@@ -72,3 +72,7 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
 - Split "Findings · open actions" into **three separate cards**: **Repeat findings**, **High-risk work**, **Open actions** (different things).
 - **Repeat findings absorbs "Recurring issues"** (they represent the same thing): remove the "Recurring issues" section from the bottom of the dashboard.
 - Clicking the Repeat findings card **pops up a panel** listing the recurring/repeat issues (the content formerly in "Recurring issues", plus the repeat list).
+
+## 18. Owner feedback 2026-10-26 (front kept as approved; only these changes)
+1. **Main problem dark card — same design.** Make the gap % larger. Replace the "B6.1 / B6.4 / B6.5 + truncated question" rows with plain, informative lines (what the issue is, in words a director reads in 2 seconds, plus how many audits noted it). No codes.
+2. **Remove "Where it fails" from the bottom of the dashboard entirely.** Its category cards move to the page opened by clicking Main problem: an animated slider/carousel under the header with gradient and fading effect.

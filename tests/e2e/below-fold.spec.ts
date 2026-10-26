@@ -1,5 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { CATEGORIES } from '../../lib/categories';
 import { getRepo } from '../../lib/data/repo';
 import { topIssues } from '../../lib/analytics';
 
@@ -60,15 +59,11 @@ test('main issues: six cards in impact order, linked to the item', async ({ page
   await expect(page.getByTestId('main-issues')).not.toContainText(/fail/i);
 });
 
-test('one gap tile per category below the hero, worst gap first', async ({ page }) => {
+test('"Where it fails" is gone from below the hero: no gap tiles on the dashboard', async ({ page }) => {
   await page.goto('/');
-  const tiles = page.getByTestId('gap-tile');
-  await expect(tiles).toHaveCount(CATEGORIES.length);
-  const hero = (await page.getByTestId('hero').boundingBox())!;
-  expect((await tiles.first().boundingBox())!.y).toBeGreaterThanOrEqual(hero.y + hero.height);
-  const gaps = await tiles.evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-gap') ?? -1)));
-  expect(gaps).toEqual([...gaps].sort((a, b) => b - a));
-  await expect(tiles.first()).toHaveAttribute('href', /^\/category\/[a-z]+\?q=all&r=SR1%2CSR2$/);
+  await expect(page.getByTestId('issue-card')).toHaveCount(6);
+  await expect(page.getByRole('heading', { name: 'Where it fails' })).toHaveCount(0);
+  await expect(page.getByTestId('gap-tile')).toHaveCount(0);
 });
 
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) test(`no horizontal document scroll at ${vp.width}`, async ({ page }) => {

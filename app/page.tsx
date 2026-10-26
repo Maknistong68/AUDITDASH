@@ -3,7 +3,7 @@ import { href, repeatHref, toSearchParams, type SP } from '@/lib/details';
 import type { CategoryId } from '@/lib/types';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
-  bandDistribution, categoryGaps, compareContractors, contractorCards, filterAudits, highRiskCount, mainProblem, portfolioSummary,
+  bandDistribution, compareContractors, contractorCards, filterAudits, highRiskCount, mainProblem, portfolioSummary,
   regionComparison, repeatFindings, topIssues,
 } from '@/lib/analytics';
 import { MAX_COMPARE } from '@/lib/compare';
@@ -12,7 +12,6 @@ import { TopBar } from '@/components/shell/TopBar';
 import { EmptyState } from '@/components/shell/EmptyState';
 import type { CompareEntry } from '@/components/sections/CompareTray';
 import { BentoGrid } from '@/components/bento/BentoGrid';
-import { GapRadar } from '@/components/charts/GapRadar';
 import { MainIssues } from '@/components/sections/MainIssues';
 import { AuditReel } from '@/components/sections/AuditReel';
 import { SectionHead } from '@/components/sections/SectionHead';
@@ -112,13 +111,9 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
             />
           )}
         </div>
-        {/* Below the fold: where it fails, main issues, past-audit reel. Hidden when the filter is empty. */}
+        {/* Below the fold: main issues, past-audit reel. Hidden when the filter is empty. */}
         {!empty && (
           <div className="flex flex-col gap-[clamp(56px,8svh,112px)] px-[var(--gutter)] pb-[clamp(64px,10svh,128px)] pt-[clamp(28px,5svh,64px)]">
-            <section aria-labelledby="gaps-title" className="scroll-mt-[calc(var(--topbar)+24px)]">
-              <SectionHead id="gaps-title" title="Where it fails" note={filter.quarter === 'Q1-2026' ? 'Score lost per category · worst first · Δ vs Q4' : 'Score lost per category · worst first'} />
-              <GapRadar gaps={categoryGaps(repo, filter)} query={query} />
-            </section>
             <section aria-labelledby="issues-title" className="scroll-mt-[calc(var(--topbar)+24px)]" data-testid="main-issues">
               <SectionHead id="issues-title" title="Recurring issues" note="Noted most often in the weakest sections · share of audits noting each item" />
               <MainIssues rows={topIssues(repo, filter, 6)} auditsByQuarter={auditsByQuarter} query={query} />

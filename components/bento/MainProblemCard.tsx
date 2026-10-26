@@ -6,6 +6,7 @@ import { CountUp } from '@/components/motion/CountUp';
 import { categoryById } from '@/lib/categories';
 import { QUARTERS } from '@/lib/filters';
 import { pct } from '@/lib/format';
+import { itemLabel } from '@/lib/itemLabels';
 import type { CategoryId, Quarter } from '@/lib/types';
 import { SPRING } from './BentoGrid';
 
@@ -23,11 +24,19 @@ const prevLabel = (q: Quarter) => {
   return i > 0 ? QUARTERS[i - 1].slice(0, 2) : null;
 };
 const whole = (n: number) => String(Math.round(n));
+/**
+ * The gap figure fills what the left column leaves beside the "gap" / Δ labels (100cqw = that space, an @container),
+ * capped by the tile's height (16svh) so it never clips in the one-viewport bento. A figure is ~0.6em per digit
+ * plus ~0.5em for the small "%".
+ */
+const figureSize = (gapRate: number) =>
+  `clamp(52px, min(calc(100cqw / ${(0.6 * String(Math.round(gapRate * 100)).length + 0.5).toFixed(2)}), 16svh), 220px)`;
 
 /**
  * L tile, the right side's hero: this quarter's worst category by score-based gap. Inverted (dark) Apple tile.
  * Gap % large, Δ vs previous quarter (a rising gap is bad → red; falling → green), top 3 driving items
- * (ranked by impact: audits noted × subsection score lost; "noted N/M" = audits with an auditor note).
+ * (ranked by impact: audits noted × subsection score lost), each as a short plain label and "N of M audits"
+ * (audits with an auditor note). No item codes here; they stay on the detail pages.
  * The whole tile opens the category details.
  */
 export function MainProblemCard({ problem, audits, query }: { problem: MainProblem; audits: number; query: string }) {
@@ -62,11 +71,13 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
             </h2>
           </div>
           <div className="flex items-end gap-[clamp(10px,1vw,18px)]">
-            <p className="figure text-[clamp(52px,9svh,104px)]" style={{ color: 'var(--hero-accent)' }}>
-              <CountUp value={problem.gapRate * 100} format={whole} duration={1.2} delay={0.3} />
-              <span className="text-[0.42em] tracking-normal">%</span>
-            </p>
-            <div className="flex flex-col gap-1 pb-[0.6em] text-[clamp(13px,1.5svh,15px)]">
+            <div className="@container min-w-0 flex-1">
+              <p data-testid="main-problem-gap" className="figure" style={{ color: 'var(--hero-accent)', fontSize: figureSize(problem.gapRate) }}>
+                <CountUp value={problem.gapRate * 100} format={whole} duration={1.2} delay={0.3} />
+                <span className="text-[0.42em] tracking-normal">%</span>
+              </p>
+            </div>
+            <div className="flex shrink-0 flex-col gap-1 whitespace-nowrap pb-[0.6em] text-[clamp(13px,1.5svh,15px)]">
               <span style={{ color: 'var(--hero-muted)' }}>gap</span>
               {d !== null && (
                 <span
@@ -93,13 +104,15 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
           </p>
           <ol className="flex flex-col gap-[clamp(6px,1.3svh,14px)]">
             {problem.items.map((it) => (
-              <li key={it.itemCode} className="grid grid-cols-[3.2em_minmax(0,1fr)_auto] items-baseline gap-2.5" title={`${it.question} (noted in ${it.hits} of ${audits} audits)`}>
-                <span className="num rounded-md px-1.5 py-[1px] text-center text-[12px] font-semibold" style={{ background: 'var(--hero-chip)', color: 'var(--hero-muted)' }}>
-                  {it.itemCode}
-                </span>
-                <span className="line-clamp-2 text-[clamp(13px,1.55svh,15px)] leading-snug">{it.question}</span>
+              <li
+                key={it.itemCode}
+                data-testid="main-problem-driver"
+                className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-2.5"
+                title={`${it.question} (noted in ${it.hits} of ${audits} audits)`}
+              >
+                <span className="line-clamp-2 text-[clamp(13px,1.55svh,15px)] leading-snug">{itemLabel(it.itemCode, it.question)}</span>
                 <span className="num whitespace-nowrap text-[13px]" style={{ color: 'var(--hero-muted)' }}>
-                  noted <span className="font-semibold" style={{ color: 'var(--hero-text)' }}>{it.hits}</span>/{audits}
+                  <span className="font-semibold" style={{ color: 'var(--hero-text)' }}>{it.hits}</span> of {audits} audits
                 </span>
               </li>
             ))}

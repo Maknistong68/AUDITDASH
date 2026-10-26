@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
-import { categoryQuarters, contractorAudits } from '@/lib/analytics';
+import { categoryGaps, categoryQuarters, contractorAudits } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
 import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
@@ -9,6 +9,7 @@ import { quarterLabel } from '@/lib/format';
 import { findCategory } from '@/lib/routeParams';
 import { DetailEmpty, DetailFrame } from '@/components/details/DetailFrame';
 import { CategorySlide } from '@/components/details/CategorySlide';
+import { CategorySlider } from '@/components/details/CategorySlider';
 import { CategoryTitle } from '@/components/details/CategoryTitle';
 import { AuditCarousel } from '@/components/motion/AuditCarousel';
 
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return { title: id ? categoryById(id).name : 'Not found' };
 }
 
-/** Category details: a carousel by quarter (latest first) within the filter's regions. */
+/** Category details: the category slider (worst gap first), then a carousel by quarter (latest first) within the filter's regions. */
 export default async function CategoryPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
   const id = findCategory((await params).cat);
   if (!id) notFound();
@@ -34,6 +35,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
 
   return (
     <DetailFrame filter={filter} crumbs={[{ label: 'Overview', href: overview }, { label: cat.name }]} parent={overview}>
+      <CategorySlider gaps={categoryGaps(repo, filter)} current={id} query={query} />
       {quarters.length === 0 ? (
         <>
           <div className="px-[var(--gutter)] pb-4">{title}</div>
