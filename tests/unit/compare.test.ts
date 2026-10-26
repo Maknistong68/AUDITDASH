@@ -32,8 +32,13 @@ describe('withCompare', () => {
 
 describe('bestWorst', () => {
   it('marks lowest gap best and highest worst, ignoring nulls; no marks when all equal or < 2 values', () => {
-    expect(bestWorst([0.2, 0.5, null])).toEqual({ best: 0, worst: 1 });
-    expect(bestWorst([0.3, 0.3])).toEqual({ best: -1, worst: -1 });
-    expect(bestWorst([0.3, null])).toEqual({ best: -1, worst: -1 });
+    expect(bestWorst([0.2, 0.5, null])).toEqual({ best: [0], worst: [1] });
+    expect(bestWorst([0.3, 0.3])).toEqual({ best: [], worst: [] });
+    expect(bestWorst([0.3, null])).toEqual({ best: [], worst: [] });
+  });
+  it('compares at displayed precision and marks every tied entry', () => {
+    expect(bestWorst([0.1944, 0.1944, 0.5])).toEqual({ best: [0, 1], worst: [2] });
+    expect(bestWorst([0.3333, 0.3324, 0.2])).toEqual({ best: [2], worst: [0, 1] });
+    expect(bestWorst([0.3333, 0.3324])).toEqual({ best: [], worst: [] });
   });
 });

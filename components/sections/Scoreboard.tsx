@@ -41,8 +41,10 @@ export function Scoreboard({ cards, compare }: { cards: Card[]; compare: Record<
   const ids = cards.map((c) => c.contractor.id);
   const selected = parseCompare(sp.get('c'), ids);
   const firstPaint = useRef(true);
+  const root = useRef<HTMLElement>(null);
   useEffect(() => {
     firstPaint.current = false;
+    root.current?.setAttribute('data-hydrated', ''); // toggles are live (used by e2e)
   }, []);
 
   const setSelected = useCallback(
@@ -56,7 +58,7 @@ export function Scoreboard({ cards, compare }: { cards: Card[]; compare: Record<
   const full = selected.length >= MAX_COMPARE;
 
   return (
-    <section aria-labelledby="board-title" className="flex min-h-0 flex-1 flex-col gap-[clamp(8px,1.4svh,16px)]">
+    <section ref={root} data-testid="scoreboard" aria-labelledby="board-title" className="flex min-h-0 flex-1 flex-col gap-[clamp(8px,1.4svh,16px)]">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
         <div className="flex items-baseline gap-2.5">
           <h2 id="board-title" className="text-[clamp(19px,2.4svh,26px)] font-semibold tracking-[-0.025em]">

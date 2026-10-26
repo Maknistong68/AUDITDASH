@@ -28,16 +28,17 @@ export function withCompare(search: string, ids: readonly string[]): string {
   return s ? `?${s}` : '';
 }
 
-/** Index of the lowest (best) and highest (worst) gap among non-null values; -1 when < 2 values or all equal. */
-export function bestWorst(values: readonly (number | null)[]): { best: number; worst: number } {
-  let best = -1;
-  let worst = -1;
-  values.forEach((v, i) => {
-    if (v === null || !Number.isFinite(v)) return;
-    if (best === -1 || v < values[best]!) best = i;
-    if (worst === -1 || v > values[worst]!) worst = i;
-  });
-  const n = values.filter((v) => v !== null && Number.isFinite(v)).length;
-  if (n < 2 || best === -1 || values[best] === values[worst]) return { best: -1, worst: -1 };
-  return { best, worst };
+/**
+ * Indices of the lowest (best) and highest (worst) gap among non-null values, compared at the displayed
+ * precision (whole percent) so ties on screen get the same mark. Empty when < 2 values or all equal.
+ */
+export function bestWorst(values: readonly (number | null)[]): { best: number[]; worst: number[] } {
+  const shown = values.map((v) => (v === null || !Number.isFinite(v) ? null : Math.round(v * 100)));
+  const nums = shown.filter((v): v is number => v !== null);
+  if (nums.length < 2) return { best: [], worst: [] };
+  const lo = Math.min(...nums);
+  const hi = Math.max(...nums);
+  if (lo === hi) return { best: [], worst: [] };
+  const at = (t: number) => shown.flatMap((v, i) => (v === t ? [i] : []));
+  return { best: at(lo), worst: at(hi) };
 }

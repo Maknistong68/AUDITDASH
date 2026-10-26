@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { getRepo } from '@/lib/data/repo';
 import {
-  bandDistribution, compareContractors, contractorCards, filterAudits, highRiskCount, regionComparison, repeatFindings,
+  bandDistribution, categoryGaps, compareContractors, contractorCards, filterAudits, highRiskCount, regionComparison, repeatFindings,
 } from '@/lib/analytics';
 import { isHighRisk } from '@/lib/highRisk';
 import type { Filter, Observation } from '@/lib/types';
@@ -109,6 +109,19 @@ describe('compareContractors', () => {
     const out = compareContractors(repo, ALL, [ids[2], 'nope', ids[0], ids[1], ids[3]]);
     expect(out.map((x) => x.card.contractor.id)).toEqual([ids[2], ids[0], ids[1]]);
     out.forEach((x) => { expect(x.gaps).toHaveLength(10); x.repeats.forEach((r) => expect(r.contractor.id).toBe(x.card.contractor.id)); });
+  });
+  test('gaps come from the latest audit only (same scope as rings and total)', () => {
+    const id = '4800001131'; // JV-ECH: audited in Q4 2025 and Q1 2026
+    expect(filterAudits(repo, { ...ALL, contractorId: id })).toHaveLength(2);
+    const [x] = compareContractors(repo, ALL, [id]);
+    const latestOnly = categoryGaps(repo, { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: id });
+    const both = categoryGaps(repo, { ...ALL, contractorId: id });
+    expect(x.gaps.map((g) => g.gapRate)).toEqual(latestOnly.map((g) => g.gapRate));
+    expect(x.gaps.map((g) => g.gapRate)).not.toEqual(both.map((g) => g.gapRate));
+    expect(x.gaps.map((g) => g.findings)).toEqual(latestOnly.map((g) => g.findings));
+    // previous-audit gap is reported for comparison
+    const q4 = categoryGaps(repo, { quarter: 'Q4-2025', regions: ['SR1', 'SR2'], contractorId: id });
+    expect(x.gaps.map((g) => g.prevGapRate)).toEqual(q4.map((g) => g.gapRate));
   });
   test('empty -> []', () => expect(compareContractors(repo, NONE, ['4800001131'])).toEqual([]));
   test('sanity: filterAudits unaffected', () => expect(filterAudits(repo, ALL)).toHaveLength(20));

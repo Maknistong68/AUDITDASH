@@ -149,18 +149,22 @@ function findingsOf(repo: Repo, audits: Audit[], obs: Observation[], cat: Catego
   });
 }
 
-export function categoryGaps(repo: Repo, filter: Filter): {
+export function categoryGaps(repo: Repo, filter: Filter): ReturnType<typeof gapsOver> {
+  const prevAudits = filter.quarter === 'Q1-2026' ? select(repo, filter, 'Q4-2025') : null;
+  return gapsOver(repo, filter, select(repo, filter), prevAudits);
+}
+
+/** Per-category gaps over an explicit audit set (prevAudits -> prevGapRate, null when absent). */
+function gapsOver(repo: Repo, filter: Filter, audits: Audit[], prevAudits: Audit[] | null): {
   category: CategoryId; gapRate: number | null; findingRate: number | null; findings: number; prevGapRate: number | null;
 }[] {
-  const audits = select(repo, filter);
   const obs = obsByAudit(repo, audits);
-  const prevAudits = filter.quarter === 'Q1-2026' ? select(repo, filter, 'Q4-2025') : null;
   return CATEGORIES.map((c) => ({
     category: c.id,
     gapRate: scoreGap(repo, audits, c.id),
     findingRate: findingRateFor(repo, filter, audits, c.id),
     findings: findingsOf(repo, audits, obs, c.id).length,
-    prevGapRate: prevAudits ? scoreGap(repo, prevAudits, c.id) : null,
+    prevGapRate: prevAudits && prevAudits.length ? scoreGap(repo, prevAudits, c.id) : null,
   }));
 }
 
@@ -378,9 +382,16 @@ export function compareContractors(repo: Repo, filter: Filter, ids: string[]): {
   return ids
     .filter((id) => cards.has(id))
     .slice(0, 3)
-    .map((id) => ({
-      card: cards.get(id)!,
-      gaps: categoryGaps(repo, { ...filter, contractorId: id }),
-      repeats: repeats.filter((r) => r.contractor.id === id),
-    }));
+    .map((id) => {
+      const card = cards.get(id)!;
+      // Same scope as the card's rings and total: the latest audit in the filter; prev = the audit behind `previous`.
+      const latest = repo.audits().find((a) => a.id === card.auditId)!;
+      const lq = QUARTER_ORDER.indexOf(latest.quarter);
+      const earlier = select(repo, { ...filter, contractorId: id }, 'all').filter((a) => QUARTER_ORDER.indexOf(a.quarter) < lq);
+      return {
+        card,
+        gaps: gapsOver(repo, { ...filter, contractorId: id }, [latest], earlier.length ? [earlier[earlier.length - 1]] : null),
+        repeats: repeats.filter((r) => r.contractor.id === id),
+      };
+    });
 }

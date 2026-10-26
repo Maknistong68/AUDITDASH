@@ -15,10 +15,10 @@ test('each card links to its contractor and has a compare toggle', async ({ page
   await expect(card.getByRole('link')).toHaveAttribute('href', '/contractor/4800001131');
   await expect(card.getByRole('button', { name: 'Compare JV-ECH (Port T1)' })).toBeVisible();
 });
-test('theme toggle persists', async ({ page }) => { await page.goto('/'); await page.getByRole('button', { name: /theme/i }).click(); const t = await page.locator('html').getAttribute('data-theme'); await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-theme', t!); });
+test('theme toggle persists', async ({ page }) => { await page.goto('/'); await expect(page.getByTestId('scoreboard')).toHaveAttribute('data-hydrated', ''); await page.getByRole('button', { name: /theme/i }).click(); const t = await page.locator('html').getAttribute('data-theme'); await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-theme', t!); });
 test('empty filter shows empty state', async ({ page }) => { await page.goto('/?q=Q4-2025&r='); await expect(page.getByTestId('empty-state')).toBeVisible(); await expect(page.locator('text=NaN')).toHaveCount(0); await expect(page.getByTestId('contractor-card')).toHaveCount(0); });
 test('filter changes URL and numbers', async ({ page }) => {
-  await page.goto('/'); await page.getByRole('button', { name: 'Q4 2025' }).click();
+  await page.goto('/'); await expect(page.getByTestId('scoreboard')).toHaveAttribute('data-hydrated', ''); await page.getByRole('button', { name: 'Q4 2025' }).click();
   await expect(page).toHaveURL(/q=Q4-2025/); await expect(page.getByTestId('contractor-card')).toHaveCount(8);
 });
 test('reduced motion renders rings at their final values', async ({ browser }) => {
@@ -33,4 +33,10 @@ test('reduced motion renders rings at their final values', async ({ browser }) =
     expect(Math.abs(offset - circ * (1 - target))).toBeLessThan(0.5);
   }
   await ctx.close();
+});
+test('portfolio delta names its baseline', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByTestId('kpi-score-delta')).toHaveText(/^Q1 vs Q4\s*[+−±]\d+ pts?$/);
+  await page.goto('/?q=Q1-2026&r=SR1,SR2');
+  await expect(page.getByTestId('kpi-score-delta')).toHaveText(/^[+−±]\d+ pts?\s*vs Q4 2025$/);
 });

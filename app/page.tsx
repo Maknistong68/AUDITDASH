@@ -60,6 +60,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
               bands={bandDistribution(repo, filter)}
               repeats={filter.quarter === 'Q4-2025' ? null : repeatFindings(repo, filter).length}
               highRisk={highRiskCount(repo, filter)}
+              quarter={filter.quarter}
             />
             <Scoreboard cards={cards} compare={compare} />
           </>

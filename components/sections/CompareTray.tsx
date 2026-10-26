@@ -73,6 +73,7 @@ export function CompareTray({
       if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
+    ref.current?.setAttribute('data-keys', 'ready'); // hydrated: Esc now closes (used by e2e)
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
@@ -148,7 +149,7 @@ export function CompareTray({
                 </div>
 
                 <AnimatePresence initial={false} mode="popLayout">
-                  {entries.map((e) => (
+                  {entries.map((e, ci) => (
                     <motion.div
                       key={e.card.contractor.id}
                       layout={reduce ? false : 'position'}
@@ -165,7 +166,7 @@ export function CompareTray({
                       </div>
                       <span />
                       {e.gaps.map((g, r) => (
-                        <GapBar key={g.category} value={g.gapRate} max={maxGap} best={gapRows[r]?.best === entries.indexOf(e)} worst={gapRows[r]?.worst === entries.indexOf(e)} />
+                        <GapBar key={g.category} value={g.gapRate} max={maxGap} best={!!gapRows[r]?.best.includes(ci)} worst={!!gapRows[r]?.worst.includes(ci)} />
                       ))}
                       <p className="self-end pb-1 pt-[clamp(8px,1.6svh,16px)] text-[13px] text-muted">
                         {e.card.previous === null ? (

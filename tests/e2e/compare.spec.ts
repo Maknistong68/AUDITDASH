@@ -5,6 +5,7 @@ const compare = (name: string) => ({ name: `Compare ${name}`, exact: true });
 test('selecting two cards opens the tray with two columns', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 }); await page.goto('/');
   await expect(page.getByTestId('compare-tray')).toHaveCount(0);
+  await expect(page.getByTestId('scoreboard')).toHaveAttribute('data-hydrated', '');
   await page.getByRole('button', compare('JV-ECH (Port T1)')).click();
   await expect(page.getByTestId('compare-tray')).toHaveCount(0);
   await page.getByRole('button', compare('PPCO')).click();
@@ -33,7 +34,7 @@ test('deep link opens the tray and survives refresh', async ({ page }) => {
 
 test('Esc closes the tray and removes c', async ({ page }) => {
   await page.goto('/?c=4800001131,4800001322');
-  await expect(page.getByTestId('compare-tray')).toBeVisible();
+  await expect(page.getByTestId('compare-tray')).toHaveAttribute('data-keys', 'ready');
   await page.keyboard.press('Escape');
   await expect(page.getByTestId('compare-tray')).toHaveCount(0);
   await expect(page).not.toHaveURL(/c=/);
@@ -41,6 +42,7 @@ test('Esc closes the tray and removes c', async ({ page }) => {
 
 test('close button closes the tray and removes c', async ({ page }) => {
   await page.goto('/?q=all&r=SR1,SR2&c=4800001131,4800001322');
+  await expect(page.getByTestId('compare-tray')).toHaveAttribute('data-keys', 'ready');
   await page.getByRole('button', { name: 'Close compare' }).click();
   await expect(page.getByTestId('compare-tray')).toHaveCount(0);
   await expect(page).not.toHaveURL(/c=/);

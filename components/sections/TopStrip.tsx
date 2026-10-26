@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUp, Repeat2, TriangleAlert } from 'lucide-react';
 import { SingleRing } from '@/components/charts/ActivityRings';
 import { CountUp } from '@/components/motion/CountUp';
 import { bandShort, bandTone, int, pct } from '@/lib/format';
-import type { Band } from '@/lib/types';
+import type { Band, Filter } from '@/lib/types';
 
 const BANDS: Band[] = ['Excellent', 'Good', 'Partially Compliant', 'Minimally Compliant', 'Non-Compliant'];
 const whole = (n: number) => String(Math.round(n));
@@ -18,6 +18,7 @@ interface Props {
   bands: Record<Band, number>;
   repeats: number | null;
   highRisk: number;
+  quarter: Filter['quarter'];
 }
 
 function Cell({ i, testid, className, children }: { i: number; testid: string; className?: string; children: React.ReactNode }) {
@@ -46,7 +47,7 @@ function Label({ children, tone }: { children: React.ReactNode; tone?: string })
 const BIG = 'figure text-[clamp(40px,6.4svh,72px)]';
 
 /** The top strip: portfolio score (ring + count-up), contractors per band, repeat and high-risk findings. */
-export function TopStrip({ avgScore, band, delta, audits, bands, repeats, highRisk }: Props) {
+export function TopStrip({ avgScore, band, delta, audits, bands, repeats, highRisk, quarter }: Props) {
   const ok = avgScore !== null && Number.isFinite(avgScore);
   const tone = band ? bandTone(band) : null;
   const d = delta === null ? null : Math.round(delta * 100);
@@ -73,12 +74,15 @@ export function TopStrip({ avgScore, band, delta, audits, bands, repeats, highRi
             <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px]">
               {band && <span className="badge px-2 py-0.5 text-[13px]" title={band}>{bandShort(band)}</span>}
               {d !== null && (
-                <span className="num inline-flex items-center gap-0.5 font-semibold" style={{ color: d > 0 ? 'var(--up)' : d < 0 ? 'var(--down)' : 'var(--muted)' }}>
-                  {d > 0 && <ArrowUp size={13} strokeWidth={2.6} aria-hidden />}
-                  {d < 0 && <ArrowDown size={13} strokeWidth={2.6} aria-hidden />}
-                  {d > 0 ? '+' : d < 0 ? '−' : '±'}
-                  {Math.abs(d)}
-                  <span className="ml-1 font-normal text-muted">vs Q4 2025</span>
+                <span data-testid="kpi-score-delta" className="num inline-flex items-center gap-0.5" title="Average of Q1 2026 audits minus average of Q4 2025 audits">
+                  {quarter === 'all' && <span className="mr-1 text-muted">Q1 vs Q4</span>}
+                  <span className="inline-flex items-center gap-0.5 font-semibold" style={{ color: d > 0 ? 'var(--up)' : d < 0 ? 'var(--down)' : 'var(--muted)' }}>
+                    {d > 0 && <ArrowUp size={13} strokeWidth={2.6} aria-hidden />}
+                    {d < 0 && <ArrowDown size={13} strokeWidth={2.6} aria-hidden />}
+                    {d > 0 ? '+' : d < 0 ? '−' : '±'}
+                    {Math.abs(d)} {Math.abs(d) === 1 ? 'pt' : 'pts'}
+                  </span>
+                  {quarter !== 'all' && <span className="ml-1 text-muted">vs Q4 2025</span>}
                 </span>
               )}
             </div>
