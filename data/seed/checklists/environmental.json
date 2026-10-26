@@ -1,0 +1,665 @@
+{
+  "type": "environmental",
+  "sections": [
+    {
+      "code": "A",
+      "title": "Previous EMS Audit Follow up",
+      "category": "environmental:A"
+    },
+    {
+      "code": "B",
+      "title": "Leadership",
+      "category": "environmental:B"
+    },
+    {
+      "code": "C",
+      "title": "Planning",
+      "category": "environmental:C"
+    },
+    {
+      "code": "D",
+      "title": "Environmental Documents",
+      "category": "environmental:D"
+    },
+    {
+      "code": "E",
+      "title": "Competency Management, Training & Awareness",
+      "category": "environmental:E"
+    },
+    {
+      "code": "F",
+      "title": "Resources",
+      "category": "environmental:F"
+    },
+    {
+      "code": "G",
+      "title": "Operational Planning & Control Evidence",
+      "category": "environmental:G"
+    },
+    {
+      "code": "H",
+      "title": "Monitoring & Measurement",
+      "category": "environmental:H"
+    },
+    {
+      "code": "I",
+      "title": "Environmental Incidents / Investigations",
+      "category": "environmental:I"
+    },
+    {
+      "code": "J",
+      "title": "Emergency Prepardeness",
+      "category": "environmental:J"
+    }
+  ],
+  "items": [
+    {
+      "code": "A1",
+      "section": "A",
+      "subsection": null,
+      "question": "Have all previous EMS non conformances been rectified (CAT1)?",
+      "weight": 1,
+      "category": "environmental:A"
+    },
+    {
+      "code": "A2",
+      "section": "A",
+      "subsection": null,
+      "question": "Have all previous improvement opportunities been addressed (CAT2)?",
+      "weight": 1,
+      "category": "environmental:A"
+    },
+    {
+      "code": "A3",
+      "section": "A",
+      "subsection": null,
+      "question": "Are Contractor NCRs available for previously identified EMS audit findings?",
+      "weight": 1,
+      "category": "environmental:A"
+    },
+    {
+      "code": "B1",
+      "section": "B",
+      "subsection": null,
+      "question": "Is there an Environmental Policy in place, approved and signed by the organisation's senior management?",
+      "weight": 1,
+      "category": "environmental:B"
+    },
+    {
+      "code": "B2",
+      "section": "B",
+      "subsection": null,
+      "question": "Has the Contractors EMS Manual been approved?",
+      "weight": 3,
+      "category": "environmental:B"
+    },
+    {
+      "code": "B3",
+      "section": "B",
+      "subsection": null,
+      "question": "Has there been any changes to EMS Manual and has it been documented?",
+      "weight": 1,
+      "category": "environmental:B"
+    },
+    {
+      "code": "B4",
+      "section": "B",
+      "subsection": null,
+      "question": "Does Contractor have established Management Review process to evaluate the adequacy and effectiveness of management system?",
+      "weight": 3,
+      "category": "environmental:B"
+    },
+    {
+      "code": "B5",
+      "section": "B",
+      "subsection": null,
+      "question": "Are management review records retained, and a process to manage non-conformances and related corrective actions in place?",
+      "weight": 1,
+      "category": "environmental:B"
+    },
+    {
+      "code": "C1",
+      "section": "C",
+      "subsection": null,
+      "question": "Does the Contractor maintain a compliance obligation register which details applicable obligations (legal, permit conditions, emission standards) to which the project need to comply?",
+      "weight": 1,
+      "category": "environmental:C"
+    },
+    {
+      "code": "C2",
+      "section": "C",
+      "subsection": null,
+      "question": "Does the Contractor undertake periodic Compliance obligation audits/verification to check their adherence to conditions of approval?",
+      "weight": 1,
+      "category": "environmental:C"
+    },
+    {
+      "code": "C3",
+      "section": "C",
+      "subsection": null,
+      "question": "Has environmental objectives been established for the project?",
+      "weight": 2,
+      "category": "environmental:C"
+    },
+    {
+      "code": "C4",
+      "section": "C",
+      "subsection": null,
+      "question": "Are adequately detailed programs for achieving objectives documented?",
+      "weight": 1,
+      "category": "environmental:C"
+    },
+    {
+      "code": "D1",
+      "section": "D",
+      "subsection": null,
+      "question": "Has the Contractors CESMP been approved?",
+      "weight": 2,
+      "category": "environmental:D"
+    },
+    {
+      "code": "D2",
+      "section": "D",
+      "subsection": null,
+      "question": "Is the CESMP reviewed annually and updated where applicable?",
+      "weight": 2,
+      "category": "environmental:D"
+    },
+    {
+      "code": "D3",
+      "section": "D",
+      "subsection": null,
+      "question": "Are documents and records required by NEOM Environment retained and available?",
+      "weight": 2,
+      "category": "environmental:D"
+    },
+    {
+      "code": "D4",
+      "section": "D",
+      "subsection": null,
+      "question": "Does the Contractor have a valid Environmental Permit (MEWA) and Accord?",
+      "weight": 2,
+      "category": "environmental:D"
+    },
+    {
+      "code": "D5",
+      "section": "D",
+      "subsection": null,
+      "question": "Has Contractor Monthly Environmental Reports submitted on time?",
+      "weight": 2,
+      "category": "environmental:D"
+    },
+    {
+      "code": "D6",
+      "section": "D",
+      "subsection": null,
+      "question": "Are the reported quantities in the Monthly Environmental Report accurate?",
+      "weight": 2,
+      "category": "environmental:D"
+    },
+    {
+      "code": "D7",
+      "section": "D",
+      "subsection": null,
+      "question": "Are all reported quantities supported by verifiable source documentation?",
+      "weight": 2,
+      "category": "environmental:D"
+    },
+    {
+      "code": "E1",
+      "section": "E",
+      "subsection": null,
+      "question": "Is Competency Management Program developed and implemented?",
+      "weight": 1,
+      "category": "environmental:E"
+    },
+    {
+      "code": "E2",
+      "section": "E",
+      "subsection": null,
+      "question": "Is there an environmental training scheduled that correlates with the training matrix?",
+      "weight": 1,
+      "category": "environmental:E"
+    },
+    {
+      "code": "E3",
+      "section": "E",
+      "subsection": null,
+      "question": "Is there an environmental component in the Contractors induction?",
+      "weight": 1,
+      "category": "environmental:E"
+    },
+    {
+      "code": "E4",
+      "section": "E",
+      "subsection": null,
+      "question": "Are work specific environmental training records available?",
+      "weight": 1,
+      "category": "environmental:E"
+    },
+    {
+      "code": "E5",
+      "section": "E",
+      "subsection": null,
+      "question": "Are regular environmental tool box talks conducted?",
+      "weight": 1,
+      "category": "environmental:E"
+    },
+    {
+      "code": "E6",
+      "section": "E",
+      "subsection": null,
+      "question": "Is a record of what was discussed during the tool box talk available on file?",
+      "weight": 1,
+      "category": "environmental:E"
+    },
+    {
+      "code": "E7",
+      "section": "E",
+      "subsection": null,
+      "question": "Do all workers attend environmental tool box talks?",
+      "weight": 1,
+      "category": "environmental:E"
+    },
+    {
+      "code": "F1",
+      "section": "F",
+      "subsection": null,
+      "question": "Are resources made available for the EMS to be maintained and continually improved?",
+      "weight": 1,
+      "category": "environmental:F"
+    },
+    {
+      "code": "F2",
+      "section": "F",
+      "subsection": null,
+      "question": "Has a full-time Environmental Manager been appointed and approved by NEV?",
+      "weight": 1,
+      "category": "environmental:F"
+    },
+    {
+      "code": "F3",
+      "section": "F",
+      "subsection": null,
+      "question": "Is sufficient number of monitoring equipment and equipment required for control measures provided to conduct scope work?",
+      "weight": 1,
+      "category": "environmental:F"
+    },
+    {
+      "code": "G1.1",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Is there approved Waste Management Plan and fully implemented?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G1.2",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Is there a copy of the waste (non-hazardous) company operating permit available on file?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G1.3",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Are Waste Transfer Notes (WTN’s) for non-hazardous waste on file?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G1.4",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Are WTN’s signed by representatives from both contractor and waste company?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G1.5",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Is the type and quantity of waste specified on the WTN?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G1.6",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Is a register of non-hazardous waste collections maintained?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G1.7",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Is a copy of the Hazardous Waste company permit available on file?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G1.8",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Are records of hazardous waste disposal available on file?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G1.9",
+      "section": "G",
+      "subsection": "G1",
+      "question": "Does the waste management register correlate to WTN’s available on file for non-hazardous and hazardous waste?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G2.1",
+      "section": "G",
+      "subsection": "G2",
+      "question": "Is there a copy of the wastewater/sewage service provider permit available on file?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G2.2",
+      "section": "G",
+      "subsection": "G2",
+      "question": "Is a register of wastewater/sewage collections maintained?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G2.3",
+      "section": "G",
+      "subsection": "G2",
+      "question": "Are Wastewater Transfer Notes (WTN’s) for wastewater/sewage on file?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G2.4",
+      "section": "G",
+      "subsection": "G2",
+      "question": "Are WTN’s for wastewater/sewage signed by representatives from both sewage producer/sewage hauler?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G2.5",
+      "section": "G",
+      "subsection": "G2",
+      "question": "Is the quantity of wastewater/sewage specified on the WTN?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G2.6",
+      "section": "G",
+      "subsection": "G2",
+      "question": "Are records (register) of wastewater/sewage disposal available on file?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G2.7",
+      "section": "G",
+      "subsection": "G2",
+      "question": "Does the wastewater/sewage disposal register correlate to WTNs available on file?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G3.1",
+      "section": "G",
+      "subsection": "G3",
+      "question": "Is site construction water sourced from approved and legal sources?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G3.2",
+      "section": "G",
+      "subsection": "G3",
+      "question": "Are records of the projects water consumption available?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G3.3",
+      "section": "G",
+      "subsection": "G3",
+      "question": "Are water records verified against available documentation?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G3.4",
+      "section": "G",
+      "subsection": "G3",
+      "question": "Are records of the projects diesel consumption available?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G3.5",
+      "section": "G",
+      "subsection": "G3",
+      "question": "Are records of the projects petrol consumption available?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G3.6",
+      "section": "G",
+      "subsection": "G3",
+      "question": "Are fuel records verified against available documentation?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G4.1",
+      "section": "G",
+      "subsection": "G4",
+      "question": "Does the vehicle/equipment maintenance conducted at an approved maintenance workshop area?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G4.2",
+      "section": "G",
+      "subsection": "G4",
+      "question": "Are vehicle / equipment maintenance records available?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "G4.3",
+      "section": "G",
+      "subsection": "G4",
+      "question": "Are spill prevention training & refuelling training records available?",
+      "weight": 1,
+      "category": "environmental:G"
+    },
+    {
+      "code": "H1.1",
+      "section": "H",
+      "subsection": "H1",
+      "question": "Is there documentation detailing the Contractor daily & weekly environmental inspections (reports)?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H1.2",
+      "section": "H",
+      "subsection": "H1",
+      "question": "Does the contractor have a dedicated environmental checklist?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H1.3",
+      "section": "H",
+      "subsection": "H1",
+      "question": "Have records of the env inspections been communicated to Contractor CM / PM?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H1.4",
+      "section": "H",
+      "subsection": "H1",
+      "question": "Is there evidence of timely closure of corrective and preventive actions raised during environmental inspections/ internal audits?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H1.5",
+      "section": "H",
+      "subsection": "H1",
+      "question": "Does the contractor conduct internal environmental management system audit? Are evidence, such as audit report and findings available for review?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H2.1",
+      "section": "H",
+      "subsection": "H2",
+      "question": "Does the Contractor have established process to monitor and manage dust emissions?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H2.2",
+      "section": "H",
+      "subsection": "H2",
+      "question": "Are dust monitoring reports available (for daily/weekly)?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H2.3",
+      "section": "H",
+      "subsection": "H2",
+      "question": "Are all monitoring results within project specified limits?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H2.4",
+      "section": "H",
+      "subsection": "H2",
+      "question": "Is there a map of dust monitoring location available on file?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H2.5",
+      "section": "H",
+      "subsection": "H2",
+      "question": "Is the dust meter/monitor calibration certificate available and up to date?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H3.1",
+      "section": "H",
+      "subsection": "H3",
+      "question": "Does the Contractor have established process to monitor and manage noise emissions?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H3.2",
+      "section": "H",
+      "subsection": "H3",
+      "question": "Are records of noise monitoring data available on file?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H3.3",
+      "section": "H",
+      "subsection": "H3",
+      "question": "Are all noise monitoring results within project specified limits?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H3.4",
+      "section": "H",
+      "subsection": "H3",
+      "question": "Is there a map of noise monitoring location available on file?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "H3.5",
+      "section": "H",
+      "subsection": "H3",
+      "question": "Is the noise meter/monitor calibration certificate available and up to date?",
+      "weight": 1,
+      "category": "environmental:H"
+    },
+    {
+      "code": "I1",
+      "section": "I",
+      "subsection": null,
+      "question": "Is a register of environmental incidents maintained?",
+      "weight": 1,
+      "category": "environmental:I"
+    },
+    {
+      "code": "I2",
+      "section": "I",
+      "subsection": null,
+      "question": "For each environmental incident, is there a notification report and an investigation report?",
+      "weight": 1,
+      "category": "environmental:I"
+    },
+    {
+      "code": "I3",
+      "section": "I",
+      "subsection": null,
+      "question": "Have incidents been reported to NEOM Environment?",
+      "weight": 1,
+      "category": "environmental:I"
+    },
+    {
+      "code": "I4",
+      "section": "I",
+      "subsection": null,
+      "question": "Are records available to verify that corrective / preventive actions have been implemented?",
+      "weight": 1,
+      "category": "environmental:I"
+    },
+    {
+      "code": "J1",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the Contractor have an Emergency Response Plan?",
+      "weight": 1,
+      "category": "environmental:J"
+    },
+    {
+      "code": "J2",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the Emergency Response Plan adequately address environmental emergencies?",
+      "weight": 1,
+      "category": "environmental:J"
+    },
+    {
+      "code": "J3",
+      "section": "J",
+      "subsection": null,
+      "question": "Is there evidence of environmental emergency mock drills available on file?",
+      "weight": 1,
+      "category": "environmental:J"
+    }
+  ]
+}

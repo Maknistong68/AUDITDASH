@@ -10,6 +10,7 @@ const byDate = (a: Audit, b: Audit) => a.date.localeCompare(b.date) || a.id.loca
 
 /** Audits matching quarter (unless overridden), regions (via contractor subregion) and optional contractorId. */
 function select(repo: Repo, filter: Filter, quarter: Filter['quarter'] = filter.quarter): Audit[] {
+  if (filter.type && filter.type !== 'hs') return []; // seed audits are all H&S; other types have none yet
   const region = new Map(repo.contractors().map((c) => [c.id, c.subregion]));
   return repo
     .audits()

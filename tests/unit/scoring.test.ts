@@ -1,8 +1,9 @@
 import { describe, expect, test } from 'vitest';
 import checklistJson from '@/data/seed/checklist.json';
 import fixture from './fixtures/abyatona-1112-responses.json';
-import { bandFor, scoreResponses } from '@/lib/scoring';
-import type { ChecklistItem, Compliance } from '@/lib/types';
+import { bandFor, scoreAppAudit, scoreResponses } from '@/lib/scoring';
+import { checklistFor } from '@/lib/auditTypes';
+import type { AppAnswer, ChecklistItem, Compliance } from '@/lib/types';
 
 const checklist = checklistJson as ChecklistItem[];
 const mk = (code: string, weight: number, section: 'A' | 'B' | 'C' = 'A', subsection: string | null = null): ChecklistItem => ({
@@ -44,5 +45,47 @@ describe('bandFor', () => {
     expect(bandFor(0.8)).toBe('Good');
     expect(bandFor(0.7)).toBe('Partially Compliant');
     expect(bandFor(0.6)).toBe('Minimally Compliant');
+  });
+});
+
+describe('scoreAppAudit', () => {
+  const map: Record<string, AppAnswer> = { full: 'compliant', partial: 'observation', no: 'non_compliant', na: 'na' };
+  test('H&S fixture mapped answers score 62.76%', () => {
+    const answers = Object.fromEntries(Object.entries(fixture as Record<string, string>).map(([k, v]) => [k, map[v]]));
+    const r = scoreAppAudit('hs', checklistFor('hs'), answers);
+    expect(r.score).toBeCloseTo(0.6276068, 6);
+    expect(r.sections.map((s) => s.code)).toEqual(['A', 'B', 'C']);
+    expect(r.counts.compliant + r.counts.observation + r.counts.nonCompliant + r.counts.na + r.counts.unanswered).toBe(81);
+  });
+  test('Security: mean of section scores', () => {
+    const items = checklistFor('security');
+    const a = items.filter((i) => i.section === 'A'); // 4 items
+    const b = items.filter((i) => i.section === 'B'); // 3 items
+    const answers: Record<string, AppAnswer> = {};
+    a.forEach((i, n) => (answers[i.code] = n === 0 ? 'observation' : 'compliant')); // 3.5/4 = .875
+    b.forEach((i, n) => (answers[i.code] = n === 0 ? 'non_compliant' : n === 1 ? 'na' : 'compliant')); // 1/2 = .5
+    const r = scoreAppAudit('security', items, answers);
+    expect(r.sections.find((s) => s.code === 'A')).toMatchObject({ title: 'Documentation', score: 0.875 });
+    expect(r.sections.find((s) => s.code === 'B')?.score).toBe(0.5);
+    expect(r.sections.find((s) => s.code === 'C')?.score).toBeNull();
+    expect(r.score).toBeCloseTo((0.875 + 0.5) / 2, 10);
+    expect(r.counts).toEqual({ compliant: 4, nonCompliant: 1, observation: 1, na: 1, unanswered: items.length - 7 });
+  });
+  test('weights apply within a section (environmental B2 has weight 3)', () => {
+    const items = checklistFor('environmental').filter((i) => i.code === 'B1' || i.code === 'B2');
+    const r = scoreAppAudit('environmental', items, { B1: 'non_compliant', B2: 'compliant' });
+    expect(r.score).toBeCloseTo(3 / 4, 10);
+  });
+  test('CRC: 13 areas weight 1, mean of one section', () => {
+    const items = checklistFor('crc');
+    const answers: Record<string, AppAnswer> = {};
+    items.forEach((i, n) => (answers[i.code] = n < 6 ? 'compliant' : n < 8 ? 'observation' : n < 12 ? 'non_compliant' : 'na'));
+    const r = scoreAppAudit('crc', items, answers);
+    expect(r.score).toBeCloseTo((6 + 1) / 12, 10);
+    expect(r.counts.na).toBe(1);
+  });
+  test('nothing answered or all N/A -> null', () => {
+    expect(scoreAppAudit('crc', checklistFor('crc'), {}).score).toBeNull();
+    expect(scoreAppAudit('crc', checklistFor('crc'), { CRC1: 'na' }).score).toBeNull();
   });
 });

@@ -1,0 +1,1021 @@
+{
+  "type": "welfare",
+  "sections": [
+    {
+      "code": "A",
+      "title": "EMPLOYEMENT PRACTICE",
+      "category": "welfare:A"
+    },
+    {
+      "code": "B",
+      "title": "EMPLOYEMENT OFFER",
+      "category": "welfare:B"
+    },
+    {
+      "code": "C",
+      "title": "WORKER ONBOARING",
+      "category": "welfare:C"
+    },
+    {
+      "code": "D",
+      "title": "EMPLOYMENT CONTRACT",
+      "category": "welfare:D"
+    },
+    {
+      "code": "E",
+      "title": "EMPLOYEMENT CONDITION",
+      "category": "welfare:E"
+    },
+    {
+      "code": "F",
+      "title": "PAYMENT OF WORKERS",
+      "category": "welfare:F"
+    },
+    {
+      "code": "G",
+      "title": "SUMMER WORKING",
+      "category": "welfare:G"
+    },
+    {
+      "code": "H",
+      "title": "END OF EMPLOYMENT",
+      "category": "welfare:H"
+    },
+    {
+      "code": "I",
+      "title": "GRIEVANCES",
+      "category": "welfare:I"
+    },
+    {
+      "code": "J",
+      "title": "WORKER WELFARE REPORTING",
+      "category": "welfare:J"
+    },
+    {
+      "code": "K",
+      "title": "CONTRACTOR'S RESPONSIBILITIES",
+      "category": "welfare:K"
+    },
+    {
+      "code": "L",
+      "title": "WORKER WELFARE REPRESENTATIVES",
+      "category": "welfare:L"
+    },
+    {
+      "code": "M",
+      "title": "SUB-CONTRACTOR MANAGEMENT",
+      "category": "welfare:M"
+    },
+    {
+      "code": "N",
+      "title": "WORKING HOUR",
+      "category": "welfare:N"
+    }
+  ],
+  "items": [
+    {
+      "code": "A1",
+      "section": "A",
+      "subsection": null,
+      "question": "Is the Contractor in possession of the necessary policies and procedures, as well as documented worker welfare manuals/plan to ensure the fair and ethical treatment of all Workers at all levels?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A2",
+      "section": "A",
+      "subsection": null,
+      "question": "Does the contractor ensure Ethical Recruitment from their supply chain by reviewing recruitment policies and procedures, and conducting audits?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A3",
+      "section": "A",
+      "subsection": null,
+      "question": "Does the contractor ensure that no minor (Under 18) is employed",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A4",
+      "section": "A",
+      "subsection": null,
+      "question": "Is the contractor conducting the required inspections on their sub contractor to assess their compliance with WW standards?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A5",
+      "section": "A",
+      "subsection": null,
+      "question": "Is the Contractor and its subcontractor only using the services of a Recruitment Agency that is duly registered with the KSA Ministry of Labor?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A6",
+      "section": "A",
+      "subsection": null,
+      "question": "Does the Contract between the Contractor and its Recruitment Agent specify that a Worker should not be charged any form of Recruitment Fees, including upfront deposits, security payments, or 'family loans' for recruitment services?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A7",
+      "section": "A",
+      "subsection": null,
+      "question": "Does the Contractor ensures that the Recruitment Agency in the labor-supplying countries is not charging candidates any Recruitment or Processing Fees? including any upfront deposits or security payments for the provision of recruitment services in order to secure employment with NEOM?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A8",
+      "section": "A",
+      "subsection": null,
+      "question": "Does the Contractor ensure that workers are sponsored under the Main Contractor or its Subcontractor, with no individual or freelance sponsorship allowed?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A9",
+      "section": "A",
+      "subsection": null,
+      "question": "Does the contractor provide a written declaration to the NEOM Worker Welfare team if the Worker has paid any fees for a role in NEOM?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A10",
+      "section": "A",
+      "subsection": null,
+      "question": "Does the Contractor reimburse a worker upon receiving evidence or proof that a worker paid any Recruitment or Processing Fees to a Recruitment Agent?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A11",
+      "section": "A",
+      "subsection": null,
+      "question": "Does the contractor verify that the workers have completed a baseline medical examination before mobilization onsite to ensure they are in good health and capable of performing the role they are being assigned?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A12",
+      "section": "A",
+      "subsection": null,
+      "question": "Are all workers provided with annual medical screenings conducted by a licensed third-party provider at no cost to them?\"",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A13",
+      "section": "A",
+      "subsection": null,
+      "question": "Is specialized medical screening offered to workers assigned to hazardous or high-altitude roles, tailored to the specific risks of their duties?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "A14",
+      "section": "A",
+      "subsection": null,
+      "question": "Can the contractor prove that his employees were provided with proper training/Induction regarding employment practices and NEOM code of conduct?",
+      "weight": 1,
+      "category": "welfare:A"
+    },
+    {
+      "code": "B1",
+      "section": "B",
+      "subsection": null,
+      "question": "Are workers given copies of the signed Original Offer of Employment in a language they understand before leaving their home country?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B2",
+      "section": "B",
+      "subsection": null,
+      "question": "Does the employment offer include the full name and Commercial Registration (CR) of the company issuing the work/residence permit?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B3",
+      "section": "B",
+      "subsection": null,
+      "question": "Is there a clear overview of the job's role and responsibilities, as well as the basic wage and all allowances in the job offer?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B4",
+      "section": "B",
+      "subsection": null,
+      "question": "Does the employment offer specify the details of the probation period, if applicable, and the skills assessment?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B5",
+      "section": "B",
+      "subsection": null,
+      "question": "Does the employment offer provide the date and means of salary payment, which shall be the same day every month, unless that date falls on a weekend, or public holiday, in which case, it shall be one day earlier.",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B6",
+      "section": "B",
+      "subsection": null,
+      "question": "Is the basic working hours of the worker clearly stated in the job offer?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B7",
+      "section": "B",
+      "subsection": null,
+      "question": "Does the employment offer specify the travel time included in the basic hours when the travel time to and from the workplace exceeds one hour?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B8",
+      "section": "B",
+      "subsection": null,
+      "question": "Is the employee's overtime hours rate clearly stated in the job offer?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B9",
+      "section": "B",
+      "subsection": null,
+      "question": "Is the worker's overtime rate (normal and holiday overtime) clearly stated in the job offer?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B10",
+      "section": "B",
+      "subsection": null,
+      "question": "Is it clear in the job offer that the worker is entitled to housing, food, and transportation?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B11",
+      "section": "B",
+      "subsection": null,
+      "question": "Does the employment offer include entitlements to days off, rest days, medical leave, medical leave payment, and annual leave, as well as return airfare to the worker's nearest international airport during their leave, without any penalties or the requirement for a surety bond?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B12",
+      "section": "B",
+      "subsection": null,
+      "question": "Was the employment letter been written and communicated to the employee in a language that they understand?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "B13",
+      "section": "B",
+      "subsection": null,
+      "question": "Is the Contractor liable for all costs associated with the worker's relocation from their home country?",
+      "weight": 1,
+      "category": "welfare:B"
+    },
+    {
+      "code": "C1",
+      "section": "C",
+      "subsection": null,
+      "question": "Is adequate transportation provided for the worker to travel to the site?",
+      "weight": 1,
+      "category": "welfare:C"
+    },
+    {
+      "code": "C2",
+      "section": "C",
+      "subsection": null,
+      "question": "Is the employer taking the necessary steps to ensure that the employee's bank account, ID cards, and medical check-up are established and completed within 30 days?",
+      "weight": 1,
+      "category": "welfare:C"
+    },
+    {
+      "code": "C3",
+      "section": "C",
+      "subsection": null,
+      "question": "Does the employer take necessary steps to ensure that newly hired employees receive induction training covering company policies, safety rules and regulations, legal dos and don'ts, health and safety, and cultural sensitivity?",
+      "weight": 1,
+      "category": "welfare:C"
+    },
+    {
+      "code": "C4",
+      "section": "C",
+      "subsection": null,
+      "question": "Does the contractor ensure that all subcontractors/labor suppliers joining the project are declared to THE NEOM Worker Welfare Team in the weekly and monthly reports?",
+      "weight": 1,
+      "category": "welfare:C"
+    },
+    {
+      "code": "C5",
+      "section": "C",
+      "subsection": null,
+      "question": "Does the contractor have proof that workers have been briefed on grievance process, including their right to raise issues without fear of discrimination or retaliation? and does the contractor provide the mechanisms for workers to do so, such as the ability to escalate issues to the NEOM Worker Welfare Team directly, through the Worker Welfare App, or via the NEOM Worker Hotline?",
+      "weight": 1,
+      "category": "welfare:C"
+    },
+    {
+      "code": "C6",
+      "section": "C",
+      "subsection": null,
+      "question": "Does the contractor provide mandatory and required PPE suitable for the role the workers are performing, including weatherproof jackets/clothing for the winter months, and replace clothing at no cost to the worker when signs of wear and tear appear?",
+      "weight": 1,
+      "category": "welfare:C"
+    },
+    {
+      "code": "C7",
+      "section": "C",
+      "subsection": null,
+      "question": "Has the employer provided the worker with the contact information for the KSA Ministry of Labor for emergencies and grievance redressal?",
+      "weight": 1,
+      "category": "welfare:C"
+    },
+    {
+      "code": "D1",
+      "section": "D",
+      "subsection": null,
+      "question": "Is the employee's signature on the employment contract, and was a copy of the contract provided to the employee?",
+      "weight": 1,
+      "category": "welfare:D"
+    },
+    {
+      "code": "D2",
+      "section": "D",
+      "subsection": null,
+      "question": "Does the contractor provide a Qiwa contract within 30 days of the employee's first day of employment?",
+      "weight": 1,
+      "category": "welfare:D"
+    },
+    {
+      "code": "D3",
+      "section": "D",
+      "subsection": null,
+      "question": "Does the employment contract comply with the requirements of Worker Welfare standards as per the KSA Labor Law and include appropriate medical insurance covering the full NEOM Region?",
+      "weight": 1,
+      "category": "welfare:D"
+    },
+    {
+      "code": "D4",
+      "section": "D",
+      "subsection": null,
+      "question": "Is the worker provided with an extended employment contract that offers higher remuneration than the original offer letter and benefits the worker? And no changes made to an employment contract without the worker's free and voluntary prior written consent?",
+      "weight": 1,
+      "category": "welfare:D"
+    },
+    {
+      "code": "D5",
+      "section": "D",
+      "subsection": null,
+      "question": "Do workers only carry out the roles and responsibilities for which they were hired and trained under the terms of their employment contract?",
+      "weight": 1,
+      "category": "welfare:D"
+    },
+    {
+      "code": "D6",
+      "section": "D",
+      "subsection": null,
+      "question": "Does the contractor ensure that workers are employed solely by a commercial entity, not under private sponsorship, and that the entity is registered or declared at NEOM, on a salaried basis?",
+      "weight": 1,
+      "category": "welfare:D"
+    },
+    {
+      "code": "E1",
+      "section": "E",
+      "subsection": null,
+      "question": "Does the contractor's HR policy include providing equal opportunities to all employees regardless of demographics?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E2",
+      "section": "E",
+      "subsection": null,
+      "question": "Is it part of the contractor's HR policy to not impose financial penalties on employees?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E3",
+      "section": "E",
+      "subsection": null,
+      "question": "Is it part of the contractor's HR policy to refrain from using intimidation against employees? . Is it strictly forbidden to use violence, bullying, harassment, victimization, threats, or intimidation against employees in any form?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E4",
+      "section": "E",
+      "subsection": null,
+      "question": "Is it part of the contractor's HR policy to take disciplinary action against any of its managerial staff or other employees who are found to be in violation of the WW Standards?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E5",
+      "section": "E",
+      "subsection": null,
+      "question": "Does the contractor guarantee workers' freedom of movement in and out of the accommodation?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E6",
+      "section": "E",
+      "subsection": null,
+      "question": "Is it guaranteed in the contract that employees will be paid for sick leave if they are absent due to an accident or injury while performing their job duties?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E7",
+      "section": "E",
+      "subsection": null,
+      "question": "Does the contractor ensure that workers receive adequate treatment if they are involved in an accident or injury while performing their job duties? When a worker's injury prevents them from performing their duties, does the Contractor continue to pay their wages in accordance with the Saudi Labor Law?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E8",
+      "section": "E",
+      "subsection": null,
+      "question": "Does the medical insurance contract cover any costs for medicines, consultations, tests, and so on as recommended by the worker's doctor if they are not covered by medical insurance?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E9",
+      "section": "E",
+      "subsection": null,
+      "question": "Is it stipulated in the contract that employees are entitled to unpaid leave for a specified number of days in the event of a childbirth, death, or serious debilitating injury to a member of their immediate family?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E10",
+      "section": "E",
+      "subsection": null,
+      "question": "Is it stated in the contract a guarantee that the workers' work permits will be renewed?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E11",
+      "section": "E",
+      "subsection": null,
+      "question": "Is it specified in the contract that all workers' personal files are kept up to date and contain all necessary information?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E12",
+      "section": "E",
+      "subsection": null,
+      "question": "Are all workers in possession of passport?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E13",
+      "section": "E",
+      "subsection": null,
+      "question": "Are all employees in possession of a valid work visa (which should have been converted into a valid resident permit)?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E14",
+      "section": "E",
+      "subsection": null,
+      "question": "Are all workers in possession of Saudi ID card?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E15",
+      "section": "E",
+      "subsection": null,
+      "question": "Are all workers in possession of free of charge health insurance ?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E16",
+      "section": "E",
+      "subsection": null,
+      "question": "Are all workers in possession of bank card(s).?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "E17",
+      "section": "E",
+      "subsection": null,
+      "question": "Are all workers working for their sponsored employer (sponsor) as listed on the Saudi ID card?",
+      "weight": 1,
+      "category": "welfare:E"
+    },
+    {
+      "code": "F1",
+      "section": "F",
+      "subsection": null,
+      "question": "Is the contractor ensuring that it and its other contracting parties are paying, all Workers in accordance with the Wage Protection System?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F2",
+      "section": "F",
+      "subsection": null,
+      "question": "Is the contracator paying all salaries on time every month",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F3",
+      "section": "F",
+      "subsection": null,
+      "question": "Is there no charge or interest imposed by the contract on wages paid in advance of the due date, whether by advance payment or loan?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F4",
+      "section": "F",
+      "subsection": null,
+      "question": "Does the contract guarantee that any wage deductions are made strictly in accordance with the requirements of KSA Labor Law?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F5",
+      "section": "F",
+      "subsection": null,
+      "question": "Is there no deduction from the worker's salary for recruitment, relocation or visa costs, housing, food, training and development, and medical insurance/health care?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F6",
+      "section": "F",
+      "subsection": null,
+      "question": "Are workers provided with a payslip for each pay period that outlines their salary, overtime, entitled benefits and are they paid on time?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F7",
+      "section": "F",
+      "subsection": null,
+      "question": "Are workers given payslips with a complete breakdown - employee information, salary, number of hours worked, rate of pay, overtime hours and pay, leave pay deductions, allowances, and so on?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F8",
+      "section": "F",
+      "subsection": null,
+      "question": "Are workers compensated if they work on a rest day ?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F9",
+      "section": "F",
+      "subsection": null,
+      "question": "Do workers continue to be paid while attending skills training, induction training, or other training?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F10",
+      "section": "F",
+      "subsection": null,
+      "question": "Does the Contractor keep a wage register?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "F11",
+      "section": "F",
+      "subsection": null,
+      "question": "Is a worker compensated for their rest day when circumstances at work require them to work extra hours or on their rest day?",
+      "weight": 1,
+      "category": "welfare:F"
+    },
+    {
+      "code": "G1",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that proper training, counseling, and education for all management levels and workers exposed to working in hot places about heat-related symptoms such as heat stroke and dehydration, as well as their prevention methods, is provided?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G2",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that workers to wear proper personal protective equipment, such as a heat protective cap?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G3",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that the temperature and humidity at the site be monitored on a regular basis at multiple intervals? and is a trained individual stationed to observe and respond to situations?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G4",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that a schedule of working hours during the coldest hours is considered?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G5",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that workers receive adequate fluids to keep them hydrated?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G6",
+      "section": "G",
+      "subsection": null,
+      "question": "Is it guaranteed by the contractor that all precautions, engineering designs, control, and engineering implementation that allow heat reduction are followed? Do they conduct work risk assessments in hazardous environments and identify protective measures?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G7",
+      "section": "G",
+      "subsection": null,
+      "question": "Does the contractor require proper breaks for workers deployed in hot places, as well as that workers be properly medically examined prior to deployment?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G8",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that proper breaks are provided for workers deployed in hot places, and that workers are properly medically examined before deployment?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G9",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that the workers were provided with with light-colored, cotton-made clothing?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G10",
+      "section": "G",
+      "subsection": null,
+      "question": "Is a Safety Officer been assigned by the contractor? [ to ensure compliance with the norms established by worker welfare and raising workers' awareness of job-related risks]",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G11",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that all buildings and vehicles used by employees are air conditioned?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G12",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that nutritional food and beverages (such as fruits and juices) are provided? Also any prove to guarantee that employees have the access to a sufficient amount of fresh drinking water, as well as the provision of personal water bottles for use on-site or in vehicles?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G13",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that employees have been granted with safe shelter in the event of inclement weather? [such as sandstorms or temperatures above 50 degrees Celsius]",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "G14",
+      "section": "G",
+      "subsection": null,
+      "question": "Can the contractor prove that the working sites were provided with a medical point as well as an adequate emergency response team and means?",
+      "weight": 1,
+      "category": "welfare:G"
+    },
+    {
+      "code": "H1",
+      "section": "H",
+      "subsection": null,
+      "question": "Do the Contractor's policies and procedures state that a Worker may terminate their Employment Contract without giving notice and retain full rights to both the End of Service Gratuity and repatriation at the Contractor's expense if the Contractor commit any of the following? i) Commits a breach of its obligations under the Employment Contractor at Law or ii) Commits a physical or immoral act upon the Worker or iii) Have misrepresented to the Worker at the time of entering into the Original Offer of Employment and/or the Employment Contract as to the terms and conditions of the work or iv) The contractor has been aware of a danger to the health, safety or security of the Worker and does not take the necessary steps to remove the relevant danger",
+      "weight": 1,
+      "category": "welfare:H"
+    },
+    {
+      "code": "H2",
+      "section": "H",
+      "subsection": null,
+      "question": "Can the contractor prove that the worker is aware that in case of any breach of a worker welfare standard from the contractor's side; he/she (the worker) may be entitled to end his/her service without notice and still be entitled to repatriation and end of service gratuity?",
+      "weight": 1,
+      "category": "welfare:H"
+    },
+    {
+      "code": "H3",
+      "section": "H",
+      "subsection": null,
+      "question": "Is the Contractor responsible for the worker's repatriation and transportation back home at the end of their contract?",
+      "weight": 1,
+      "category": "welfare:H"
+    },
+    {
+      "code": "H4",
+      "section": "H",
+      "subsection": null,
+      "question": "Are all wages and end-of-service gratuities (due to workers), final settlements including air ticket at the end of their employment contracts been paid to the relevant worker on time? [prior to their return to their country of origin, or as soon as reasonably practicable if the worker remains in Saudi Arabia]",
+      "weight": 1,
+      "category": "welfare:H"
+    },
+    {
+      "code": "H5",
+      "section": "H",
+      "subsection": null,
+      "question": "Does the contractor approve the employee's request to transfer their employment (Iqama) to a new employer within 72 hours, if such a request is made? This includes if the worker has not completed their contract or offer of employment.",
+      "weight": 1,
+      "category": "welfare:H"
+    },
+    {
+      "code": "H6",
+      "section": "H",
+      "subsection": null,
+      "question": "Can the contractor prove that in the event of worker death; all the wages and end-of-service payments are been transferred to the worker's dependents ?",
+      "weight": 1,
+      "category": "welfare:H"
+    },
+    {
+      "code": "H7",
+      "section": "H",
+      "subsection": null,
+      "question": "Does the contractor adhere to the off-boarding process, including obtaining the NEOM WW Off-boarding Commitment Letter from each subcontractor/manpower supplier, as well as the employee site clearance form for all individuals being offboarded?",
+      "weight": 1,
+      "category": "welfare:H"
+    },
+    {
+      "code": "I1",
+      "section": "I",
+      "subsection": null,
+      "question": "Is the Contractor responsible for grievance redressal, and the mechanism for raising questions must be made known to the workers through proper training and awareness sessions?",
+      "weight": 1,
+      "category": "welfare:I"
+    },
+    {
+      "code": "I2",
+      "section": "I",
+      "subsection": null,
+      "question": "Are employees aware of the grievance key contacts at NEOM, the contractor management, the government process?",
+      "weight": 1,
+      "category": "welfare:I"
+    },
+    {
+      "code": "I3",
+      "section": "I",
+      "subsection": null,
+      "question": "Are workers aware of the Contractor's previous grievance redressal efforts and the assistance provided by the contractor in resolving the same for the workers?",
+      "weight": 1,
+      "category": "welfare:I"
+    },
+    {
+      "code": "I4",
+      "section": "I",
+      "subsection": null,
+      "question": "Can the contractor demonstrate that he has a functional Workers Welfare Forum in place?",
+      "weight": 1,
+      "category": "welfare:I"
+    },
+    {
+      "code": "I5",
+      "section": "I",
+      "subsection": null,
+      "question": "Is there a procedure in place to ensure that grievances raised at the WW Forum are recorded confidentially and addressed?",
+      "weight": 1,
+      "category": "welfare:I"
+    },
+    {
+      "code": "I6",
+      "section": "I",
+      "subsection": null,
+      "question": "Does the contractor ensure that the grievnaces are resolved within 48 hours?",
+      "weight": 1,
+      "category": "welfare:I"
+    },
+    {
+      "code": "J1",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the contractor ensure the Monthly Salary Declaration Letter is submitted on or before 15th of each month?",
+      "weight": 1,
+      "category": "welfare:J"
+    },
+    {
+      "code": "J2",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the contractor ensure monthly submission of the WPS for both self and supply chain to THE NEOm WW?",
+      "weight": 1,
+      "category": "welfare:J"
+    },
+    {
+      "code": "J3",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the contractor ensure that all employees working on Oxagon project are residing in NEOM accommodation?",
+      "weight": 1,
+      "category": "welfare:J"
+    },
+    {
+      "code": "J4",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the contractor ensure that accommodation and kitchen inspection reports are submitted each month, if the workers residing outside NEOM accommodation?",
+      "weight": 1,
+      "category": "welfare:J"
+    },
+    {
+      "code": "J5",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the contractor ensure the Weekly Accommodation Report is submitted on time?",
+      "weight": 1,
+      "category": "welfare:J"
+    },
+    {
+      "code": "J6",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the contractor ensure the Monthly Manpower Status Report is kept up to date?",
+      "weight": 1,
+      "category": "welfare:J"
+    },
+    {
+      "code": "J7",
+      "section": "J",
+      "subsection": null,
+      "question": "Does the contractor organize monthly Worker Welfare Committee meetings (at least once a month)with participation from subcontractors, worker welfare representatives, accommodation managers, and worker-nominated representatives, and are meeting minutes recorded and shared with NEOM?",
+      "weight": 1,
+      "category": "welfare:J"
+    },
+    {
+      "code": "K1",
+      "section": "K",
+      "subsection": null,
+      "question": "Is the contractor using the tools, standard forms, and templates provided in the Worker Welfare Pack?",
+      "weight": 1,
+      "category": "welfare:K"
+    },
+    {
+      "code": "K2",
+      "section": "K",
+      "subsection": null,
+      "question": "Has the contractor taken appropriate action to resolve Worker Welfare non-compliances throughout the project lifecycle, including those by subcontractors and suppliers?",
+      "weight": 1,
+      "category": "welfare:K"
+    },
+    {
+      "code": "K3",
+      "section": "K",
+      "subsection": null,
+      "question": "Has the contractor conducted off-boarding for all subcontractors upon contract completion and submitted the off-boarding report to NEOM within 30 days of demobilization?",
+      "weight": 1,
+      "category": "welfare:K"
+    },
+    {
+      "code": "K4",
+      "section": "K",
+      "subsection": null,
+      "question": "Can the contractor provide evidence that all workers—both direct and indirect—have received their salaries and final dues prior to offboarding?",
+      "weight": 1,
+      "category": "welfare:K"
+    },
+    {
+      "code": "K5",
+      "section": "K",
+      "subsection": null,
+      "question": "Has the contractor ensured that all workers, including those of subcontractors and suppliers, are aware of Worker Welfare policies, procedures, and their legal rights?",
+      "weight": 1,
+      "category": "welfare:K"
+    },
+    {
+      "code": "L1",
+      "section": "L",
+      "subsection": null,
+      "question": "Has the contractor officially assigned a Worker Welfare Representative, and is that individual actively participating in NEOM’s worker welfare forums and completing the required training sessions?",
+      "weight": 1,
+      "category": "welfare:L"
+    },
+    {
+      "code": "L2",
+      "section": "L",
+      "subsection": null,
+      "question": "Has the Worker Welfare Representative been appointed through an official company letter, and are they being monitored according to NEOM’s set KPIs?",
+      "weight": 1,
+      "category": "welfare:L"
+    },
+    {
+      "code": "L3",
+      "section": "L",
+      "subsection": null,
+      "question": "Does your Worker Welfare Representative meet the qualification criteria of either holding a bachelor’s degree in HR (or equivalent) or having at least five years of relevant experience?",
+      "weight": 1,
+      "category": "welfare:L"
+    },
+    {
+      "code": "L4",
+      "section": "L",
+      "subsection": null,
+      "question": "If a subcontractor lacks a qualified Worker Welfare Representative, who from their senior management has been designated to coordinate with your representative?",
+      "weight": 1,
+      "category": "welfare:L"
+    },
+    {
+      "code": "M1",
+      "section": "M",
+      "subsection": null,
+      "question": "Prequalification & Compliance Planning Has the company, along with its suppliers, been assessed against NEOM’s Worker Welfare Standards during the prequalification process, and—if any gaps were identified, has the company submitted a formal improvement action plan and senior-level commitment statement?\"",
+      "weight": 1,
+      "category": "welfare:M"
+    },
+    {
+      "code": "M2",
+      "section": "M",
+      "subsection": null,
+      "question": "Post-Award Requirements & Licensing Within two weeks of contract award, has the company submitted an updated improvement action plan, a draft Worker Welfare Management Plan with financial provisions, and does it hold a valid license to conduct employment or recruitment activities as required by law?",
+      "weight": 1,
+      "category": "welfare:M"
+    },
+    {
+      "code": "N1",
+      "section": "N",
+      "subsection": null,
+      "question": "Are working hours limited to a maximum of 8 hours per day and 48 hours per week?",
+      "weight": 1,
+      "category": "welfare:N"
+    },
+    {
+      "code": "N2",
+      "section": "N",
+      "subsection": null,
+      "question": "Is overtime limited to 2 hours per day, and during Ramadan, are basic working hours limited to 6 hours per day and 36 hours per week for fasting Muslims with a rest interval of at least 1.5 hours?",
+      "weight": 1,
+      "category": "welfare:N"
+    },
+    {
+      "code": "N3",
+      "section": "N",
+      "subsection": null,
+      "question": "Are working hours and rest periods regulated to ensure no more than 5 consecutive hours of work without a break for rest, prayer, and a meal of at least 30 minutes?",
+      "weight": 1,
+      "category": "welfare:N"
+    },
+    {
+      "code": "N4",
+      "section": "N",
+      "subsection": null,
+      "question": "Is any worker prevented from working more than 2 consecutive rest days per month?",
+      "weight": 1,
+      "category": "welfare:N"
+    },
+    {
+      "code": "N5",
+      "section": "N",
+      "subsection": null,
+      "question": "Are rest, prayer, and meal periods excluded from the calculation of basic working hours?",
+      "weight": 1,
+      "category": "welfare:N"
+    }
+  ]
+}

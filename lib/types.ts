@@ -5,8 +5,13 @@ export type Quarter = 'Q4-2025' | 'Q1-2026';
 export type Band = 'Excellent'|'Good'|'Partially Compliant'|'Minimally Compliant'|'Non-Compliant';
 export interface Category { id: CategoryId; name: string; short: string; color: string; icon: string }
 export interface ChecklistItem { code: string; section: 'A'|'B'|'C'; subsection: string | null; question: string; weight: number; category: CategoryId }
+/** A checklist item of any audit type; `category` is a CategoryId for H&S, else a section slug like `security:A`. */
+export interface TypedChecklistItem extends Omit<ChecklistItem, 'category' | 'section'> { section: string; category: string }
+export type AuditType = 'hs' | 'security' | 'environmental' | 'welfare' | 'crc';
+export type AppAnswer = 'compliant' | 'non_compliant' | 'observation' | 'na';
+export interface TypeSection { code: string; title: string; category: string | null }
 export interface Contractor { id: string; name: string; contractNo: string; subregion: Subregion }
 export interface SectionScore { code: string; label: string; possible: number; scored: number }
-export interface Audit { id: string; contractorId: string; quarter: Quarter; date: string; location: string; inspectionNo: string; auditors: string[]; totalScore: number; sections: SectionScore[] }
+export interface Audit { id: string; type?: AuditType; contractorId: string; quarter: Quarter; date: string; location: string; inspectionNo: string; auditors: string[]; totalScore: number; sections: SectionScore[] }
 export interface Observation { id: string; auditId: string; itemCode: string | null; kind: 'negative'|'positive'|'site'; text: string; category: CategoryId | null; hasPhoto: boolean }
-export interface Filter { quarter: Quarter | 'all'; regions: Subregion[]; contractorId?: string }  // contractorId not in URL; used by contractor profile
+export interface Filter { quarter: Quarter | 'all'; regions: Subregion[]; contractorId?: string; type?: AuditType }  // contractorId not in URL; used by contractor profile
