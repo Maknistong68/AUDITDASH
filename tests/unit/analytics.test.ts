@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { getRepo } from '@/lib/data/repo';
 import {
-  applicableSlots, categoryDetail, categoryGaps, contractorInCategory, filterAudits, itemHistory, league, portfolioSummary, topIssues,
+  applicableSlots, auditCompliance, categoryDetail, categoryGaps, contractorInCategory, filterAudits, itemHistory, league, portfolioSummary, topIssues,
 } from '@/lib/analytics';
 import type { Filter } from '@/lib/types';
 
@@ -65,6 +65,36 @@ describe('categoryGaps', () => {
   });
 });
 
+describe('score-based gap', () => {
+  const gap = (c: string, f: Filter = ALL) => categoryGaps(repo, f).find((x) => x.category === c)!;
+  test('hand-computed permits compliance 4800001272-Q4', () => {
+    const a = repo.audits().find((x) => x.id === '4800001272-Q4-2025-20251029')!;
+    const items = repo.checklist().filter((i) => i.category === 'permits');
+    expect(auditCompliance(a, items)).toBeCloseTo((3 * 0.5 + 1 * 0.5 + 3 + 1 + 1) / 9, 10);
+    expect(auditCompliance(a, items)).toBeCloseTo(0.7778, 4);
+  });
+  test('N/A subsection excluded from compliance', () => {
+    const a = repo.audits().find((x) => x.id === '4800001112-Q4-2025-20251015')!;
+    const permits = repo.checklist().filter((i) => i.category === 'permits');
+    const b4 = a.sections.find((s) => s.code === 'B4')!;
+    expect(auditCompliance(a, permits)).toBeCloseTo(b4.scored / b4.possible, 10);
+  });
+  test('gap rates in [0,1] and spread >= 0.15 for all', () => {
+    const rates = categoryGaps(repo, ALL).map((x) => x.gapRate!);
+    rates.forEach((r) => { expect(r).toBeGreaterThanOrEqual(0); expect(r).toBeLessThanOrEqual(1); });
+    expect(Math.max(...rates) - Math.min(...rates)).toBeGreaterThanOrEqual(0.15);
+  });
+  test('permits gap > health gap for all', () => expect(gap('permits').gapRate!).toBeGreaterThan(gap('health').gapRate!));
+  test('findingRate present and bounded', () => categoryGaps(repo, ALL).forEach((x) => { expect(x.findingRate!).toBeGreaterThanOrEqual(0); expect(x.findingRate!).toBeLessThanOrEqual(1); }));
+  test('findings exclude N/A-subsection negatives', () => {
+    const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
+    const raw = repo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.category === 'permits' && o.kind !== 'positive');
+    const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
+    expect(na).toBeGreaterThan(0);
+    expect(categoryGaps(repo, f).find((x) => x.category === 'permits')!.findings).toBe(raw.length - na);
+  });
+});
+
 describe('league', () => {
   test('single-audit contractor has previous null', () =>
     expect(league(repo, ALL).find((l) => l.contractor.id === '4200000026')!.previous).toBeNull());
@@ -96,7 +126,8 @@ describe('topIssues', () => {
   test('top issues sorted', () => {
     const t = topIssues(repo, ALL);
     expect(t).toHaveLength(6);
-    expect(t[0].auditsHit).toBeGreaterThanOrEqual(t[1].auditsHit);
+    for (let i = 1; i < t.length; i++) expect(t[i - 1].impact).toBeGreaterThanOrEqual(t[i].impact);
+    t.forEach((x) => { expect(x.impact).toBeGreaterThanOrEqual(0); expect(x.impact).toBeLessThanOrEqual(x.auditsHit); });
     expect(t[0].auditsTotal).toBe(20);
     t.forEach((x) => {
       expect(x.auditsHit).toBeLessThanOrEqual(x.auditsTotal);

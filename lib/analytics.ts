@@ -63,7 +63,34 @@ function itemsOf(repo: Repo, cat: CategoryId): ChecklistItem[] {
   return repo.checklist().filter((i) => i.category === cat);
 }
 
-const isNa = (item: ChecklistItem, na: Set<string>) => !!item.subsection && na.has(item.subsection);
+const isNa = (item: ChecklistItem, na: Set<string>) => na.has(item.subsection ?? item.section);
+
+/** Official section ratio scored/possible for the item's subsection (section for A items); null = not applicable. */
+function itemRatio(a: Audit, item: ChecklistItem): number | null {
+  const code = item.subsection ?? item.section;
+  const sec = a.sections.find((x) => x.code === code);
+  return !sec || sec.possible === 0 ? null : sec.scored / sec.possible;
+}
+
+/** Weighted compliance of one audit over a category's applicable items; null if none applicable. */
+export function auditCompliance(a: Audit, items: ChecklistItem[]): number | null {
+  let w = 0;
+  let wv = 0;
+  for (const i of items) {
+    const r = itemRatio(a, i);
+    if (r === null) continue;
+    w += i.weight;
+    wv += i.weight * r;
+  }
+  return w === 0 ? null : wv / w;
+}
+
+/** Score-based gap = 1 - mean compliance over audits with an applicable item; null if none. */
+function scoreGap(repo: Repo, audits: Audit[], cat: CategoryId): number | null {
+  const items = itemsOf(repo, cat);
+  const m = mean(audits.map((a) => auditCompliance(a, items)).filter((x): x is number => x !== null));
+  return m === null ? null : 1 - m;
+}
 
 /** Applicable item-slots for a category over the filtered audits (items x audits minus N/A subsections). */
 export function applicableSlots(repo: Repo, filter: Filter, cat: CategoryId, audits: Audit[] = select(repo, filter)): number {
@@ -98,24 +125,34 @@ function itemHits(repo: Repo, audits: Audit[], cat: CategoryId, obs = obsByAudit
   return seen.size;
 }
 
-function gapRateFor(repo: Repo, filter: Filter, audits: Audit[], cat: CategoryId): number | null {
+function findingRateFor(repo: Repo, filter: Filter, audits: Audit[], cat: CategoryId): number | null {
   const slots = applicableSlots(repo, filter, cat, audits);
   return slots === 0 ? null : itemHits(repo, audits, cat) / slots;
 }
 
-const isFinding = (o: Observation, cat: CategoryId) => (o.kind === 'negative' || o.kind === 'site') && o.category === cat;
+/** negative/site observations of the category, excluding those on items whose subsection is N/A in that audit. */
+function findingsOf(repo: Repo, audits: Audit[], obs: Observation[], cat: CategoryId): Observation[] {
+  const items = itemMap(repo);
+  const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
+  return obs.filter((o) => {
+    if ((o.kind !== 'negative' && o.kind !== 'site') || o.category !== cat) return false;
+    const item = o.itemCode ? items.get(o.itemCode) : undefined;
+    return !(item && isNa(item, na.get(o.auditId) ?? new Set()));
+  });
+}
 
 export function categoryGaps(repo: Repo, filter: Filter): {
-  category: CategoryId; gapRate: number | null; findings: number; prevGapRate: number | null;
+  category: CategoryId; gapRate: number | null; findingRate: number | null; findings: number; prevGapRate: number | null;
 }[] {
   const audits = select(repo, filter);
   const obs = obsByAudit(repo, audits);
   const prevAudits = filter.quarter === 'Q1-2026' ? select(repo, filter, 'Q4-2025') : null;
   return CATEGORIES.map((c) => ({
     category: c.id,
-    gapRate: gapRateFor(repo, filter, audits, c.id),
-    findings: obs.filter((o) => isFinding(o, c.id)).length,
-    prevGapRate: prevAudits ? gapRateFor(repo, filter, prevAudits, c.id) : null,
+    gapRate: scoreGap(repo, audits, c.id),
+    findingRate: findingRateFor(repo, filter, audits, c.id),
+    findings: findingsOf(repo, audits, obs, c.id).length,
+    prevGapRate: prevAudits ? scoreGap(repo, prevAudits, c.id) : null,
   }));
 }
 
@@ -140,7 +177,7 @@ export function league(repo: Repo, filter: Filter): { contractor: Contractor; la
 }
 
 export function topIssues(repo: Repo, filter: Filter, n = 6): {
-  itemCode: string; question: string; category: CategoryId; auditsHit: number; auditsTotal: number; byQuarter: Record<Quarter, number>;
+  itemCode: string; question: string; category: CategoryId; auditsHit: number; auditsTotal: number; impact: number; byQuarter: Record<Quarter, number>;
 }[] {
   const audits = select(repo, filter);
   const quarterOf = new Map(audits.map((a) => [a.id, a.quarter]));
@@ -156,9 +193,11 @@ export function topIssues(repo: Repo, filter: Filter, n = 6): {
     if (!item) return [];
     const byQuarter: Record<Quarter, number> = { 'Q4-2025': 0, 'Q1-2026': 0 };
     for (const id of set) byQuarter[quarterOf.get(id)!]++;
-    return [{ itemCode: code, question: item.question, category: item.category, auditsHit: set.size, auditsTotal: audits.length, byQuarter }];
+    const ratios = audits.filter((a) => set.has(a.id)).map((a) => itemRatio(a, item)).filter((x): x is number => x !== null);
+    const impact = set.size * (1 - (mean(ratios) ?? 1));
+    return [{ itemCode: code, question: item.question, category: item.category, auditsHit: set.size, auditsTotal: audits.length, impact, byQuarter }];
   });
-  rows.sort((a, b) => b.auditsHit - a.auditsHit || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
+  rows.sort((a, b) => b.impact - a.impact || b.auditsHit - a.auditsHit || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
   return rows.slice(0, n);
 }
 
@@ -172,10 +211,10 @@ export function categoryDetail(repo: Repo, filter: Filter, cat: CategoryId): {
   for (const contractor of repo.contractors()) {
     const mine = audits.filter((a) => a.contractorId === contractor.id);
     if (!mine.length) continue;
-    const gapRate = gapRateFor(repo, filter, mine, cat);
+    const gapRate = scoreGap(repo, mine, cat);
     if (gapRate === null) continue;
     const mineIds = new Set(mine.map((a) => a.id));
-    contractors.push({ contractor, gapRate, findings: obs.filter((o) => mineIds.has(o.auditId) && isFinding(o, cat)).length });
+    contractors.push({ contractor, gapRate, findings: findingsOf(repo, mine, obs.filter((o) => mineIds.has(o.auditId)), cat).length });
   }
   contractors.sort((a, b) => b.gapRate - a.gapRate || a.contractor.name.localeCompare(b.contractor.name));
   const hitsByCode = new Map<string, Set<string>>();
