@@ -1,13 +1,12 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
-import { Check } from 'lucide-react';
 import { QUARTERS, REGIONS, filterToQuery } from '@/lib/filters';
 import type { Filter, Subregion } from '@/lib/types';
 
 const QUARTER_LABEL: Record<Filter['quarter'], string> = { 'Q4-2025': 'Q4 2025', 'Q1-2026': 'Q1 2026', all: 'All' };
 
-/** Quarter segmented control + region toggle chips. State lives in the URL (?q=&r=). */
+/** Quarter switch (text + underline) and region toggles (dot = on). State lives in the URL (?q=&r=). */
 export function FilterBar({ filter }: { filter: Filter }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -18,8 +17,8 @@ export function FilterBar({ filter }: { filter: Filter }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-3" aria-busy={pending}>
-      <div role="group" aria-label="Quarter" className="flex h-9 items-center rounded-[var(--radius-control)] bg-raised p-1">
+    <div className="flex flex-wrap items-center gap-x-7 gap-y-2" aria-busy={pending}>
+      <div role="group" aria-label="Quarter" className="flex items-center gap-5">
         {([...QUARTERS, 'all'] as Filter['quarter'][]).map((q) => {
           const on = filter.quarter === q;
           return (
@@ -28,8 +27,8 @@ export function FilterBar({ filter }: { filter: Filter }) {
               type="button"
               aria-pressed={on}
               onClick={() => go({ ...filter, quarter: q })}
-              className={`h-7 rounded-[5px] px-3 text-[13px] font-medium transition-colors ${
-                on ? 'bg-active text-ink' : 'text-muted hover:text-ink'
+              className={`relative h-9 text-[14px] transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-[1.5px] after:origin-left after:bg-ink after:transition-transform after:duration-300 motion-reduce:after:transition-none ${
+                on ? 'font-medium text-ink after:scale-x-100' : 'text-muted after:scale-x-0 hover:text-ink'
               }`}
             >
               {QUARTER_LABEL[q]}
@@ -37,7 +36,7 @@ export function FilterBar({ filter }: { filter: Filter }) {
           );
         })}
       </div>
-      <div role="group" aria-label="Sub-region" className="flex items-center gap-1.5">
+      <div role="group" aria-label="Sub-region" className="flex items-center gap-4">
         {REGIONS.map((r) => {
           const on = filter.regions.includes(r);
           return (
@@ -46,11 +45,12 @@ export function FilterBar({ filter }: { filter: Filter }) {
               type="button"
               aria-pressed={on}
               onClick={() => toggleRegion(r)}
-              className={`flex h-9 items-center gap-1.5 rounded-[var(--radius-control)] border px-3 text-[13px] font-medium transition-colors active:scale-[0.97] ${
-                on ? 'border-control bg-surface text-ink dark:bg-active' : 'border-dashed border-control text-muted hover:text-ink'
-              }`}
+              className={`flex h-9 items-center gap-2 text-[14px] transition-colors ${on ? 'font-medium text-ink' : 'text-muted hover:text-ink'}`}
             >
-              <Check size={14} aria-hidden className={on ? 'opacity-100' : 'opacity-0'} />
+              <span
+                aria-hidden
+                className={`size-2 rounded-full border transition-colors ${on ? 'border-ink bg-ink' : 'border-faint bg-transparent'}`}
+              />
               {r}
             </button>
           );

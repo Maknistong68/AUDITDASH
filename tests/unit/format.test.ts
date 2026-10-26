@@ -8,10 +8,11 @@ describe('format', () => {
     expect(pct(Number.NaN)).toBe('—');
     expect(pct(Infinity)).toBe('—');
   });
-  it('pts signs percentage-point changes', () => {
-    expect(pts(0.0097)).toBe('+1.0');
-    expect(pts(-0.031)).toBe('−3.1');
-    expect(pts(0)).toBe('±0.0');
+  it('pts signs whole percentage-point changes', () => {
+    expect(pts(0.0097)).toBe('+1');
+    expect(pts(-0.031)).toBe('−3');
+    expect(pts(0.004)).toBe('±0');
+    expect(pts(0)).toBe('±0');
   });
   it('int adds separators', () => expect(int(1322)).toBe('1,322'));
   it('bandColor maps every band to a token', () => {

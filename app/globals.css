@@ -1,30 +1,29 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Two themes, one system:
- *  - light "executive ledger": achromatic chrome on a blue-grey ground, white panels, ink figures;
- *    colour only on data (category hues, band colour).
- *  - dark "command centre": true-black ground, elevation by lightness alone (#000 / #111 / #1c1c1c),
- *    no borders on panels; colour only on data.
- * Band colours are an ordinal status ladder validated with the dataviz validator per mode
- * (light vs #ffffff, dark vs #111111). They always ship with the band name or a number beside them.
+ * Design tokens: "clean executive". Editorial, airy, one accent.
+ *  - light: warm off-white paper, ink type, hairline rules; no boxed panels.
+ *  - dark: deep neutral ink (not navy), warm off-white type.
+ * The ONE accent is --gap-hue (gap severity). Green (--positive) appears only on improvement arrows/trails.
+ * Band colours are kept for ScoreRing (audit reel / report, later tasks); the hero is neutral.
  */
 :root {
   color-scheme: light;
-  --ground: #f2f4f7;
+  --ground: #f6f5f2;
   --surface: #ffffff;
-  --raised: #eceef1;
+  --raised: #f2efea;
   --active: #ffffff;
-  --border: #e3e6ea;
-  --rule: #eef0f3;
-  --control: #cfd4da;
-  --text: #0a0a0a;
-  --muted: #5f6368;
-  --faint: #6b6b6b;
+  --border: #e6e1d9;
+  --rule: #e6e1d9;
+  --control: #d6d0c6;
+  --text: #161513;
+  --muted: #6b665e;
+  --faint: #77726a;
   --positive: #1f7a45;
   --negative: #c4242a;
-  --track: #eceef1;
-  --gap-hue: #d9461b; /* gap severity: one warm hue, density = gap rate */
+  --track: #ebe7e0;
+  --zone: #f3f0eb;
+  --gap-hue: #d9461b;
 
   --band-excellent: #0f8a4a;
   --band-good: #1f7fc4;
@@ -32,7 +31,8 @@
   --band-minimal: #e0483a;
   --band-non: #a3174f;
 
-  --topbar: 56px;
+  --topbar: 64px;
+  --gutter: clamp(24px, 3.2vw, 64px);
   --gap: 16px;
   --radius-card: 8px;
   --radius-control: 6px;
@@ -40,19 +40,20 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ground: #000000;
-  --surface: #111111;
-  --raised: #1c1c1c;
-  --active: #2a2a2a;
-  --border: transparent;
-  --rule: #1f1f1f;
-  --control: #3a3a3a;
-  --text: #ffffff;
-  --muted: #b4b4b4;
-  --faint: #949494;
-  --positive: #3fc07a;
+  --ground: #0f1012;
+  --surface: #16171a;
+  --raised: #1a1b1e;
+  --active: #26272b;
+  --border: #26272b;
+  --rule: #26272b;
+  --control: #3a3b40;
+  --text: #f3f1ec;
+  --muted: #a29e96;
+  --faint: #8f8b83;
+  --positive: #4cc285;
   --negative: #f06a6a;
-  --track: #222222;
+  --track: #232428;
+  --zone: #141518;
   --gap-hue: #f0612f;
 
   --band-excellent: #1fa463;
@@ -66,19 +67,20 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --ground: #000000;
-    --surface: #111111;
-    --raised: #1c1c1c;
-    --active: #2a2a2a;
-    --border: transparent;
-    --rule: #1f1f1f;
-    --control: #3a3a3a;
-    --text: #ffffff;
-    --muted: #b4b4b4;
-    --faint: #949494;
-    --positive: #3fc07a;
+    --ground: #0f1012;
+    --surface: #16171a;
+    --raised: #1a1b1e;
+    --active: #26272b;
+    --border: #26272b;
+    --rule: #26272b;
+    --control: #3a3b40;
+    --text: #f3f1ec;
+    --muted: #a29e96;
+    --faint: #8f8b83;
+    --positive: #4cc285;
     --negative: #f06a6a;
-    --track: #222222;
+    --track: #232428;
+    --zone: #141518;
     --gap-hue: #f0612f;
     --band-excellent: #1fa463;
     --band-good: #3b93e0;
@@ -103,7 +105,9 @@
   --color-faint: var(--faint);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
+  --color-accent: var(--gap-hue);
   --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-display: var(--font-instrument), Georgia, serif;
 }
 
 html,
@@ -121,28 +125,64 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Small-caps kicker: the one label style of the hero. */
+.kicker {
+  font-size: 13px;
+  line-height: 16px;
+  font-weight: 500;
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
 :focus-visible {
   outline: 2px solid var(--text);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
-/* Panels: border on light, lightness step on dark. */
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-card);
+/* Count-up: with JS the server value is hidden before first paint, then counted once from 0. */
+html.js [data-countup]:not([data-ready]) {
+  visibility: hidden;
 }
 
-/* Category hue for a gap tile: light step by default, dark step under the dark theme. */
-.gap-tile {
-  --c: var(--cat-l);
+/* Gap row expansion (CSS-driven so it never re-renders React): hover or keyboard focus grows the row. */
+.gap-row {
+  flex: 1 1 0;
+  transition: flex-grow 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
 }
-:root[data-theme="dark"] .gap-tile {
-  --c: var(--cat-d);
+.gap-list:has(.gap-row:hover, .gap-row:focus-visible) .gap-row:not(:hover):not(:focus-visible) {
+  opacity: 0.55;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .gap-tile {
-    --c: var(--cat-d);
+.gap-row:hover,
+.gap-row:focus-visible {
+  flex-grow: 1.9;
+}
+.gap-chips-wrap {
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.gap-row:hover .gap-chips-wrap,
+.gap-row:focus-visible .gap-chips-wrap {
+  grid-template-rows: 1fr;
+}
+.gap-chips {
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
+}
+.gap-row:hover .gap-chips,
+.gap-row:focus-visible .gap-chips {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition: opacity 220ms ease 80ms, transform 220ms ease 80ms, visibility 0s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gap-row,
+  .gap-chips,
+  .gap-chips-wrap {
+    transition: none !important;
   }
 }
 
