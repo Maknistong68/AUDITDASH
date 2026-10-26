@@ -81,3 +81,8 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
 - Remove the strip of small category cards from the category page.
 - Use the **same dark Main-problem card** (same design as on the dashboard) at the top of the category page as card **#1** (worst category).
 - That same card is **movable/draggable** left/right to show **#2, #3, …** (next categories, same card design); the page content below follows the card shown.
+
+## 20. Refinement (owner, 2026-10-26)
+- Clicking the dashboard Main-problem card **animates**: the card moves left and shrinks smoothly into the category page's first card (shared-element transition).
+- On the category page the card is **~50% smaller (or less)**; strip it to the essentials (remove the extra content inside).
+- **No "1 / 8" counter, no dots.** Replace with a **gradient moving carousel**: a horizontal row of **same-size** compact cards (one per category, worst first), edges fading with a gradient, draggable/swipeable; the active card is the current category; the page content follows.
