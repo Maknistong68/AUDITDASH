@@ -323,8 +323,8 @@ html.js [data-countup]:not([data-ready]) {
  * Main problem → category: the card travels left and shrinks into the active compact card. Both snapshots fill the
  * moving box from its top-left corner (cropped, never squashed): the compact content fades in over the big card, so it
  * reads as one dark card changing size, never two cards.
- * Repeat findings → /repeats and High-risk work → /high-risk: the card grows into the header strip and its figure flies
- * into the header figure.
+ * Repeat findings → /repeats, High-risk work → /high-risk and Portfolio score → /audits: the card grows into the header
+ * strip and its figure flies into the header figure. Contractors by band and Region → /audits: the card grows into its panel.
  */
 ::view-transition-group(*) {
   animation-duration: 1000ms;
@@ -337,7 +337,10 @@ html.js [data-countup]:not([data-ready]) {
 }
 ::view-transition-image-pair(mp-card),
 ::view-transition-image-pair(rp-card),
-::view-transition-image-pair(hr-card) {
+::view-transition-image-pair(hr-card),
+::view-transition-image-pair(ps-card),
+::view-transition-image-pair(ps-bands),
+::view-transition-image-pair(ps-regions) {
   border-radius: var(--radius-card);
   overflow: hidden;
 }
@@ -363,25 +366,40 @@ html.js [data-countup]:not([data-ready]) {
 /* The repeats and high-risk cards: one opaque card surface grows; its content (kept at its own size) fades out early and the
    strip's content fades in. */
 ::view-transition-image-pair(rp-card),
-::view-transition-image-pair(hr-card) {
+::view-transition-image-pair(hr-card),
+::view-transition-image-pair(ps-card),
+::view-transition-image-pair(ps-bands),
+::view-transition-image-pair(ps-regions) {
   background: var(--surface);
   box-shadow: var(--shadow-card);
 }
 ::view-transition-old(rp-card),
 ::view-transition-new(rp-card),
 ::view-transition-old(hr-card),
-::view-transition-new(hr-card) {
+::view-transition-new(hr-card),
+::view-transition-old(ps-card),
+::view-transition-new(ps-card),
+::view-transition-old(ps-bands),
+::view-transition-new(ps-bands),
+::view-transition-old(ps-regions),
+::view-transition-new(ps-regions) {
   width: auto;
   height: auto;
   inset: 0 auto auto 0;
   mix-blend-mode: normal;
 }
 ::view-transition-old(rp-card),
-::view-transition-old(hr-card) {
+::view-transition-old(hr-card),
+::view-transition-old(ps-card),
+::view-transition-old(ps-bands),
+::view-transition-old(ps-regions) {
   animation-name: handoff-out;
 }
 ::view-transition-new(rp-card),
-::view-transition-new(hr-card) {
+::view-transition-new(hr-card),
+::view-transition-new(ps-card),
+::view-transition-new(ps-bands),
+::view-transition-new(ps-regions) {
   animation-name: handoff-in;
 }
 @keyframes handoff-out {
@@ -401,6 +419,21 @@ html.js [data-countup]:not([data-ready]) {
   transform-origin: left;
   animation: rp-grow 900ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms) both;
 }
+/* /audits: each contractor's line between two audits grows from the earlier dot to the later one, staggered by --d. */
+.ps-line {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: rp-grow 800ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms) both;
+}
+/* /audits?focus=…: the panel a dashboard card opened rings briefly in the accent, then settles. */
+.ps-focus {
+  animation: ps-focus 2200ms cubic-bezier(0.22, 1, 0.36, 1) 700ms both;
+}
+@keyframes ps-focus {
+  0% { box-shadow: var(--shadow-card), 0 0 0 0 transparent; }
+  18%, 70% { box-shadow: var(--shadow-card), 0 0 0 3px var(--accent); }
+  100% { box-shadow: var(--shadow-card), 0 0 0 0 transparent; }
+}
 @keyframes rp-pop {
   from { opacity: 0; transform: scale(0.2); }
   to { opacity: 1; transform: scale(1); }
@@ -415,6 +448,11 @@ html.js [data-countup]:not([data-ready]) {
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (prefers-reduced-motion: reduce) {
+  /* the focused panel still shows its ring, without the pulse */
+  .ps-focus {
+    animation: none !important;
+    box-shadow: var(--shadow-card), 0 0 0 3px var(--accent);
+  }
   ::view-transition-group(*),
   ::view-transition-old(*),
   ::view-transition-new(*) {

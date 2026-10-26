@@ -16,6 +16,11 @@ export const REPEATS_FIGURE = 'rp-figure';
 /** High-risk work card → the /high-risk header strip, and its figure → the header figure. */
 export const HIGHRISK_CARD = 'hr-card';
 export const HIGHRISK_FIGURE = 'hr-figure';
+/** Portfolio score card → the /audits header strip, and its figure → the header figure; the Bands and Region cards → their panels. */
+export const PORTFOLIO_CARD = 'ps-card';
+export const PORTFOLIO_FIGURE = 'ps-figure';
+export const BANDS_CARD = 'ps-bands';
+export const REGIONS_CARD = 'ps-regions';
 
 /** Length of the morph (mirrors `::view-transition-group(*)` in globals.css). */
 export const HANDOFF_MS = 1000;

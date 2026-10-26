@@ -80,11 +80,11 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                       query={query}
                     />
                   )}
-                  <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} />
+                  <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} href={href('/audits', query)} />
                   <RepeatsCard repeats={repeats ? repeats.length : null} spread={spread} href={href('/repeats', query)} />
                   <HighRiskCard count={highRiskCount(repo, filter)} byQuarter={highRiskByQuarter} href={href('/high-risk', query)} />
-                  <BandsCard bands={bandDistribution(repo, filter)} />
-                  <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} />
+                  <BandsCard bands={bandDistribution(repo, filter)} href={`${href('/audits', query)}&focus=bands`} />
+                  <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} href={`${href('/audits', query)}&focus=regions`} />
                 </>
               }
             />

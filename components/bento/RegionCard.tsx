@@ -1,10 +1,12 @@
 'use client';
+import { HandoffLink } from '@/components/motion/HandoffLink';
 import { QUARTERS as QUARTER_ORDER } from '@/lib/filters';
+import { REGIONS_CARD } from '@/lib/handoff';
 import { bandFor } from '@/lib/scoring';
 import { bandTone, pct } from '@/lib/format';
 import type { Filter, Quarter, Subregion } from '@/lib/types';
 import { BentoCard, TileLabel } from './BentoGrid';
-import { PAD, ScoreBar, Signed } from './parts';
+import { CardChevron, PAD, ScoreBar, Signed } from './parts';
 
 type Row = { region: Subregion; byQuarter: Record<Quarter, number | null> };
 
@@ -22,14 +24,17 @@ const qName = (q: Quarter) => q.replace('-', ' ');
 /**
  * S: SR1 vs SR2 — average official score per region for the filtered quarter (under All: each region's latest
  * quarter), with Δ vs the quarter before when there is one. The footer names exactly what is shown.
+ * The whole tile opens /audits?focus=regions with the shared hand-off: the tile grows into the view's region panel.
  */
-export function RegionCard({ rows, quarter }: { rows: Row[]; quarter: Filter['quarter'] }) {
+export function RegionCard({ rows, quarter, href }: { rows: Row[]; quarter: Filter['quarter']; href: string }) {
   const picks = rows.map((r) => ({ r, ...pick(r, quarter) }));
   const anyDelta = picks.some((p) => p.d !== null);
   const scope = quarter === 'all' ? 'Latest quarter' : qName(quarter);
   const prevQ = quarter === 'all' ? 'Q4' : QUARTER_ORDER[QUARTER_ORDER.indexOf(quarter) - 1]?.slice(0, 2);
   return (
-    <BentoCard i={6} testid="region-compare" className={`${PAD} justify-between gap-2 min-[640px]:col-span-2`}>
+    <BentoCard i={6} testid="region-compare" handoff={REGIONS_CARD} className={`${PAD} lift group justify-between gap-2 min-[640px]:col-span-2`}>
+      <HandoffLink href={href} aria-label="Region average score. Open portfolio" className="absolute inset-0 z-[1] rounded-[var(--radius-card)]" />
+      <CardChevron small />
       <TileLabel>Region · average score</TileLabel>
       <ul className="grid gap-[clamp(8px,1.6svh,16px)]">
         {picks.map(({ r, v, d }) => {
