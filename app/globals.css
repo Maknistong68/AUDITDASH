@@ -325,6 +325,8 @@ html.js [data-countup]:not([data-ready]) {
  * reads as one dark card changing size, never two cards.
  * Repeat findings → /repeats, High-risk work → /high-risk and Portfolio score → /audits: the card grows into the header
  * strip and its figure flies into the header figure. Contractors by band and Region → /audits: the card grows into its panel.
+ * A Contractors row → /contractor/[id]: the row's name flies into the page title and its score into the opened audit's
+ * score (ct-name, ct-score; the default cross-fade of the two snapshots).
  */
 ::view-transition-group(*) {
   animation-duration: 1000ms;

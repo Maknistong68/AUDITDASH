@@ -21,6 +21,9 @@ export const PORTFOLIO_CARD = 'ps-card';
 export const PORTFOLIO_FIGURE = 'ps-figure';
 export const BANDS_CARD = 'ps-bands';
 export const REGIONS_CARD = 'ps-regions';
+/** A Contractors card row → the contractor page: its name → the page title, its score → the opened audit's score. */
+export const CONTRACTOR_NAME = 'ct-name';
+export const CONTRACTOR_SCORE = 'ct-score';
 
 /** Length of the morph (mirrors `::view-transition-group(*)` in globals.css). */
 export const HANDOFF_MS = 1000;

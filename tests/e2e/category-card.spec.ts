@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { categoryCards } from '../../lib/analytics';
+import { categoryCards, categoryQuarters } from '../../lib/analytics';
+import { itemLabel } from '../../lib/itemLabels';
 import { CATEGORIES } from '../../lib/categories';
 
 const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
@@ -267,4 +268,95 @@ test('the dashboard Main problem card renders exactly as before the refactor', a
   await expect(mp).not.toContainText('#');
   // no shared-element name at rest: it is set only for the moment of the hand-off
   expect(await mp.evaluate((e) => getComputedStyle(e).viewTransitionName)).toBe('none');
+});
+
+const CODE = /\b[ABC]\d+(\.\d+)?\b/;
+const slide = (page: Page) => page.locator('[data-testid="slide"][data-active]');
+const quartersReady = (page: Page) => expect(page.getByTestId('carousel')).toHaveAttribute('data-ready', '');
+async function noPageScroll(page: Page) {
+  const [sh, ih, sw, iw] = await page.evaluate(() => [
+    document.documentElement.scrollHeight, innerHeight, document.documentElement.scrollWidth, innerWidth,
+  ]);
+  expect(sh).toBeLessThanOrEqual(ih);
+  expect(sw).toBeLessThanOrEqual(iw);
+}
+
+for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+  test(`/category fits one screen at ${vp.width}: carousel on top, every block in view, no codes or sentences`, async ({ page }) => {
+    await page.setViewportSize(vp);
+    await page.goto(`/category/subcontractor?${Q}`);
+    await ready(page);
+    await quartersReady(page);
+    await noPageScroll(page);
+    await expect(active(page)).toBeInViewport({ ratio: 1 });
+    for (const id of ['slide-header', 'ranked-contractors', 'driving-items']) await expect(slide(page).getByTestId(id)).toBeInViewport({ ratio: 1 });
+    const text = await page.getByTestId('details').innerText();
+    expect(text).not.toMatch(CODE);
+    expect(text).not.toContain('averaged over');
+    expect(text).not.toContain('?');
+    // the visible contractor rows sit inside their card
+    const card = (await slide(page).getByTestId('ranked-contractors').boundingBox())!;
+    for (const b of await slide(page).locator('[data-testid="contractor-row"]:visible').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().bottom)))
+      expect(b).toBeLessThanOrEqual(card.y + card.height);
+    // the earlier quarter keeps the page still too
+    await page.getByRole('button', { name: 'Previous quarter' }).click();
+    await expect(page).toHaveURL(/s=1/);
+    await noPageScroll(page);
+  });
+}
+
+test('the drivers are plain labels with a bar and "N of M audits", in impact order', async ({ page }) => {
+  const q = categoryQuarters(getRepo(), ALL, 'subcontractor')[0];
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto(`/category/subcontractor?${Q}`);
+  await quartersReady(page);
+  const items = slide(page).getByTestId('driving-item');
+  await expect(items).toHaveCount(q.items.length);
+  for (let i = 0; i < q.items.length; i++) {
+    await expect(items.nth(i).getByTestId('driving-item-label')).toHaveText(itemLabel(q.items[i].itemCode, q.items[i].question));
+    await expect(items.nth(i).getByTestId('driving-item-count')).toHaveText(`${q.items[i].hits} of ${q.audits} audits`);
+    await expect(items.nth(i).locator('span[aria-hidden]')).toHaveCount(1); // the bar
+  }
+  await expect(slide(page).getByTestId('driving-items')).not.toContainText(CODE);
+});
+
+test('"+M more" expands a long list in place, scrolling inside its card, never the page', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  const q = categoryQuarters(getRepo(), ALL, 'documents')[0];
+  await page.goto(`/category/documents?${Q}`);
+  await quartersReady(page);
+  const list = slide(page).getByTestId('driver-list');
+  const more = slide(page).getByTestId('driver-list-more');
+  await expect(more).toBeVisible();
+  const shown = await list.locator('[data-testid="driving-item"]:visible').count();
+  expect(shown).toBeLessThan(q.items.length);
+  await expect(more).toHaveText(`+${q.items.length - shown} more`);
+  await more.click();
+  await expect(list).toHaveAttribute('data-open', '');
+  await expect(list.locator('[data-testid="driving-item"]:visible')).toHaveCount(q.items.length);
+  await noPageScroll(page);
+  expect(await list.evaluate((e) => e.scrollHeight > e.clientHeight && getComputedStyle(e).overflowY === 'auto')).toBe(true);
+  await list.evaluate((e) => e.scrollTo(0, e.scrollHeight));
+  await expect(list.getByTestId('driving-item').last()).toBeInViewport();
+  await noPageScroll(page);
+  await more.click();
+  await expect(list.locator('[data-testid="driving-item"]:visible')).toHaveCount(shown);
+  // the contractor list does the same when it is cut
+  const cmore = slide(page).getByTestId('contractor-list-more');
+  if (await cmore.count()) {
+    await cmore.click();
+    await expect(slide(page).getByTestId('contractor-row').filter({ visible: true })).toHaveCount(q.contractors.length);
+    await noPageScroll(page);
+  }
+});
+
+test('a deep link to a driver the card hides opens the list on it', async ({ page }) => {
+  await page.setViewportSize({ width: 1366, height: 768 });
+  const q = categoryQuarters(getRepo(), ALL, 'documents')[0];
+  const code = q.items.at(-1)!.itemCode;
+  await page.goto(`/category/documents?${Q}#item-${code}`);
+  await quartersReady(page);
+  await expect(slide(page).getByTestId('driver-list')).toHaveAttribute('data-open', '');
+  await expect(page.locator(`[id="item-${code}"]`)).toBeInViewport();
+  await noPageScroll(page);
 });

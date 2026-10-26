@@ -21,12 +21,15 @@ export function AuditCarousel({
   initial = 0,
   unit = 'audit',
   title,
+  fit = false,
 }: {
   slides: React.ReactNode[];
   labels: string[];
   initial?: number;
   unit?: 'audit' | 'quarter';
   title?: React.ReactNode;
+  /** One-screen view (DetailFrame `fit`): the carousel fills what is left of the column and every slide is that tall. */
+  fit?: boolean;
 }) {
   const n = slides.length;
   const [index, setIndex] = useState(() => Math.max(0, Math.min(n - 1, initial)));
@@ -101,8 +104,8 @@ export function AuditCarousel({
   const many = n > 1;
 
   return (
-    <section aria-roledescription="carousel" aria-label={unit === 'audit' ? 'Audit history' : 'Quarters'} data-testid="carousel" data-index={index} data-ready={measured ? '' : undefined}>
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 px-[var(--gutter)] pb-[clamp(10px,1.6svh,18px)]">
+    <section aria-roledescription="carousel" aria-label={unit === 'audit' ? 'Audit history' : 'Quarters'} data-testid="carousel" data-index={index} data-ready={measured ? '' : undefined} className={fit ? 'flex min-h-0 flex-1 flex-col' : undefined}>
+      <div className={`flex flex-wrap items-end justify-between gap-x-6 gap-y-3 px-[var(--gutter)] ${fit ? 'shrink-0 pb-[clamp(8px,1.2svh,16px)]' : 'pb-[clamp(10px,1.6svh,18px)]'}`}>
         <div className="min-w-0">{title}</div>
         {many && (
           <div className="flex items-center gap-3">
@@ -142,7 +145,7 @@ export function AuditCarousel({
         {many ? `${index + 1} of ${n}: ${labels[index]}` : ''}
       </p>
 
-      <div className="overflow-x-clip">
+      <div className={fit ? 'min-h-0 flex-1 overflow-x-clip' : 'overflow-x-clip'}>
         <motion.div
           ref={track}
           drag={many ? 'x' : false}
@@ -159,7 +162,7 @@ export function AuditCarousel({
             // Before hydration (and without JS) the server-chosen slide is placed by CSS alone.
             translate: measured ? undefined : `calc(-${index} * (100% - 2 * var(--gutter) + var(--gap-grid)))`,
           }}
-          className={`flex items-start gap-[var(--gap-grid)] px-[var(--gutter)] ${many ? 'cursor-grab active:cursor-grabbing' : ''}`}
+          className={`flex gap-[var(--gap-grid)] px-[var(--gutter)] ${fit ? 'h-full items-stretch' : 'items-start'} ${many ? 'cursor-grab active:cursor-grabbing' : ''}`}
         >
           {slides.map((slide, i) => {
             const active = i === index;
@@ -172,10 +175,10 @@ export function AuditCarousel({
                 aria-hidden={active ? undefined : true}
                 data-testid="slide"
                 data-active={active ? '' : undefined}
-                className="relative w-full min-w-0 shrink-0 transition-opacity duration-300 motion-reduce:transition-none"
+                className={`relative w-full min-w-0 shrink-0 transition-opacity duration-300 motion-reduce:transition-none ${fit ? 'h-full' : ''}`}
                 style={{ opacity: active ? 1 : 0.42 }}
               >
-                <div inert={!active}>{slide}</div>
+                <div inert={!active} className={fit ? 'h-full' : undefined}>{slide}</div>
                 {!active && (
                   <button
                     type="button"

@@ -1,12 +1,13 @@
 'use client';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import Link from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { ArrowDown, ArrowUp, Check, Plus } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
 import { CountUp } from '@/components/motion/CountUp';
+import { HandoffLink } from '@/components/motion/HandoffLink';
 import { CompareTray, type CompareEntry } from '@/components/sections/CompareTray';
 import { MAX_COMPARE, parseCompare, toggleCompare, withCompare } from '@/lib/compare';
+import { CONTRACTOR_NAME, CONTRACTOR_SCORE } from '@/lib/handoff';
 import { bandShort, bandTone, deltaPoints, pct, prevQuarterShort } from '@/lib/format';
 import type { ContractorCard as Card } from '@/lib/analytics';
 import { SPRING, TileLabel } from './BentoGrid';
@@ -74,7 +75,7 @@ function Row({
       <span className="num text-[clamp(13px,1.5svh,15px)] font-semibold text-faint">{rank}</span>
       <span className="flex min-w-0 flex-col justify-center">
         <span className="truncate text-[clamp(14px,1.75svh,18px)] font-semibold leading-tight tracking-[-0.02em]" title={contractor.name}>
-          {contractor.name}
+          <span data-handoff={CONTRACTOR_NAME}>{contractor.name}</span>
         </span>
         <span className="text-[12px] leading-tight text-muted">{contractor.subregion}</span>
       </span>
@@ -91,8 +92,10 @@ function Row({
         />
       </span>
       <span className="figure text-right text-[clamp(20px,3.1svh,34px)]">
-        <CountUp value={total * 100} format={whole} duration={1} delay={delay} />
-        <span className="text-[0.5em] tracking-normal text-muted">%</span>
+        <span data-handoff={CONTRACTOR_SCORE}>
+          <CountUp value={total * 100} format={whole} duration={1} delay={delay} />
+          <span className="text-[0.5em] tracking-normal text-muted">%</span>
+        </span>
       </span>
       <span className="flex justify-start">
         <span className="badge px-2 py-[2px] text-[13px]" title={band}>
@@ -102,7 +105,7 @@ function Row({
       <span className="flex justify-start">
         <Delta total={total} previous={previous} auditId={auditId} size={13} bare />
       </span>
-      <Link
+      <HandoffLink
         href={`/contractor/${contractor.id}${query}`}
         aria-label={`${contractor.name}, rank ${rank}, ${pct(total)}%, ${band}`}
         className="absolute inset-0 z-[1] rounded-[14px]"
@@ -127,7 +130,8 @@ function Row({
 }
 
 /**
- * XL tile: contractors ranked by latest official score, highest first. Row → contractor details;
+ * XL tile: contractors ranked by latest official score, highest first. Row → contractor details with the shared hand-off
+ * (its name and score morph into the contractor page's title and score, lib/handoff);
  * the + toggle adds to compare (max 3; selection in ?c=, see lib/compare). Hosts the compare tray.
  */
 export function ContractorsCard({ cards, compare }: { cards: Card[]; compare: Record<string, CompareEntry> }) {

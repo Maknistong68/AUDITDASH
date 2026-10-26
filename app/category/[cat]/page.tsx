@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 /**
- * Category details: a row of compact cards, one per category ranked by the latest quarter's gap (#1 = the main problem),
+ * Category details, one screen (no page scroll): a row of compact cards, one per category ranked by the latest quarter's gap (#1 = the main problem),
  * this category's centred and active (drag or click to another), then a carousel by quarter (latest first) within the
  * filter's regions.
  * Without a card (no audits, or no applicable item in the latest quarter) the plain category title stays.
@@ -41,7 +41,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const title = ranked ? undefined : <CategoryTitle id={id} meta={`${items} checklist items · gap by quarter`} />;
 
   return (
-    <DetailFrame filter={filter} crumbs={[{ label: 'Overview', href: overview }, { label: cat.name }]} parent={overview}>
+    <DetailFrame filter={filter} crumbs={[{ label: 'Overview', href: overview }, { label: cat.name }]} parent={overview} fit>
       {ranked && (
         <CategoryCarousel cards={cards} current={id} query={query} />
       )}
@@ -53,6 +53,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
       ) : (
         <AuditCarousel
           unit="quarter"
+          fit
           initial={initial}
           labels={quarters.map((q) => quarterLabel(q.quarter))}
           title={title}

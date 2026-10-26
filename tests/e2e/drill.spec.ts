@@ -151,13 +151,15 @@ test('reduced motion still navigates between audits', async ({ browser }) => {
   await ctx.close();
 });
 
-test('findings show three per category, then all', async ({ page }) => {
+test('observations show as counts per category, each opening that audit in the category; no note text', async ({ page }) => {
   await page.goto('/contractor/4800001131');
   await ready(page);
-  const group = active(page).getByTestId('finding-group').first();
-  await expect(group.getByTestId('finding')).toHaveCount(3);
-  await group.getByRole('button', { name: /Show all \d+/ }).click();
-  expect(await group.getByTestId('finding').count()).toBeGreaterThan(3);
+  const counts = active(page).getByTestId('obs-count');
+  expect(await counts.count()).toBeGreaterThan(1);
+  await expect(active(page).getByTestId('finding')).toHaveCount(0);
+  await expect(counts.first()).toHaveAttribute('href', /^\/category\/[a-z]+\/4800001131\?q=all&r=SR1%2CSR2$/);
+  await counts.first().click();
+  await expect(page).toHaveURL(/\/category\/[a-z]+\/4800001131\?q=all/);
 });
 
 test('category rows on a contractor slide open that audit in the category', async ({ page }) => {
