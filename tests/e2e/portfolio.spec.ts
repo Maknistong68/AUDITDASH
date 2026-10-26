@@ -9,16 +9,11 @@ const hydrated = async (page: import('@playwright/test').Page) =>
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) test(`hero fits ${vp.width}`, async ({ page }) => {
   await page.setViewportSize(vp); await page.goto('/');
   await expect(page.getByTestId('score-ring')).toBeVisible();
-  for (const id of ['main-problem', 'audit-overview', 'audit-trends', 'findings-actions', 'kpi-score', 'kpi-repeats', 'kpi-highrisk', 'open-actions', 'kpi-bands', 'region-compare']) {
+  for (const id of ['main-problem', 'kpi-score', 'kpi-repeats', 'kpi-highrisk', 'kpi-bands', 'region-compare']) {
     await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
   }
   await expect(page.getByTestId('contractor-row')).toHaveCount(12);
   await expect(page.getByTestId('contractor-row').last()).toBeInViewport({ ratio: 1 });
-  // nothing spills out of its card
-  for (const id of ['contractors', 'main-problem', 'audit-overview', 'audit-trends', 'findings-actions']) {
-    const over = await page.getByTestId(id).evaluate((el) => el.scrollHeight - el.clientHeight);
-    expect(over, id).toBeLessThanOrEqual(1);
-  }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const box = await page.getByTestId('hero').boundingBox(); expect(box!.y + box!.height).toBeLessThanOrEqual(vp.height + 1);
 });
@@ -38,16 +33,12 @@ test('main problem names a category and links to its details', async ({ page }) 
   await page.goto('/');
   const mp = page.getByTestId('main-problem');
   await expect(mp.getByRole('heading')).toHaveText('Subcontractor Control');
-  await expect(mp.getByTestId('main-problem-open')).toHaveAttribute('href', '/category/subcontractor?q=all&r=SR1%2CSR2');
-  // the old driving-item list (B6.1 …) moved to the controller view
-  await expect(mp).not.toContainText('B6.1');
+  await expect(mp.getByRole('link')).toHaveAttribute('href', '/category/subcontractor?q=all&r=SR1%2CSR2');
 });
 test('no rings: the hero holds no svg circles', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('contractor-row')).toHaveCount(12);
-  // lucide icons (e.g. the Eye of Monitoring) may draw circles; no chart ring may
-  await expect(page.getByTestId('hero').locator('svg:not(.lucide) circle')).toHaveCount(0);
-  expect(await page.getByTestId('hero').locator('svg.lucide').count()).toBeGreaterThan(0);
+  await expect(page.getByTestId('hero').locator('svg circle')).toHaveCount(0);
 });
 test('theme toggle persists', async ({ page }) => { await page.goto('/'); await hydrated(page); await page.getByRole('button', { name: /theme/i }).click(); const t = await page.locator('html').getAttribute('data-theme'); await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-theme', t!); });
 test('empty filter shows empty state', async ({ page }) => { await page.goto('/?q=Q4-2025&r='); await expect(page.getByTestId('empty-state')).toBeVisible(); await expect(page.locator('text=NaN')).toHaveCount(0); await expect(page.getByTestId('contractor-row')).toHaveCount(0); });

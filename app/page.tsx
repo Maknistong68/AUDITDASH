@@ -3,7 +3,7 @@ import { href, repeatHref, toSearchParams, type SP } from '@/lib/details';
 import type { CategoryId } from '@/lib/types';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
-  bandDistribution, categoryGaps, compareContractors, contractorCards, filterAudits, gapContribution, highRiskCount, mainProblem, portfolioSummary,
+  bandDistribution, categoryGaps, compareContractors, contractorCards, filterAudits, highRiskCount, mainProblem, portfolioSummary,
   regionComparison, repeatFindings, topIssues,
 } from '@/lib/analytics';
 import { MAX_COMPARE } from '@/lib/compare';
@@ -18,9 +18,11 @@ import { AuditReel } from '@/components/sections/AuditReel';
 import { SectionHead } from '@/components/sections/SectionHead';
 import { ContractorsCard } from '@/components/bento/ContractorsCard';
 import { MainProblemCard } from '@/components/bento/MainProblemCard';
-import { AuditOverviewCard } from '@/components/bento/AuditOverviewCard';
-import { AuditTrendsCard } from '@/components/bento/AuditTrendsCard';
-import { FindingsCard } from '@/components/bento/FindingsCard';
+import { ScoreCard } from '@/components/bento/ScoreCard';
+import { RepeatsCard } from '@/components/bento/RepeatsCard';
+import { HighRiskCard } from '@/components/bento/HighRiskCard';
+import { BandsCard } from '@/components/bento/BandsCard';
+import { RegionCard } from '@/components/bento/RegionCard';
 import { TypeEmpty } from '@/components/shell/TypeEmpty';
 
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<SP> }) {
@@ -94,21 +96,17 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
               right={
                 <>
                   {problem && (
-                    <MainProblemCard problem={problem} drivers={gapContribution(repo, filter).slice(0, 4)} query={query} />
+                    <MainProblemCard
+                      problem={problem}
+                      audits={filterAudits(repo, { ...filter, quarter: problem.quarter }).length}
+                      query={query}
+                    />
                   )}
-                  <AuditOverviewCard
-                    avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter}
-                    byQuarter={byQuarter} bands={bandDistribution(repo, filter)}
-                  />
-                  <AuditTrendsCard
-                    byQuarter={QUARTERS.map((q, k) => ({ quarter: q, value: byQuarter[k].value }))}
-                    rows={regionComparison(repo, filter)}
-                    quarter={filter.quarter}
-                  />
-                  <FindingsCard
-                    repeats={repeats ? repeats.length : null} top={topRepeats}
-                    highRisk={highRiskCount(repo, filter)} highRiskHref={href('/category/documents', query)}
-                  />
+                  <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} />
+                  <RepeatsCard repeats={repeats ? repeats.length : null} top={topRepeats} />
+                  <HighRiskCard count={highRiskCount(repo, filter)} href={href('/category/documents', query)} />
+                  <BandsCard bands={bandDistribution(repo, filter)} />
+                  <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} />
                 </>
               }
             />

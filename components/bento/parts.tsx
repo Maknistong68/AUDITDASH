@@ -39,15 +39,3 @@ export function ScoreBar({ value, delay }: { value: number; delay: number }) {
     </span>
   );
 }
-
-/** A smaller display figure for the counts that share one card. */
-export const MID = 'figure text-[clamp(36px,5.6svh,68px)]';
-
-/** A block label inside a merged card (one step quieter than the tile label). */
-export function SubLabel({ children, tone, className = '' }: { children: React.ReactNode; tone?: string; className?: string }) {
-  return (
-    <h3 className={`flex items-center gap-1.5 text-[13px] font-semibold leading-tight ${className}`} style={{ color: tone ?? 'var(--muted)' }}>
-      {children}
-    </h3>
-  );
-}
