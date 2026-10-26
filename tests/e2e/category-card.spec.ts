@@ -87,7 +87,7 @@ test('the compact card: essentials only, at most 55% of the dashboard card width
   const c = RANKED[0];
   const d = Math.round(c.gapRate * 100) - Math.round(c.prevGapRate! * 100);
   await expect(active(page)).toHaveText(
-    `#1${nameOf(ORDER[0])}${Math.round(c.gapRate * 100)}%gap${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)} ${Math.abs(d) === 1 ? 'pt' : 'pts'}vs Q4`,
+    `#1${nameOf(ORDER[0])}${Math.round(c.gapRate * 100)}%score lost${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)} ${Math.abs(d) === 1 ? 'pt' : 'pts'}vs Q4`,
   );
   await expect(page.getByTestId('main-problem-driver')).toHaveCount(0);
   await expect(page.getByTestId('category-deck')).not.toContainText('Driven by');

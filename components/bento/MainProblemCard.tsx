@@ -1,14 +1,12 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useRef } from 'react';
 import { ArrowDown, ArrowUp, ChevronRight } from 'lucide-react';
 import { CountUp } from '@/components/motion/CountUp';
 import { categoryById } from '@/lib/categories';
 import { QUARTERS } from '@/lib/filters';
 import { pct } from '@/lib/format';
-import { canHandOff, handOff } from '@/lib/handoff';
+import { HandoffLink } from '@/components/motion/HandoffLink';
+import { HANDOFF } from '@/lib/handoff';
 import { itemLabel } from '@/lib/itemLabels';
 import type { CategoryId, Quarter } from '@/lib/types';
 import { SPRING } from './BentoGrid';
@@ -46,20 +44,11 @@ const figureSize = (gapRate: number) =>
 export function MainProblemCard({ problem, audits, query }: { problem: MainProblem; audits: number; query: string }) {
   const reduce = useReducedMotion();
   const cat = categoryById(problem.category);
-  const router = useRouter();
-  const tile = useRef<HTMLElement>(null);
   const url = `/category/${problem.category}?${query}`;
-  // Fetch the category page ahead, so the hand-off starts without a wait.
-  useEffect(() => router.prefetch(url), [router, url]);
-  const onClick = (e: React.MouseEvent) => {
-    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !tile.current || !canHandOff()) return;
-    e.preventDefault();
-    handOff(tile.current, () => router.push(url));
-  };
   return (
     <motion.section
-      ref={tile}
       data-testid="main-problem"
+      data-handoff={HANDOFF}
       aria-labelledby="mp-title"
       initial={reduce ? false : { opacity: 0, y: 22, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -68,9 +57,8 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
       whileTap={reduce ? undefined : { scale: 0.99, y: -1 }}
       className="hero-tile lift group relative col-span-full flex min-h-0 min-w-0 rounded-[var(--radius-card)]"
     >
-      <Link
+      <HandoffLink
         href={url}
-        onClick={onClick}
         aria-label={`Main problem ${qLabel(problem.quarter)}: ${cat.name}, ${pct(problem.gapRate)}% score lost. Open details`}
         className="absolute inset-0 z-[2] rounded-[var(--radius-card)]"
       />

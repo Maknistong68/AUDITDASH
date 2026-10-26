@@ -12,9 +12,12 @@ export function BentoCard({
   testid,
   className = '',
   label,
+  handoff,
   children,
 }: {
   i: number;
+  /** The card's name in the shared "card opens" hand-off (lib/handoff), when it opens a detail view. */
+  handoff?: string;
   testid?: string;
   className?: string;
   label?: string;
@@ -24,6 +27,7 @@ export function BentoCard({
   return (
     <motion.section
       data-testid={testid}
+      data-handoff={handoff}
       aria-label={label}
       initial={reduce ? false : { opacity: 0, y: 22, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}

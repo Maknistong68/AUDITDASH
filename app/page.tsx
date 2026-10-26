@@ -3,7 +3,7 @@ import { href, toSearchParams, type SP } from '@/lib/details';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
   bandDistribution, compareContractors, contractorCards, filterAudits, highRiskCount, mainProblem, portfolioSummary,
-  regionComparison, systemicRepeats,
+  regionComparison, repeatSpread, systemicRepeats,
 } from '@/lib/analytics';
 import { MAX_COMPARE } from '@/lib/compare';
 import { TopBar } from '@/components/shell/TopBar';
@@ -46,9 +46,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   // Questions repeating at ≥5 contractors; needs an earlier quarter (null → "—").
   const repeats = filter.quarter === 'Q4-2025' || empty ? null : systemicRepeats(repo, filter);
   // How widespread the repeats are: number of questions per reach (contractors hit), widest first.
-  const spread = [...new Set((repeats ?? []).map((r) => r.contractorCount))]
-    .sort((a, b) => b - a)
-    .map((reach) => ({ reach, of: repeats![0].eligibleContractors, questions: repeats!.filter((r) => r.contractorCount === reach).length }));
+  const spread = repeatSpread(repeats ?? []);
   const query = filterToQuery(filter);
   // High-risk findings per audit, per quarter shown (one bar under a single-quarter filter).
   const highRiskByQuarter = empty ? [] : (filter.quarter === 'all' ? QUARTERS : [filter.quarter]).map((q) => {
@@ -83,7 +81,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                     />
                   )}
                   <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} />
-                  <RepeatsCard repeats={repeats ? repeats.length : null} spread={spread} />
+                  <RepeatsCard repeats={repeats ? repeats.length : null} spread={spread} href={href('/repeats', query)} />
                   <HighRiskCard count={highRiskCount(repo, filter)} byQuarter={highRiskByQuarter} href={href('/category/documents', query)} />
                   <BandsCard bands={bandDistribution(repo, filter)} />
                   <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} />

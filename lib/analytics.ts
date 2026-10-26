@@ -392,8 +392,7 @@ export function rankedSystemicRepeats(repo: Repo, filter: Filter, minContractors
   const pool = select(repo, filter, 'all');
   const items = itemMap(repo);
   const quarterOf = new Map(pool.map((a) => [a.id, a.quarter]));
-  const has = (c: string, q: Quarter) => pool.some((a) => a.contractorId === c && a.quarter === q);
-  const eligibleContractors = repo.contractors().filter((c) => has(c.id, 'Q4-2025') && has(c.id, 'Q1-2026')).length;
+  const eligibleContractors = repeatContractors(repo, filter).length;
   const auditOf = (c: string, q: Quarter) => pool.filter((a) => a.contractorId === c && a.quarter === q).at(-1);
   const negs = itemNegatives(pool, obsByAudit(repo, pool), items);
   const byItem = new Map<string, Contractor[]>();
@@ -418,6 +417,20 @@ export function rankedSystemicRepeats(repo: Repo, filter: Filter, minContractors
   }
   rows.sort((a, b) => b.contractorCount - a.contractorCount || b.impact - a.impact || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
   return rows;
+}
+
+/** The contractors a systemic repeat can reach: audited in both Q4 2025 and Q1 2026 within the filter's regions. */
+export function repeatContractors(repo: Repo, filter: Filter): Contractor[] {
+  const pool = select(repo, filter, 'all');
+  const has = (c: string, q: Quarter) => pool.some((a) => a.contractorId === c && a.quarter === q);
+  return repo.contractors().filter((c) => has(c.id, 'Q4-2025') && has(c.id, 'Q1-2026'));
+}
+
+/** How widespread systemic repeats are: questions per reach (contractors hit), widest first. */
+export function repeatSpread(rows: SystemicRepeat[]): { reach: number; of: number; questions: number }[] {
+  return [...new Set(rows.map((r) => r.contractorCount))]
+    .sort((a, b) => b - a)
+    .map((reach) => ({ reach, of: rows[0].eligibleContractors, questions: rows.filter((r) => r.contractorCount === reach).length }));
 }
 
 /** High-risk (B4/B5 items, keyword site findings) non-positive observations over filtered audits, N/A subsections excluded. */

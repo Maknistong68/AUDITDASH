@@ -306,16 +306,24 @@ html.js [data-countup]:not([data-ready]) {
 }
 
 /*
- * The dashboard → category hand-off (lib/handoff): the Main problem card travels left and shrinks into the active
- * compact card, ease-out. Both snapshots fill the moving box from its top-left corner (cropped, never squashed): the
- * compact content fades in over the big card, so it reads as one dark card changing size, never two cards. The page
- * behind cross-fades.
+ * The "card opens" hand-off (lib/handoff, HANDOFF_MS): a dashboard card travels into its detail view's header element,
+ * about 1 s, ease-out, so it is felt. Every named group shares the timing; the page behind cross-fades.
+ * Main problem → category: the card travels left and shrinks into the active compact card. Both snapshots fill the
+ * moving box from its top-left corner (cropped, never squashed): the compact content fades in over the big card, so it
+ * reads as one dark card changing size, never two cards.
+ * Repeat findings → /repeats: the card grows into the header strip and its figure flies into the header figure.
  */
-::view-transition-group(mp-card) {
-  animation-duration: 540ms;
+::view-transition-group(*) {
+  animation-duration: 1000ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
-::view-transition-image-pair(mp-card) {
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 1000ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-image-pair(mp-card),
+::view-transition-image-pair(rp-card) {
   border-radius: var(--radius-card);
   overflow: hidden;
 }
@@ -325,8 +333,6 @@ html.js [data-countup]:not([data-ready]) {
   object-fit: cover;
   object-position: left top;
   mix-blend-mode: normal;
-  animation-duration: 540ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 /* The big card stays opaque underneath while the compact one fades in over it: the box never turns see-through. */
 ::view-transition-old(mp-card) {
@@ -340,9 +346,48 @@ html.js [data-countup]:not([data-ready]) {
   0%, 8% { opacity: 0; }
   42%, 100% { opacity: 1; }
 }
+/* The repeats card: one opaque card surface grows; its content (kept at its own size) fades out early and the
+   strip's content fades in. */
+::view-transition-image-pair(rp-card) {
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+::view-transition-old(rp-card),
+::view-transition-new(rp-card) {
+  width: auto;
+  height: auto;
+  inset: 0 auto auto 0;
+  mix-blend-mode: normal;
+}
+::view-transition-old(rp-card) {
+  animation-name: handoff-out;
+}
+::view-transition-new(rp-card) {
+  animation-name: handoff-in;
+}
+@keyframes handoff-out {
+  0% { opacity: 1; }
+  40%, 100% { opacity: 0; }
+}
+/* /repeats: the matrix dots pop in and the Q4 → Q1 bars grow, staggered by --d, as the hand-off lands. */
+.rp-dot {
+  animation: rp-pop 520ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms) both;
+}
+.rp-grow {
+  transform-origin: left;
+  animation: rp-grow 900ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms) both;
+}
+@keyframes rp-pop {
+  from { opacity: 0; transform: scale(0.2); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes rp-grow {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 360ms;
+  animation-duration: 600ms;
   animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (prefers-reduced-motion: reduce) {

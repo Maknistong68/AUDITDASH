@@ -1,14 +1,27 @@
 /**
- * The dashboard → category hand-off: one shared-element view transition. The dashboard's Main problem card is named
- * `HANDOFF` only for the moment of the click; the category page's active carousel card carries the same name, so the
- * browser morphs one into the other (position and size), timed by the ::view-transition rules in globals.css.
- * Unsupported browsers and reduced motion get a plain navigation.
+ * The "card opens" hand-off, shared by every clickable dashboard card: one shared-element view transition.
+ * Inside the clicked card, every element marked `data-handoff="<name>"` (the card itself included) takes that
+ * `view-transition-name` only for the moment of the click; the detail view's header element carries the same name
+ * as its `view-transition-name`, so the browser morphs one into the other (position and size). Timing is the ::view-transition
+ * rules in globals.css: HANDOFF_MS, ease-out. Unsupported browsers and reduced motion get a plain navigation.
  */
+
+import type { MouseEvent } from 'react';
+
+/** Main problem card → the category page's active carousel card. */
 export const HANDOFF = 'mp-card';
+/** Repeat findings card → the /repeats header strip, and its figure → the header figure. */
+export const REPEATS_CARD = 'rp-card';
+export const REPEATS_FIGURE = 'rp-figure';
+
+/** Length of the morph (mirrors `::view-transition-group(*)` in globals.css). */
+export const HANDOFF_MS = 1000;
+/** Ease-out (mirrors globals.css); also the carousel glide's curve. */
+export const HANDOFF_EASE = [0.22, 1, 0.36, 1] as const;
 
 let arrived: (() => void) | null = null;
 
-/** Called by the category carousel once its active card is in the DOM: the browser may capture the new state. */
+/** Called by a detail view once its landing element is in the DOM: the browser may capture the new state. */
 export function cardArrived() {
   arrived?.();
 }
@@ -21,9 +34,19 @@ export function canHandOff(): boolean {
   );
 }
 
-/** Run `navigate` inside a view transition from `from` to the next page's card (gives up waiting after 3 s). */
-export function handOff(from: HTMLElement, navigate: () => void) {
-  from.style.viewTransitionName = HANDOFF;
+/** The elements of `card` (itself included) that take part, with their names from `data-handoff`. */
+export function handoffParts(card: HTMLElement): [HTMLElement, string][] {
+  const els = [card, ...card.querySelectorAll<HTMLElement>('[data-handoff]')].filter((e) => e.dataset.handoff);
+  return els.map((e) => [e, e.dataset.handoff!]);
+}
+
+/**
+ * Run `navigate` inside a view transition from `from` (one element, named HANDOFF, or a list of [element, name]) to the
+ * next page's matching elements (gives up waiting for cardArrived after 3 s).
+ */
+export function handOff(from: HTMLElement | [HTMLElement, string][], navigate: () => void) {
+  const parts: [HTMLElement, string][] = Array.isArray(from) ? from : [[from, HANDOFF]];
+  for (const [el, name] of parts) el.style.viewTransitionName = name;
   const t = document.startViewTransition(
     () =>
       new Promise<void>((resolve) => {
@@ -37,5 +60,12 @@ export function handOff(from: HTMLElement, navigate: () => void) {
         navigate();
       }),
   );
-  t.finished.finally(() => from.style.removeProperty('view-transition-name'));
+  t.finished.finally(() => {
+    for (const [el] of parts) el.style.removeProperty('view-transition-name');
+  });
+}
+
+/** True when a click should open in place (plain left click, nothing handled it already). */
+export function isPlainClick(e: MouseEvent): boolean {
+  return !e.defaultPrevented && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey;
 }

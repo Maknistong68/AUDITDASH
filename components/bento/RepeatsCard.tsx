@@ -1,8 +1,10 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Repeat2 } from 'lucide-react';
+import { ChevronRight, Repeat2 } from 'lucide-react';
 import { CountUp } from '@/components/motion/CountUp';
+import { HandoffLink } from '@/components/motion/HandoffLink';
 import { int } from '@/lib/format';
+import { REPEATS_CARD, REPEATS_FIGURE } from '@/lib/handoff';
 import { BentoCard, TileLabel } from './BentoGrid';
 import { BIG, PAD } from './parts';
 
@@ -14,52 +16,75 @@ const shade = (k: number) => `color-mix(in srgb, var(--tone-dot) ${SHADES[Math.m
  * M: questions repeating at ≥5 contractors (lib/analytics systemicRepeats). Under the number, one stacked bar of how
  * widespread they are: a segment per reach (contractors hit, widest first), width ∝ questions at that reach, with a tiny
  * "questions · reach" label under each segment.
+ * The whole tile opens /repeats with the shared hand-off: the tile grows into the view's header strip and the figure
+ * flies into its header figure (lib/handoff).
  */
-export function RepeatsCard({ repeats, spread }: {
-  repeats: number | null; spread: { reach: number; of: number; questions: number }[];
+export function RepeatsCard({ repeats, spread, href }: {
+  repeats: number | null; spread: Spread; href: string;
 }) {
-  const reduce = useReducedMotion();
-  const reachLabel = (s: { reach: number; of: number }) => (s.reach === s.of ? `all ${s.of}` : `${s.reach} of ${s.of}`);
   return (
-    <BentoCard i={3} testid="kpi-repeats" className={`tone-minimal ${PAD} justify-between gap-2 min-[640px]:col-span-3`}>
+    <BentoCard i={3} testid="kpi-repeats" handoff={REPEATS_CARD} className={`tone-minimal ${PAD} lift group justify-between gap-2 min-[640px]:col-span-3`}>
+      <HandoffLink
+        href={href}
+        aria-label={`Repeat findings: ${repeats === null ? 'needs an earlier quarter' : `${repeats} questions repeating`}. Open details`}
+        className="absolute inset-0 z-[1] rounded-[var(--radius-card)]"
+      />
+      <span
+        aria-hidden
+        className="absolute right-[clamp(12px,1.4svh,20px)] top-[clamp(10px,1.4svh,18px)] grid size-7 place-items-center rounded-full bg-fill-2 text-muted transition-transform duration-300 group-hover:translate-x-0.5"
+      >
+        <ChevronRight size={16} strokeWidth={2.4} />
+      </span>
       <TileLabel tone="var(--tone)">
         <Repeat2 size={16} strokeWidth={2.4} aria-hidden />
         Repeat findings
       </TileLabel>
       <div className="flex items-end gap-3">
-        <p data-testid="repeats-count" className={BIG}>
+        <p data-testid="repeats-count" data-handoff={REPEATS_FIGURE} className={BIG}>
           {repeats === null ? <span className="text-faint">—</span> : <CountUp value={repeats} format={int} duration={1.2} delay={0.3} />}
         </p>
         <p className="pb-[0.5em] text-[13px] leading-tight text-muted">{repeats === null ? 'Needs an earlier quarter' : 'questions repeating'}</p>
       </div>
-      {repeats !== null && spread.length > 0 && (
-        <div
-          data-testid="repeats-spread"
-          role="img"
-          aria-label={`How widespread: ${spread.map((s) => `${s.questions} at ${reachLabel(s)} contractors`).join(', ')}`}
-          className="grid gap-x-[3px] gap-y-1.5"
-          style={{ gridTemplateColumns: spread.map((s) => `minmax(max-content, ${s.questions}fr)`).join(' ') }}
-        >
-          {spread.map((s, k) => (
-            <motion.span
-              key={s.reach}
-              data-testid="repeats-segment"
-              data-reach={s.reach}
-              data-questions={s.questions}
-              className="block h-[clamp(8px,1.1svh,12px)] first:rounded-l-full last:rounded-r-full"
-              style={{ background: shade(k), transformOrigin: 'left' }}
-              initial={reduce ? false : { scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ type: 'spring', stiffness: 120, damping: 20, delay: 0.35 + k * 0.08 }}
-            />
-          ))}
-          {spread.map((s) => (
-            <span key={s.reach} data-testid="repeats-segment-label" className="num whitespace-nowrap text-[11px] leading-none text-muted">
-              <span className="font-semibold text-ink">{s.questions}</span> · {reachLabel(s)}
-            </span>
-          ))}
-        </div>
-      )}
+      {repeats !== null && spread.length > 0 && <ReachBar spread={spread} />}
     </BentoCard>
+  );
+}
+
+type Spread = { reach: number; of: number; questions: number }[];
+const reachLabel = (s: { reach: number; of: number }) => (s.reach === s.of ? `all ${s.of}` : `${s.reach} of ${s.of}`);
+
+/**
+ * One stacked bar of how widespread the repeats are: a segment per reach (contractors hit, widest first), width ∝
+ * questions at that reach, a tiny "questions · reach" label under each. Shared by the card and the /repeats header.
+ */
+export function ReachBar({ spread }: { spread: Spread }) {
+  const reduce = useReducedMotion();
+  return (
+    <div
+      data-testid="repeats-spread"
+      role="img"
+      aria-label={`How widespread: ${spread.map((s) => `${s.questions} at ${reachLabel(s)} contractors`).join(', ')}`}
+      className="grid gap-x-[3px] gap-y-1.5"
+      style={{ gridTemplateColumns: spread.map((s) => `minmax(max-content, ${s.questions}fr)`).join(' ') }}
+    >
+      {spread.map((s, k) => (
+        <motion.span
+          key={s.reach}
+          data-testid="repeats-segment"
+          data-reach={s.reach}
+          data-questions={s.questions}
+          className="block h-[clamp(8px,1.1svh,12px)] first:rounded-l-full last:rounded-r-full"
+          style={{ background: shade(k), transformOrigin: 'left' }}
+          initial={reduce ? false : { scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ type: 'spring', stiffness: 120, damping: 20, delay: 0.35 + k * 0.08 }}
+        />
+      ))}
+      {spread.map((s) => (
+        <span key={s.reach} data-testid="repeats-segment-label" className="num whitespace-nowrap text-[11px] leading-none text-muted">
+          <span className="font-semibold text-ink">{s.questions}</span> · {reachLabel(s)}
+        </span>
+      ))}
+    </div>
   );
 }

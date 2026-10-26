@@ -6,13 +6,24 @@ import type { Filter } from '@/lib/types';
 /**
  * Shell of every details page: the top bar (filters stay), the breadcrumb, Esc → parent.
  * Children own their horizontal gutters (carousels run full-bleed so neighbours can peek).
+ * `fit`: a one-screen view: main is exactly the viewport under the top bar (the page never scrolls) and the children
+ * share what the breadcrumb leaves (flex column).
  */
-export function DetailFrame({ filter, crumbs, parent, children }: { filter: Filter; crumbs: Crumb[]; parent: string; children: React.ReactNode }) {
+export function DetailFrame({ filter, crumbs, parent, fit = false, children }: {
+  filter: Filter; crumbs: Crumb[]; parent: string; fit?: boolean; children: React.ReactNode;
+}) {
   return (
     <>
       <TopBar filter={filter} detail />
       <EscToParent href={parent} />
-      <main data-testid="details" className="flex flex-col pb-[clamp(28px,5svh,64px)] pt-[clamp(8px,1.4svh,18px)]">
+      <main
+        data-testid="details"
+        className={
+          fit
+            ? 'flex h-[calc(100svh-var(--topbar))] flex-col overflow-hidden pb-[clamp(12px,2.2svh,30px)] pt-[clamp(8px,1.4svh,18px)]'
+            : 'flex flex-col pb-[clamp(28px,5svh,64px)] pt-[clamp(8px,1.4svh,18px)]'
+        }
+      >
         <div className="px-[var(--gutter)] pb-[clamp(6px,1svh,12px)] print:hidden">
           <Breadcrumb items={crumbs} />
         </div>

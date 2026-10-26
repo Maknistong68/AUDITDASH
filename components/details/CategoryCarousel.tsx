@@ -12,8 +12,11 @@ import { pct } from '@/lib/format';
 import { cardArrived, HANDOFF } from '@/lib/handoff';
 import type { CategoryId } from '@/lib/types';
 
-/** Gliding the active card into its slot: a critically damped spring (no overshoot) that keeps the release velocity, ~0.5 s. */
-const SLIDE = { type: 'spring', stiffness: 260, damping: 34 } as const;
+/**
+ * Gliding the active card into its slot: a spring with no overshoot that keeps the release velocity, ~0.9 s, to match
+ * the ~1 s card hand-off (lib/handoff HANDOFF_MS).
+ */
+const SLIDE = { type: 'spring', visualDuration: 0.9, bounce: 0 } as const;
 /** Share of the release velocity added to where the row lands (the momentum of a flick). */
 const POWER = 0.25;
 /**
@@ -267,7 +270,7 @@ function CompactCard({
           <span className="text-[0.42em] tracking-normal">%</span>
         </span>
         <span className="flex shrink-0 flex-col gap-0.5 whitespace-nowrap pb-[0.45em] text-[12px] min-[1600px]:text-[13px]">
-          <span style={{ color: 'var(--hero-muted)' }}>gap</span>
+          <span style={{ color: 'var(--hero-muted)' }}>score lost</span>
           {d !== null && (
             <span
               className="num inline-flex items-center gap-0.5 font-semibold"
