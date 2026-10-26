@@ -339,3 +339,25 @@ Tasks 1–3 stand. Task 4's functional shell (URL filters, themes, empty state, 
 Sections in order: **Where it fails** (10 categories, each links to `/category/<id>`, testid `gap-tile`, `layoutId="cat-<id>"`, single severity hue), **Region comparison** (SR1 vs SR2 per quarter, testid `region-compare`), **Main issues** (testid `issue-card`, as original Task 5), **Past audits reel** (testid `reel-card`, as original Task 5). Apple style. Original Task 5 tests apply plus: 10 `gap-tile`s below the hero; region-compare shows 2 regions.
 
 Tasks 6–8 unchanged in scope; they follow the Apple style established by Task 4R2.
+
+---
+
+## Amendment 2 (2026-10-26) — follows spec Revision 2
+Replaces Task 4R2's scoreboard visuals and re-scopes Tasks 5–7. Order: 4R3 → 5r2 → 6r → 7r → 8.
+
+### Task 4R3: Bento main screen (no rings)
+**Files:** Modify `app/page.tsx`, `app/globals.css`, `components/sections/*` (CompareTray keeps behaviour); Create `components/bento/{BentoGrid,ContractorsCard,MainProblemCard,ScoreCard,RepeatsCard,HighRiskCard,BandsCard,RegionCard}.tsx`, `components/charts/SectionBars.tsx` (A/B/C mini bars); Delete `ActivityRings.tsx` and the ring scoreboard; Test `tests/e2e/portfolio.spec.ts`, `tests/e2e/compare.spec.ts` (update).
+**Consumes:** contractorCards, portfolioSummary, bandDistribution, repeatFindings, highRiskCount, regionComparison, categoryGaps, categoryDetail, topIssues, compareContractors.
+**Add to lib/analytics.ts:** `mainProblem(repo, filter): { category: CategoryId; gapRate: number; prevGapRate: number | null; quarter: Quarter; items: { itemCode: string; question: string; hits: number }[] } | null` — worst category by score-based gap on the LATEST quarter present in the filtered audits; prevGapRate = previous quarter's gap (same regions/contractor) or null; items = top 3 by hits from categoryDetail for that quarter. Unit-test: filter all → quarter Q1-2026, category equals argmax of categoryGaps for Q1-2026; empty filter → null.
+**Requirements:** testids: `hero` (bento grid, fits 1366×768 & 1920×1080, no horizontal scroll), `score-ring` stays on the portfolio score element, `contractor-row` ×12 for filter all (each links `/contractor/<id>`, compare toggle "Compare <name>"), `main-problem` (links `/category/<id>?<query>`), `kpi-repeats`, `kpi-highrisk`, `kpi-bands`, `region-compare`. XL card spans the left ~half full height; rows animate in with stagger; bar widths animate; no rings anywhere (compare tray shows A/B/C via SectionBars). Apple style tokens from 4R2 kept.
+**Tests:** e2e: 12 contractor rows in descending score order; main-problem shows a category name and links correctly; compare flow still works (2 → tray, 4th disabled, `c=` deep link, Esc); hero fits; empty state; no `svg circle` ring elements inside `hero`.
+**Deliverables:** regenerated docs/screens/portfolio-*.png, compare-1920-light.png, portfolio-motion.webm.
+
+### Task 5r2: Below the fold
+"Where it fails" (10 categories, testid `gap-tile`, single severity hue, link `/category/<id>`), Main issues (testid `issue-card`, link `/category/<cat>?…#item-<code>`), Past-audit reel (testid `reel-card`, newest first, scroll-snap, arrows, link `/audit/<id>`). Tests as original Task 5 (reel 20 cards for all, 8 for `?q=Q1-2026&r=SR1`; issues 6 ordered; no horizontal document scroll) plus 10 gap-tiles.
+
+### Task 6r: Swipeable details + drill levels
+Routes: `/contractor/[contractor]` (carousel of that contractor's audits within filter regions, latest first; slide = score + band + Δ, A/B/C SectionBars, 10-category gaps for that audit, findings grouped by category (capped, expandable), link "Full report" → `/audit/<id>`); `/category/[cat]` (carousel by quarter, latest first; slide = gap %, contractors ranked by gap (rows link `/category/[cat]/[contractor]`), driving items); `/category/[cat]/[contractor]` (carousel of that contractor's audits; items of the category with finding/no finding/N/A per audit; rows link to item); `/category/[cat]/[contractor]/[item]` (item history timeline); `/category/[cat]/[contractor]/[item]/[obs]` (observation full text). Carousel: drag/swipe (framer drag), ←/→ keys, prev/next buttons with accessible names, dots, current slide in URL `?s=<index>` (deep-linkable), reduced-motion = no slide animation. Breadcrumb on all, Esc → parent. Unknown params → 404. Tests: four-level drill path Main → category → contractor → item → observation and back via Esc; swipe/arrow changes slide and URL `s`; deep link `?s=1` opens earlier audit; contractor with one audit shows no arrows; unknown id 404; long observation no overflow at 1366.
+
+### Task 7r: Audit report
+`/audit/[audit]` as original Task 7's report (header, score, SectionBars, observations filterable by category chips, Positives tab, print stylesheet), Apple style. Tests: `/audit/4800001272-Q4-2025-20251029` shows 71% and "Partially Compliant", Positives tab lists 14, category chip filters, unknown id 404.

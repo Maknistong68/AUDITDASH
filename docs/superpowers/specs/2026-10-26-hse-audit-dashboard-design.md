@@ -173,3 +173,12 @@ content and wrong typography. Approved replacement:
 - **Below the fold:** Where it fails (10 categories) · Region comparison SR1 vs SR2 by quarter · Main issues ·
   Past-audit reel.
 - Drill levels L2–L5, contractor profile and audit report are unchanged in scope but follow the Apple style.
+
+## Revision 2 (2026-10-26) — bento layout, no rings, swipeable audit history
+User feedback on Revision 1: the activity rings are annoying. Approved replacement (Apple look kept):
+- **Main screen = asymmetric bento cards** of different sizes:
+  - **XL — Contractors:** ranked highest → lowest score: rank, name, region, score bar, %, band badge, Δ vs previous; row → contractor details; small compare toggle per row (compare tray kept, rings replaced by A/B/C bars).
+  - **L — Main problem this quarter:** the worst gap category for the latest quarter in the filter (e.g. "Leadership"), big gap %, Δ vs previous quarter, its top 3 driving items; card → category details.
+  - **M — Portfolio score**, **M — Repeat findings**; **S — High-risk work**, **S — Contractors by band**, **S — Region SR1 vs SR2**.
+- **Details pages are swipeable histories:** contractor details = carousel of that contractor's audits, first slide = latest audit, swipe/arrow/drag left-right for earlier audits; category details = carousel by quarter (latest first) showing contractors ranked by that category's gap and its driving items. Deeper levels (contractor-in-category → item history → observation) and the audit report remain.
+- **Below the fold:** all 10 categories ("Where it fails"), Main issues, Past-audit reel.
