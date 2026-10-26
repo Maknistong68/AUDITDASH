@@ -5,7 +5,7 @@ A dashboard for directors that turns contractor HSE (health, safety and environm
 ## Screens
 
 - **Main bento**: portfolio overview of contractors and categories at a glance.
-- **Details with swipe**: per-contractor details; swipe (or arrow keys) between contractors.
+- **Details with swipe**: per-contractor details; swipe (or arrow keys) between that contractor's audits, latest first.
 - **Category drill**: drill into a category to see where scores are lost.
 - **Item / observation**: the individual checklist item and its observation.
 - **Audit report**: the full report for one audit.
@@ -50,6 +50,10 @@ The pytest importer tests read the source workbooks, so they only run where `dat
 4. Production branch: `main`.
 
 `npm run build` needs no network access and no secrets.
+
+### Before sharing the Vercel link
+
+Turn on **Vercel Deployment Protection** (Settings → Deployment Protection: Vercel Authentication, or Password Protection) before you send the link to anyone. The mock data is real audit data and the app has no login until Plan 2. Pages also send `noindex, nofollow`, but that only keeps them out of search engines; it does not stop someone with the link.
 
 ## Data note
 

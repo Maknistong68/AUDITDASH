@@ -14,11 +14,12 @@ export interface FindingGroup {
 
 const CAP = 3;
 
-function Group({ g }: { g: FindingGroup }) {
+function Group({ g, auditId }: { g: FindingGroup; auditId: string }) {
   const [open, setOpen] = useState(false);
   const Icon = CATEGORY_ICONS[g.icon];
   const shown = open ? g.findings : g.findings.slice(0, CAP);
-  const listId = `findings-${g.category}`;
+  // unique per audit: every carousel slide renders its own groups
+  const listId = `findings-${auditId}-${g.category}`;
   return (
     <section data-testid="finding-group" data-category={g.category} className="mb-[clamp(14px,2.2svh,26px)] break-inside-avoid">
       <h4 className="flex items-center gap-2 pb-1.5 text-[15px] font-semibold tracking-[-0.01em]">
@@ -67,10 +68,10 @@ function Group({ g }: { g: FindingGroup }) {
 }
 
 /** Findings of one audit grouped by category: three per category, then "Show all". */
-export function FindingGroups({ groups }: { groups: FindingGroup[] }) {
+export function FindingGroups({ groups, auditId }: { groups: FindingGroup[]; auditId: string }) {
   return (
     <div className="columns-1 gap-[clamp(20px,2.4vw,44px)] min-[900px]:columns-2 min-[1500px]:columns-3">
-      {groups.map((g) => <Group key={g.category} g={g} />)}
+      {groups.map((g) => <Group key={g.category} g={g} auditId={auditId} />)}
     </div>
   );
 }

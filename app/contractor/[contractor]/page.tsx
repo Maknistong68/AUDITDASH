@@ -4,7 +4,7 @@ import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
 import { auditFindings, auditGaps, contractorAudits, sectionRatios } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
-import { parseSlide } from '@/lib/carousel';
+import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
 import { dateLabel, quarterLabel } from '@/lib/format';
 import { DetailEmpty, DetailFrame, PageTitle } from '@/components/details/DetailFrame';
@@ -72,7 +72,7 @@ export default async function ContractorPage({ params, searchParams }: { params:
       ) : (
         <AuditCarousel
           unit="audit"
-          initial={parseSlide(s, rows.length)}
+          initial={initialSlide(s, rows.map((r) => r.audit.quarter), filter.quarter)}
           labels={rows.map((r) => `${dateLabel(r.audit.date)} · ${quarterLabel(r.audit.quarter)}`)}
           slides={slides}
           title={

@@ -73,7 +73,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
   const counts = new Map(CATEGORIES.map((c) => [c.id, report.negatives.filter((o) => o.category === c.id).length]));
   const groups = CATEGORIES.filter((c) => counts.get(c.id)! > 0).sort((a, b) => counts.get(b.id)! - counts.get(a.id)!);
   const tabs = [
-    { id: 'negative' as const, label: 'Negative observations', n: report.negatives.length },
+    { id: 'negative' as const, label: 'Observations', n: report.negatives.length },
     { id: 'positive' as const, label: 'Positive observations', n: report.positives.length },
   ];
 
@@ -117,6 +117,8 @@ export default async function AuditReportPage({ params, searchParams }: { params
                 </div>
               </div>
               <ScoreBar value={audit.totalScore} delay={0.15} />
+              {/* The total is the workbook's own figure; it need not equal the section ratios beside it. */}
+              <p className="text-[13px] text-muted" data-testid="report-total-note">Official total from the audit workbook</p>
             </div>
             <div className="min-[1100px]:max-[1499px]:pb-[2px]">
               <SectionBars rings={sectionRatios(audit)} delay={0.2} />
@@ -211,7 +213,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
 
           <div role="tabpanel" id="panel-negative" aria-labelledby="tab-negative" data-testid="panel-negative" className={tab === 'negative' ? '' : 'hidden print:block'}>
             <h2 className="hidden pb-2 text-[20px] font-semibold tracking-[-0.02em] print:block">
-              Negative observations <span className="num text-muted">{report.negatives.length}</span>
+              Observations <span className="num text-muted">{report.negatives.length}</span>
             </h2>
             {groups.length ? (
               <div className="columns-1 gap-[clamp(24px,2.8vw,56px)] min-[1100px]:columns-2 print:columns-1">
@@ -220,7 +222,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
                 ))}
               </div>
             ) : (
-              <p className="text-[15px] text-muted">No negative observations in this audit.</p>
+              <p className="text-[15px] text-muted">No observations in this audit.</p>
             )}
           </div>
 

@@ -1,6 +1,6 @@
 'use client';
 import { CountUp } from '@/components/motion/CountUp';
-import { bandShort, bandTone, int, pct } from '@/lib/format';
+import { bandShort, bandTone, deltaPoints, int, pct } from '@/lib/format';
 import type { Band, Filter } from '@/lib/types';
 import { BentoCard, TileLabel } from './BentoGrid';
 import { BIG, PAD, ScoreBar, Signed, whole } from './parts';
@@ -11,7 +11,10 @@ export function ScoreCard({ avgScore, band, delta, audits, quarter, byQuarter }:
   byQuarter: { label: string; value: number | null }[];
 }) {
   const ok = avgScore !== null && Number.isFinite(avgScore);
-  const d = delta === null ? null : Math.round(delta * 100);
+  // The delta is the difference of the quarter averages as displayed (each rounded first), so it always matches them.
+  const q1 = byQuarter.find((q) => q.label === 'Q1 2026')?.value ?? null;
+  const q4 = byQuarter.find((q) => q.label === 'Q4 2025')?.value ?? null;
+  const d = delta === null || q1 === null ? null : deltaPoints(q1, q4);
   return (
     <BentoCard i={2} testid="kpi-score" className={`${PAD} justify-between gap-2 min-[640px]:col-span-3 ${band ? `tone-${bandTone(band)}` : ''}`}>
       <TileLabel>Portfolio score · {int(audits)} audits</TileLabel>

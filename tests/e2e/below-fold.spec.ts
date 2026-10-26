@@ -18,9 +18,9 @@ test('reel lists every filtered audit, newest first', async ({ page }) => {
 test('clicking the first reel card opens its audit', async ({ page }) => {
   await page.goto('/');
   const first = page.getByTestId('reel-card').first();
-  await expect(first).toHaveAttribute('href', /^\/audit\/[\w-]+$/);
+  await expect(first).toHaveAttribute('href', /^\/audit\/[\w-]+\?q=all&r=SR1%2CSR2$/);
   await first.click();
-  await expect(page).toHaveURL(/\/audit\/[\w-]+$/);
+  await expect(page).toHaveURL(/\/audit\/[\w-]+\?q=all&r=SR1%2CSR2$/);
 });
 
 test('reel scrolls inside itself: wheel and arrow buttons', async ({ page }) => {

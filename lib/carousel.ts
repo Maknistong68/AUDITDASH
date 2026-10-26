@@ -19,11 +19,31 @@ export function snapIndex(index: number, count: number, offset: number, velocity
   return Math.max(0, Math.min(count - 1, index + dir));
 }
 
-/** The current search string with `s` set (removed for slide 0), every other param kept. Leading "?" or "". */
+/**
+ * The current search string with `s` set, every other param kept. Leading "?" or "".
+ * Slide 0 drops `s`, except when a quarter filter is set: there an absent `s` means "open on that quarter"
+ * (see initialSlide), so slide 0 is written as `s=0` to survive a reload.
+ */
 export function withSlide(search: string, index: number): string {
   const sp = new URLSearchParams(search);
-  if (index > 0) sp.set('s', String(index));
+  const q = sp.get('q');
+  if (index > 0 || (q !== null && q !== 'all')) sp.set('s', String(index));
   else sp.delete('s');
-  const q = sp.toString();
-  return q ? `?${q}` : '';
+  const out = sp.toString();
+  return out ? `?${out}` : '';
+}
+
+/**
+ * The slide a details carousel opens on. A valid `?s=` wins; otherwise, when the page filter names a quarter,
+ * the first slide (slides are latest first) in that quarter, so the details match the overview row that linked here;
+ * otherwise slide 0.
+ */
+export function initialSlide(raw: string | string[] | null | undefined, quarters: readonly string[], filterQuarter: string): number {
+  const v = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof v === 'string' && /^\d+$/.test(v)) return parseSlide(v, quarters.length);
+  if (filterQuarter !== 'all') {
+    const i = quarters.indexOf(filterQuarter);
+    if (i >= 0) return i;
+  }
+  return 0;
 }

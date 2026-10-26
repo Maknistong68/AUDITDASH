@@ -82,7 +82,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
                   data-testid="contractor-row"
                   href={d.contractorHref(r.contractor.id)}
                   className="group grid grid-cols-[1.4em_minmax(0,1.4fr)_minmax(40px,1fr)_3.2em_14px] items-center gap-2.5 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(6px,1.1svh,10px)] transition-colors hover:bg-fill-2"
-                  title={`${r.contractor.name}: gap ${pct(r.gapRate)}%, ${r.findings} negative observations`}
+                  title={`${r.contractor.name}: gap ${pct(r.gapRate)}%, ${r.findings} observations`}
                 >
                   <span className="num text-[13px] font-semibold text-faint">{rank}</span>
                   <span className="flex min-w-0 flex-col">

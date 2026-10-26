@@ -193,3 +193,42 @@ test('reduced motion zeroes CSS transitions and press transforms', async ({ brow
   await page.mouse.up();
   await ctx.close();
 });
+
+test('a Q4 contractor row opens the contractor on that Q4 audit (same score)', async ({ page }) => {
+  await page.goto('/?q=Q4-2025&r=SR1%2CSR2');
+  await expect(page.getByTestId('contractors')).toHaveAttribute('data-hydrated', '');
+  const link = page.locator('[data-testid="contractor-row"] a[href^="/contractor/4800001131"]');
+  await expect(link).toHaveAttribute('aria-label', /, 74%, /);
+  await link.click();
+  await expect(page).toHaveURL(/\/contractor\/4800001131\?q=Q4-2025/);
+  await ready(page);
+  await expect(active(page).getByTestId('slide-score')).toHaveText('74%');
+  // going to the latest audit writes s=0, so a reload stays there instead of jumping back to Q4
+  await page.keyboard.press('ArrowLeft');
+  await expect(page).toHaveURL(/[?&]s=0(&|$)/);
+  await page.reload();
+  await ready(page);
+  await expect(active(page).getByTestId('slide-score')).toHaveText('85%');
+});
+
+test('the Q4 main-problem tile opens its category on Q4 with the same gap and item anchors', async ({ page }) => {
+  await page.goto('/?q=Q4-2025&r=SR1%2CSR2');
+  const link = page.getByTestId('main-problem').getByRole('link');
+  const gap = /gap (\d+)%/.exec((await link.getAttribute('aria-label'))!)![1];
+  await link.click();
+  await expect(page).toHaveURL(/\/category\/[a-z]+\?q=Q4-2025/);
+  await ready(page);
+  await expect(active(page).getByTestId('slide-score')).toHaveText(`${gap}%`);
+  await expect(active(page).locator('[id^="item-"]').first()).toBeAttached();
+});
+
+test('a Q4 main-issue card lands on the Q4 slide with its item anchor', async ({ page }) => {
+  await page.goto('/?q=Q4-2025&r=SR1%2CSR2');
+  const card = page.getByTestId('issue-card').first();
+  const target = (await card.getAttribute('href'))!;
+  const code = target.split('#item-')[1];
+  await page.goto(target);
+  await ready(page);
+  await expect(page.getByTestId('carousel')).toHaveAttribute('data-index', '1');
+  await expect(active(page).locator(`[id="item-${code}"]`)).toBeAttached();
+});

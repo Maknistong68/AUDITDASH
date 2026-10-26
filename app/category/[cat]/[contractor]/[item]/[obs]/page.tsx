@@ -14,7 +14,7 @@ import { CategoryChip } from '@/components/details/parts';
 type Params = { cat: string; contractor: string; item: string; obs: string };
 
 /** The organisation's own terms; neutral styling (a note on an item is not a pass/fail verdict). */
-const KIND = { negative: 'Negative observation', site: 'Site observation', positive: 'Positive observation' } as const;
+const KIND = { negative: 'Observation', site: 'Site observation', positive: 'Positive observation' } as const;
 
 /** The observation in full: the only level with long text. */
 export default async function ObservationPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {

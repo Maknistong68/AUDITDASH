@@ -273,13 +273,13 @@ function GapBar({ value, max, best, worst }: { value: number | null; max: number
         )}
       </div>
       <span
-        className={`num w-[4.2ch] shrink-0 text-right text-[13px] ${worst ? 'font-semibold' : 'text-muted'}`}
-        style={worst ? { color: 'var(--gap)' } : undefined}
+        className={`num w-[4.2ch] shrink-0 text-right text-[13px] ${worst ? 'font-semibold text-ink' : 'text-muted'}`}
         title={worst ? 'Largest gap in this row' : best ? 'Smallest gap in this row' : undefined}
       >
         {ok ? `${pct(value)}%` : '—'}
       </span>
-      <span className="grid w-3.5 shrink-0 place-items-center" style={{ color: 'var(--up)' }}>
+      {/* "smallest of the row" is relative, not good in itself: neutral ink, never the green "good" tone */}
+      <span className="grid w-3.5 shrink-0 place-items-center text-ink">
         {best && <Check size={14} strokeWidth={3} aria-label="Smallest gap" />}
       </span>
     </div>

@@ -84,7 +84,7 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
                   data-testid="category-gap-row"
                   href={href(`/category/${g.category}/${d.contractorId}`, d.query, { s: d.index })}
                   className="group grid grid-cols-[18px_minmax(0,1fr)_minmax(48px,0.8fr)_3.2em_14px] items-center gap-2.5 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(7px,1.2svh,11px)] transition-colors hover:bg-fill-2"
-                  title={`${c.name}: gap ${pct(g.gapRate)}%, ${g.findings} negative observations`}
+                  title={`${c.name}: gap ${pct(g.gapRate)}%, ${g.findings} observations`}
                 >
                   {Icon && <Icon size={16} strokeWidth={2.2} className="text-muted" aria-hidden />}
                   <span className="truncate text-[14px] font-semibold">{c.short}</span>
@@ -102,10 +102,10 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
 
       <BentoCard i={2} testid="findings" className="gap-3 px-[clamp(10px,1vw,18px)] py-[clamp(14px,2svh,24px)] min-[900px]:col-span-12">
         <TileLabel className="px-2">
-          Negative observations <span className="num text-ink">{d.findings}</span>
+          Observations <span className="num text-ink">{d.findings}</span>
           <span className="font-normal">· by category, most first</span>
         </TileLabel>
-        {d.groups.length ? <FindingGroups groups={d.groups} /> : <p className="px-2 text-[15px] text-muted">No negative observations in this audit.</p>}
+        {d.groups.length ? <FindingGroups groups={d.groups} auditId={d.audit.id} /> : <p className="px-2 text-[15px] text-muted">No observations in this audit.</p>}
       </BentoCard>
     </div>
   );

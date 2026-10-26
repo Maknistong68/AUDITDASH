@@ -1,5 +1,6 @@
 import { getRepo } from '@/lib/data/repo';
-import { toSearchParams, type SP } from '@/lib/details';
+import { href, repeatHref, toSearchParams, type SP } from '@/lib/details';
+import type { CategoryId } from '@/lib/types';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
   bandDistribution, categoryGaps, compareContractors, contractorCards, filterAudits, highRiskCount, mainProblem, portfolioSummary,
@@ -47,13 +48,21 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   const problem = empty ? null : mainProblem(repo, filter);
   const repeats = filter.quarter === 'Q4-2025' || empty ? null : repeatFindings(repo, filter);
   // Items repeated by the most contractors (ties: lower item code first).
-  const by = new Map<string, { question: string; n: number }>();
-  for (const r of repeats ?? []) by.set(r.itemCode, { question: r.question, n: (by.get(r.itemCode)?.n ?? 0) + 1 });
-  const topRepeats = [...by]
-    .sort((a, b) => b[1].n - a[1].n || a[0].localeCompare(b[0], undefined, { numeric: true }))
-    .slice(0, 3)
-    .map(([itemCode, v]) => ({ itemCode, question: v.question, contractors: v.n }));
+  const by = new Map<string, { question: string; category: CategoryId; ids: string[] }>();
+  for (const r of repeats ?? []) {
+    const e = by.get(r.itemCode) ?? by.set(r.itemCode, { question: r.question, category: r.category, ids: [] }).get(r.itemCode)!;
+    e.ids.push(r.contractor.id);
+  }
   const query = filterToQuery(filter);
+  const topRepeats = [...by]
+    .sort((a, b) => b[1].ids.length - a[1].ids.length || a[0].localeCompare(b[0], undefined, { numeric: true }))
+    .slice(0, 3)
+    .map(([itemCode, v]) => ({
+      itemCode,
+      question: v.question,
+      contractors: v.ids.length,
+      href: repeatHref(v.category, itemCode, v.ids, query),
+    }));
   const audits = empty ? [] : filterAudits(repo, filter);
   const contractorsById = new Map(repo.contractors().map((c) => [c.id, c]));
   const auditsByQuarter = Object.fromEntries(QUARTERS.map((q) => [q, audits.filter((a) => a.quarter === q).length])) as Record<(typeof QUARTERS)[number], number>;
@@ -90,7 +99,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                   )}
                   <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} />
                   <RepeatsCard repeats={repeats ? repeats.length : null} top={topRepeats} />
-                  <HighRiskCard count={highRiskCount(repo, filter)} />
+                  <HighRiskCard count={highRiskCount(repo, filter)} href={href('/category/permits', query)} />
                   <BandsCard bands={bandDistribution(repo, filter)} />
                   <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} />
                 </>
@@ -106,11 +115,11 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
               <GapRadar gaps={categoryGaps(repo, filter)} query={query} />
             </section>
             <section aria-labelledby="issues-title" className="scroll-mt-[calc(var(--topbar)+24px)]" data-testid="main-issues">
-              <SectionHead id="issues-title" title="Main issues" note="Most score lost · share of audits noting each item" />
+              <SectionHead id="issues-title" title="Recurring issues" note="Noted most often in the weakest sections · share of audits noting each item" />
               <MainIssues rows={topIssues(repo, filter, 6)} auditsByQuarter={auditsByQuarter} query={query} />
             </section>
             <section aria-labelledby="reel-title" className="scroll-mt-[calc(var(--topbar)+24px)]">
-              <AuditReel audits={reel} />
+              <AuditReel audits={reel} query={query} />
             </section>
           </div>
         )}

@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScoreBar } from '@/components/bento/parts';
+import { href } from '@/lib/details';
 import { bandShort, bandTone, dateLabel, pct, quarterLabel } from '@/lib/format';
 import type { Band, Quarter, Subregion } from '@/lib/types';
 import { SectionHead } from './SectionHead';
@@ -28,7 +29,7 @@ function snapPoints(el: HTMLElement): number[] {
  * while the wheel turns and resumes on the next card in the direction of travel. Prev/next page by a view.
  * The reel stays inside the page margins (cards are clipped at the margin, never against the screen edge).
  */
-export function AuditReel({ audits }: { audits: ReelAudit[] }) {
+export function AuditReel({ audits, query }: { audits: ReelAudit[]; query: string }) {
   const reduce = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
   const [edge, setEdge] = useState({ start: true, end: audits.length < 2 });
@@ -123,7 +124,7 @@ export function AuditReel({ audits }: { audits: ReelAudit[] }) {
           return (
             <MotionLink
               key={a.id}
-              href={`/audit/${a.id}`}
+              href={href(`/audit/${a.id}`, query)}
               data-testid="reel-card"
               data-date={a.date}
               aria-label={`${a.contractor}, ${dateLabel(a.date)}, ${pct(a.score)}%, ${a.band}`}

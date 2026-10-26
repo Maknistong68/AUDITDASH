@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getRepo } from '@/lib/data/repo';
 import { auditCompliance, auditItemStates, contractorAudits } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
-import { parseSlide } from '@/lib/carousel';
+import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
 import { dateLabel, quarterLabel } from '@/lib/format';
 import { findCategory, findContractor } from '@/lib/routeParams';
@@ -50,7 +50,7 @@ export default async function ContractorInCategoryPage({ params, searchParams }:
       ) : (
         <AuditCarousel
           unit="audit"
-          initial={parseSlide(s, rows.length)}
+          initial={initialSlide(s, rows.map((r) => r.audit.quarter), filter.quarter)}
           labels={rows.map((r) => `${dateLabel(r.audit.date)} · ${quarterLabel(r.audit.quarter)}`)}
           title={title}
           slides={rows.map(({ audit, previous }) => (

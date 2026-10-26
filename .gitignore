@@ -40,3 +40,5 @@ next-env.d.ts
 /playwright-report/
 # design inspector working files
 /.taste-skill/
+# agent working files (reports, plans)
+/.superpowers/

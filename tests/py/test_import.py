@@ -39,11 +39,21 @@ def seed_text(seed_dir):
 
 
 def test_twenty_audits_twelve_contractors(seed): assert len(seed.audits) == 20 and len(seed.contractors) == 12
+# Every audit's "TOTAL FINAL SCORE" cell, read straight from the workbook (checked cell by cell, not via the parser).
+EXCEL_TOTALS = {
+    '4800001134-Q4-2025-20251022': 0.67, '4800000901-Q4-2025-20251020': 0.68, '4800000838-Q4-2025-20251112': 0.62,
+    '4800001322-Q4-2025-20251013': 0.62, '4800000838-Q4-2025-20251119': 0.65, '4800001112-Q4-2025-20251015': 0.620940170940171,
+    '4800001272-Q4-2025-20251029': 0.71, '4800001131-Q4-2025-20251103': 0.74, '4800000876-Q4-2025-20251201': 0.64,
+    '4800001134-Q1-2026-20260310': 0.64, '4800001112-Q1-2026-20260308': 0.60, '4800000882-Q1-2026-20260125': 0.68,
+    '4200000026-Q1-2026-20260208': 0.60, '4800001322-Q1-2026-20260118': 0.76, '4800001440-Q1-2026-20260302': 0.60,
+    '4800000838-Q1-2026-20260201': 0.72, '4800000892-Q1-2026-20260315': 0.62, '4800001272-Q1-2026-20260223': 0.65,
+    '4800001131-Q1-2026-20260301': 0.85, '4800000876-Q1-2026-20260215': 0.66,
+}
 def test_totals_match_excel(seed):
     t = {a['id']: a['totalScore'] for a in seed.audits}
-    assert t['4800001272-Q4-2025-20251029'] == 0.71
-    assert t['4800001131-Q1-2026-20260301'] == 0.85
-    assert abs(t['4800001112-Q4-2025-20251015'] - 0.620940170940171) < 1e-9
+    assert len(EXCEL_TOTALS) == 20 and set(t) == set(EXCEL_TOTALS)
+    for audit_id, expected in EXCEL_TOTALS.items():
+        assert abs(t[audit_id] - expected) < 1e-9, audit_id
 def test_sibs_has_three_audits(seed): assert sum(a['contractorId']=='4800000838' for a in seed.audits) == 3
 def test_alfahd_1272_q4_counts(seed):
     obs = [o for o in seed.observations if o['auditId']=='4800001272-Q4-2025-20251029']

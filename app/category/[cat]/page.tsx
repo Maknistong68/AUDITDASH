@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
 import { categoryQuarters, contractorAudits } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
-import { parseSlide } from '@/lib/carousel';
+import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
 import { quarterLabel } from '@/lib/format';
 import { findCategory } from '@/lib/routeParams';
@@ -28,7 +28,7 @@ export default async function CategoryPage({ params, searchParams }: { params: P
   const quarters = categoryQuarters(repo, filter, id);
   const overview = `/?${query}`;
   const cat = categoryById(id);
-  const initial = parseSlide(s, quarters.length);
+  const initial = initialSlide(s, quarters.map((q) => q.quarter), filter.quarter);
   const items = repo.checklist().filter((i) => i.category === id).length;
   const title = <CategoryTitle id={id} meta={`${items} checklist items · gap by quarter`} />;
 

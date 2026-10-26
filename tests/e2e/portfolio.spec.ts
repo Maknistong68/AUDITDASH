@@ -81,3 +81,52 @@ test('main problem tile lifts on hover', async ({ page }) => {
   await mp.hover();
   await expect.poll(async () => y0 - (await mp.boundingBox())!.y).toBeGreaterThan(2);
 });
+
+test('the high-risk tile opens Permits & High-Risk Work with the filter', async ({ page }) => {
+  await page.goto('/?q=Q1-2026&r=SR1');
+  await hydrated(page);
+  const link = page.getByTestId('kpi-highrisk').getByRole('link');
+  await expect(link).toHaveAttribute('href', '/category/permits?q=Q1-2026&r=SR1');
+  await link.click();
+  await expect(page).toHaveURL(/\/category\/permits\?q=Q1-2026&r=SR1$/);
+  await expect(page.getByTestId('carousel')).toBeVisible();
+});
+
+test('repeat rows link to the repeated item', async ({ page }) => {
+  await page.goto('/');
+  await hydrated(page);
+  await expect(page.getByTestId('kpi-repeats')).toContainText('noted again in a later quarter');
+  await expect(page.getByTestId('kpi-repeats')).not.toContainText(/fail/i);
+  const rows = page.getByTestId('repeat-row');
+  await expect(rows).toHaveCount(3);
+  for (const h of await rows.evaluateAll((els) => els.map((e) => e.getAttribute('href')!))) {
+    expect(h).toMatch(/^\/category\/[a-z]+(\/\d{10}\/[\w.%]+\?q=all&r=SR1%2CSR2|\?q=all&r=SR1%2CSR2#item-[\w.]+)$/);
+  }
+  const first = (await rows.first().getAttribute('href'))!;
+  await rows.first().click();
+  await expect(page).toHaveURL(first);
+  if (first.includes('#item-')) {
+    await expect(page.getByTestId('carousel')).toHaveAttribute('data-ready', '');
+    await expect(page.locator('[data-testid="slide"][data-active]').locator(`[id="item-${first.split('#item-')[1]}"]`)).toBeAttached();
+  } else {
+    await expect(page.getByTestId('item-timeline')).toBeVisible();
+  }
+});
+
+test('reduced motion only strips hover/press motion utilities, never positioning translates', async ({ page }) => {
+  await page.goto('/');
+  // selectors of every rule that sets `translate: none` inside a prefers-reduced-motion block
+  const selectors = await page.evaluate(() => {
+    const out: string[] = [];
+    const walk = (rules: CSSRuleList, inReduce: boolean) => {
+      for (const r of Array.from(rules)) {
+        if (r instanceof CSSMediaRule) walk(r.cssRules, inReduce || /prefers-reduced-motion/.test(r.conditionText));
+        else if (r instanceof CSSStyleRule && inReduce && r.style.getPropertyValue('translate') === 'none') out.push(...r.selectorText.split(',').map((x) => x.trim()));
+      }
+    };
+    for (const sh of Array.from(document.styleSheets)) { try { walk(sh.cssRules, false); } catch { /* cross-origin */ } }
+    return out;
+  });
+  expect(selectors.length).toBeGreaterThan(0);
+  for (const sel of selectors) expect(sel).toMatch(/\[class\*="(group-)?hover:-?translate"\]|\[class\*="(active|hover):scale"\]/);
+});
