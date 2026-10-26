@@ -154,3 +154,22 @@ requesting-code-review → maturity-assessor → commit & push to `claude/audit-
 - A negative observation on an item = that item not fully compliant (Excel lacks item-level answers).
 - Photos in Excel are placeholders ("Picture"/#VALUE!) — mock data shows a placeholder thumbnail.
 - Auditor phone numbers in the Excel are not shown on the dashboard.
+
+## Revision 1 (2026-10-26) — Level-1 redesign after user review
+The user rejected two hero designs (boxed tiles; editorial bars + race) as too plain, unengaging, wrong
+content and wrong typography. Approved replacement:
+- **Style: Apple** — premium depth, soft glass/gradients, rounded cards, SF-like type, spring motion.
+  Light + dark kept.
+- **Top strip:** portfolio score · contractors per band · **repeat findings** · **high-risk work findings**.
+  - Repeat finding = same contractor + same checklist item with a negative finding in its latest audit
+    AND in an audit from an earlier quarter (N/A items excluded).
+  - High-risk work finding = negative/site observation in category `permits`, or a site finding whose text
+    matches high-risk keywords (lifting, crane, excavation, height, scaffold, harness, electrical, earthing,
+    confined, hot work, LPG, gas cylinder).
+- **Centrepiece: contractor scoreboard** — one card per contractor with three concentric animated rings
+  (outer A Management, middle B Site Processes, inner C Planning & Commitment = latest audit section
+  scored/possible), official total score, band badge, Δ vs previous quarter, rank. Card → contractor profile.
+- **Compare mode:** select 2–3 cards → tray slides up: rings side by side, 10-category gaps, trend, top repeat issues.
+- **Below the fold:** Where it fails (10 categories) · Region comparison SR1 vs SR2 by quarter · Main issues ·
+  Past-audit reel.
+- Drill levels L2–L5, contractor profile and audit report are unchanged in scope but follow the Apple style.

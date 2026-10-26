@@ -305,3 +305,37 @@ test('reduced motion', async ({ page }) => { await page.emulateMedia({ reducedMo
 - [ ] **Step 3:** Dispatch the `maturity-assessor` agent; fix every item scored < 4; re-run until all scored dimensions ≥ 4.
 - [ ] **Step 4:** superpowers:requesting-code-review on the branch; address findings.
 - [ ] **Step 5: Commit & push** `docs: maturity assessor and plan-1 report` → `git push -u origin claude/audit-dashboard-design-4dt7ud`
+
+---
+
+## Amendment 1 (2026-10-26) — follows spec Revision 1
+Tasks 1–3 stand. Task 4's functional shell (URL filters, themes, empty state, testids `hero`, `score-ring`,
+`empty-state`) stands; its visuals are replaced. New/changed tasks, executed in this order:
+
+### Task 3b: Analytics for scoreboard, repeats, high-risk, regions, compare
+**Files:** Modify `lib/analytics.ts`; Create `lib/highRisk.ts`; Test `tests/unit/analytics-scoreboard.test.ts`
+**Produces:**
+- `HIGH_RISK_KEYWORDS: RegExp` and `isHighRisk(o: Observation): boolean` (category `permits`, or kind `site` matching keywords).
+- `contractorCards(repo, filter): { contractor: Contractor; auditId: string; total: number; band: Band; rings: { A: number | null; B: number | null; C: number | null }; previous: number | null; rank: number }[]` sorted by total desc (rank 1-based, ties share rank). rings = latest audit SectionScore scored/possible for codes A, B, C (null when possible 0).
+- `bandDistribution(repo, filter): Record<Band, number>` over contractors' latest totals (all 5 keys present).
+- `repeatFindings(repo, filter): { contractor: Contractor; itemCode: string; question: string; category: CategoryId; quarters: Quarter[] }[]` per the spec definition; empty when filter.quarter === 'Q4-2025'.
+- `highRiskCount(repo, filter): number` over filtered audits, N/A-excluded.
+- `regionComparison(repo, filter): { region: Subregion; byQuarter: Record<Quarter, number | null> }[]` (avg totalScore; ignores filter.quarter, respects regions).
+- `compareContractors(repo, filter, ids: string[]): { card: ReturnType<typeof contractorCards>[number]; gaps: ReturnType<typeof categoryGaps>; repeats: ReturnType<typeof repeatFindings> }[]` (ids order kept, unknown ids skipped, max 3).
+**Tests (must include):** JV-ECH (4800001131) card total 0.85, previous 0.74, rank 1 for filter all; ring values in [0,1] or null; bandDistribution sums to number of contractors with audits; repeatFindings empty for Q4-2025 and every row's contractor has audits in both quarters; isHighRisk true for 'Tower light found operational without earthing' (site) and false for 'Mosquito presence' (site); regionComparison returns SR1 and SR2 rows with both quarter keys; compareContractors keeps order and caps at 3; empty filter → [] / zeros, no NaN.
+
+### Task 4R2: Apple-style hero — top strip, contractor ring scoreboard, compare tray
+**Files:** Modify `app/page.tsx`, `app/globals.css`, `app/layout.tsx`, shell components; Create `components/charts/ActivityRings.tsx`, `components/sections/{TopStrip,Scoreboard,ContractorCard,CompareTray}.tsx`; Test `tests/e2e/portfolio.spec.ts` (update), `tests/e2e/compare.spec.ts`
+**Consumes:** Task 3b functions, `portfolioSummary`.
+- Top strip testids: `kpi-score`, `kpi-bands`, `kpi-repeats`, `kpi-highrisk`. Scoreboard: 12 cards for filter all, testid `contractor-card`, each links to `/contractor/<id>` and has a select toggle (accessible name "Compare <name>"). `score-ring` testid stays on the portfolio score element inside the top strip.
+- Compare tray (testid `compare-tray`) appears when ≥2 selected, max 3 (4th toggle disabled), shows rings, 10 category gaps per contractor, trend, top 3 repeat issues; selection in URL param `c=<id,id>` so it survives refresh; Esc / close button clears.
+- Hero (testid `hero`) = top strip + scoreboard and must fit 1366×768 and 1920×1080 without horizontal scroll (scoreboard grid 6×2 at 1920, 4×3 or scaled at 1366).
+- Remove the gap-tile list and race from the hero (gap-by-category moves below the fold in Task 5); update e2e: replace `gap-tile` count assertion with `contractor-card` count 12; keep theme, empty-state, filter tests.
+- Load skills: `awesome-design-md` (read its apple.md) + `design-taste-frontend` + `dataviz`.
+**Tests:** e2e: 12 cards; selecting 2 shows tray with 2 columns; 4th disabled after 3; `?c=4800001131,4800001322` deep link opens tray; Esc closes and removes `c`; empty filter shows empty state; hero fits both viewports; reduced motion renders rings at final values.
+**Deliverables:** docs/screens/portfolio-*.png (4), docs/screens/portfolio-motion.webm, docs/screens/compare-1920-light.png.
+
+### Task 5 (revised): Below the fold
+Sections in order: **Where it fails** (10 categories, each links to `/category/<id>`, testid `gap-tile`, `layoutId="cat-<id>"`, single severity hue), **Region comparison** (SR1 vs SR2 per quarter, testid `region-compare`), **Main issues** (testid `issue-card`, as original Task 5), **Past audits reel** (testid `reel-card`, as original Task 5). Apple style. Original Task 5 tests apply plus: 10 `gap-tile`s below the hero; region-compare shows 2 regions.
+
+Tasks 6–8 unchanged in scope; they follow the Apple style established by Task 4R2.
