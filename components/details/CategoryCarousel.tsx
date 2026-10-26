@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { animate, motion, useMotionValue, useReducedMotion, type PanInfo } from 'framer-motion';
+import { animate, motion, useMotionValue, useReducedMotion, useTransform, type MotionValue, type PanInfo } from 'framer-motion';
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { prevLabel, qLabel, type MainProblem } from '@/components/bento/MainProblemCard';
@@ -12,10 +12,23 @@ import { pct } from '@/lib/format';
 import { cardArrived, HANDOFF } from '@/lib/handoff';
 import type { CategoryId } from '@/lib/types';
 
-/** Centring: a critically damped spring (no overshoot) that keeps the release velocity, ~0.5 s. */
+/** Gliding the active card into its slot: a critically damped spring (no overshoot) that keeps the release velocity, ~0.5 s. */
 const SLIDE = { type: 'spring', stiffness: 260, damping: 34 } as const;
 /** Share of the release velocity added to where the row lands (the momentum of a flick). */
 const POWER = 0.25;
+/**
+ * Opacity by a card's distance (in card pitches) from the active slot at the left of the content column: the next card
+ * clear, then fainter, gone by the fourth; a card slid out to the left fades within one pitch. Follows the row while it
+ * is dragged or gliding, so the fade reads as one gradient anchored on the active card.
+ */
+const FADE_AT = [-1, 0, 1, 2, 3, 4];
+const FADE_TO = [0, 1, 0.75, 0.45, 0.2, 0];
+export function fadeAt(d: number): number {
+  if (d <= FADE_AT[0]) return FADE_TO[0];
+  for (let k = 1; k < FADE_AT.length; k++)
+    if (d <= FADE_AT[k]) return FADE_TO[k - 1] + ((FADE_TO[k] - FADE_TO[k - 1]) * (d - FADE_AT[k - 1])) / (FADE_AT[k] - FADE_AT[k - 1]);
+  return FADE_TO[FADE_TO.length - 1];
+}
 
 /**
  * The page (one per category) remounts this carousel on every category change. The outgoing one leaves where its row
@@ -27,15 +40,16 @@ let refocus = false;
 
 /**
  * The category page's compact cards: one same-size dark card per category, ranked by the latest quarter's gap (worst
- * first, so #1 is the dashboard's main problem), in a row whose edges fade out. The active card is this page's
- * category, centred, with an accent ring; the rest are dimmed. Drag or flick the row (it snaps to the nearest card),
+ * first, so #1 is the dashboard's main problem). The active card is this page's category, anchored at the left edge of
+ * the content column with an accent ring; the cards after it fade out with distance (fadeAt) and the row's edges are
+ * masked. Drag or flick the row (it snaps to the nearest card),
  * click a card, or use ←/→ on it: the URL follows (filter kept) and the content below with it.
  * The active card is the landing point of the dashboard hand-off (lib/handoff). Reduced motion: no glide.
  */
 export function CategoryCarousel({ cards, current, query }: { cards: MainProblem[]; current: CategoryId; query: string }) {
   const n = cards.length;
   const at = Math.max(0, cards.findIndex((c) => c.category === current));
-  // The card the server render centres (CSS offset below); x is the row's offset from there.
+  // The card the server render puts in the active slot (CSS offset below); x is the row's offset from there.
   const [origin] = useState(at);
   const [index, setIndex] = useState(at);
   const [step, setStep] = useState(0);
@@ -104,7 +118,7 @@ export function CategoryCarousel({ cards, current, query }: { cards: MainProblem
   // The route moved on (back/forward): show its card.
   useEffect(() => setIndex(at), [at]);
 
-  // Centre the active card whenever it changes.
+  // Glide the active card into the left slot whenever it changes.
   const shown = useRef(index);
   useEffect(() => {
     if (shown.current === index) return;
@@ -175,7 +189,7 @@ export function CategoryCarousel({ cards, current, query }: { cards: MainProblem
           style={{ x, ['--origin' as string]: origin }}
         >
           {cards.map((c, i) => (
-            <div role="listitem" key={c.category} className="shrink-0">
+            <FadingItem key={c.category} x={x} offset={i - origin} step={stepRef}>
               <CompactCard
                 ref={(el) => { links.current[i] = el; }}
                 card={c}
@@ -187,11 +201,22 @@ export function CategoryCarousel({ cards, current, query }: { cards: MainProblem
                   else setIndex(i);
                 }}
               />
-            </div>
+            </FadingItem>
           ))}
         </motion.div>
       </div>
     </section>
+  );
+}
+
+/** A list item whose opacity follows its live distance from the active slot (fadeAt); a card faded out takes no clicks. */
+function FadingItem({ x, offset, step, children }: { x: MotionValue<number>; offset: number; step: React.RefObject<number>; children: React.ReactNode }) {
+  const opacity = useTransform(x, (v) => fadeAt(offset + (step.current ? v / step.current : 0)));
+  const pointerEvents = useTransform(opacity, (o) => (o < 0.05 ? 'none' : 'auto'));
+  return (
+    <motion.div role="listitem" className="shrink-0" style={{ opacity, pointerEvents }}>
+      {children}
+    </motion.div>
   );
 }
 
@@ -229,7 +254,7 @@ function CompactCard({
       data-rank={rank}
       data-active={active ? '' : undefined}
       title={`${name}: gap ${pct(card.gapRate)}% in ${qLabel(card.quarter)}`}
-      className={`compact-card hero-tile flex h-[var(--cc-h)] w-[var(--cc-w)] flex-col justify-between rounded-[var(--radius-card)] p-[clamp(14px,1.1vw,20px)] transition-[opacity,box-shadow] duration-300 ${active ? 'is-active' : 'opacity-55 hover:opacity-80'}`}
+      className={`compact-card hero-tile flex h-[var(--cc-h)] w-[var(--cc-w)] flex-col justify-between rounded-[var(--radius-card)] p-[clamp(14px,1.1vw,20px)] transition-[box-shadow] duration-300 ${active ? 'is-active' : ''}`}
       style={active ? { viewTransitionName: HANDOFF } : undefined}
     >
       <span className="flex min-w-0 flex-col gap-1">

@@ -283,8 +283,9 @@ html.js [data-countup]:not([data-ready]) {
 
 /*
  * Category page: the compact-card carousel. Same-size cards (--cc-w × --cc-h, under half the dashboard card), the row
- * offset so the server-rendered active card (--origin) sits centred; framer drags/glides it from there. The row's
- * edges fade out with a mask. The active card carries an accent ring; the others are dimmed (opacity in the markup).
+ * offset so the server-rendered active card (--origin) sits at the content column's left edge (--gutter); framer
+ * drags/glides it from there. The cards after it fade with distance (opacity in the markup); the mask takes the row's
+ * two edges to transparent. The active card carries an accent ring.
  */
 [data-testid="category-deck"] {
   --cc-w: clamp(260px, 17.5vw, 340px);
@@ -293,11 +294,11 @@ html.js [data-countup]:not([data-ready]) {
   --cc-fade: clamp(48px, 9vw, 180px);
 }
 .carousel-fade {
-  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--cc-fade), #000 calc(100% - var(--cc-fade)), transparent 100%);
-  mask-image: linear-gradient(90deg, transparent 0, #000 var(--cc-fade), #000 calc(100% - var(--cc-fade)), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - var(--cc-fade)), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - var(--cc-fade)), transparent 100%);
 }
 .carousel-row {
-  margin-left: calc(50% - var(--cc-w) / 2 - var(--origin) * (var(--cc-w) + var(--cc-gap)));
+  margin-left: calc(var(--gutter) - var(--origin) * (var(--cc-w) + var(--cc-gap)));
 }
 .compact-card.is-active {
   /* inset, so the ring is inside the card's own box and travels with it in the hand-off */

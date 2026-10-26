@@ -14,6 +14,17 @@ const cards = (page: Page) => page.getByTestId('category-card');
 const active = (page: Page) => page.locator('[data-testid="category-card"][data-active]');
 const ready = (page: Page) => expect(page.getByTestId('category-deck')).toHaveAttribute('data-ready', '');
 const catUrl = (id: string, q = Q) => new RegExp(`/category/${id}\\?${q}$`);
+/** Left edge of the content column: the quarter carousel's first slide (same gutter as the breadcrumb). */
+const columnLeft = async (page: Page) => (await page.getByTestId('slide').first().boundingBox())!.x;
+/** Each card's effective opacity (its list item fades by distance from the active card). */
+const opacities = (page: Page) =>
+  cards(page).evaluateAll((els) =>
+    els.map((e) => {
+      let o = 1;
+      for (let n: Element | null = e; n; n = n.parentElement) o *= Number(getComputedStyle(n).opacity);
+      return o;
+    }),
+  );
 
 /** Press on the active card, move by dx in small steps, hold still (no flick momentum), release. */
 async function drag(page: Page, dx: number, steps = 16) {
@@ -97,13 +108,17 @@ test('the carousel: one same-size card per category, worst first, no counter, do
     expect(Math.abs(w - boxes[0][0])).toBeLessThanOrEqual(1);
     expect(Math.abs(h - boxes[0][1])).toBeLessThanOrEqual(1);
   }
-  // only the active card is fully opaque, and it is centred
+  // the active card is fully opaque and sits at the left edge of the content column; the ones after it fade with distance
   await expect(active(page)).toHaveAttribute('data-rank', '3');
-  const opacities = await cards(page).evaluateAll((els) => els.map((e) => Number(getComputedStyle(e).opacity)));
-  expect(opacities[2]).toBe(1);
-  for (const [i, o] of opacities.entries()) if (i !== 2) expect(o).toBeLessThan(1);
+  const o = await opacities(page);
+  expect(o[2]).toBe(1);
+  expect(o[3]).toBeGreaterThan(o[4]);
+  expect(o[4]).toBeGreaterThan(o[5]);
+  expect(o[5]).toBeGreaterThan(o[6]);
+  expect(o[7]).toBeLessThan(0.05);
+  expect(o[1]).toBeLessThan(0.05); // #2, slid out to the left
   const a = (await active(page).boundingBox())!;
-  expect(Math.abs(a.x + a.width / 2 - 960)).toBeLessThanOrEqual(2);
+  expect(Math.abs(a.x - (await columnLeft(page)))).toBeLessThanOrEqual(2);
 
   const deck = page.getByTestId('category-deck');
   await expect(deck).not.toContainText('/ 8');
@@ -119,7 +134,26 @@ test('the carousel: one same-size card per category, worst first, no counter, do
   expect(mask).toContain('linear-gradient');
 });
 
-test('clicking card #3 opens its category, keeping the filter, and it becomes active and centred', async ({ page }) => {
+test('at #1 the active card is anchored left, and the fade makes #2 clearer than #3, #3 than #4', async ({ page }) => {
+  for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
+    await page.setViewportSize(vp);
+    await page.goto(`/category/${ORDER[0]}?${Q}`);
+    await ready(page);
+    const a = (await active(page).boundingBox())!;
+    expect(Math.abs(a.x - (await columnLeft(page)))).toBeLessThanOrEqual(2);
+    const crumb = (await page.getByTestId('breadcrumb').boundingBox())!;
+    expect(Math.abs(a.x - crumb.x)).toBeLessThanOrEqual(2);
+    const o = await opacities(page);
+    expect(o[0]).toBe(1);
+    expect(o[1]).toBeGreaterThan(0.6);
+    expect(o[1]).toBeGreaterThan(o[2]);
+    expect(o[2]).toBeGreaterThan(o[3]);
+    expect(o[3]).toBeGreaterThan(o[4]);
+    expect(o[4]).toBeLessThan(0.05);
+  }
+});
+
+test('clicking card #3 opens its category, keeping the filter, and it becomes active at the left edge', async ({ page }) => {
   const q = 'q=Q1-2026&r=SR1';
   const order = categoryCards(getRepo(), { quarter: 'Q1-2026', regions: ['SR1'] }).map((c) => c.category);
   await page.setViewportSize({ width: 1920, height: 1080 });
@@ -129,11 +163,9 @@ test('clicking card #3 opens its category, keeping the filter, and it becomes ac
   await expect(page).toHaveURL(catUrl(order[2], q));
   await expect(active(page)).toHaveAttribute('data-rank', '3');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(nameOf(order[2]));
-  // it glides to the centre
-  await expect.poll(async () => {
-    const a = (await active(page).boundingBox())!;
-    return Math.abs(a.x + a.width / 2 - 960) <= 2;
-  }).toBe(true);
+  // it glides into the active slot at the content column's left edge
+  const left = await columnLeft(page);
+  await expect.poll(async () => Math.abs((await active(page).boundingBox())!.x - left) <= 2).toBe(true);
 });
 
 test('dragging the carousel then releasing snaps to a card and navigates', async ({ page }) => {
