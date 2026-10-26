@@ -55,3 +55,8 @@ Header (Audits Only · tabs · + New Audit) → main dashboard (Audit Overview, 
 Flow to convey: **Audit Input → Audit Data → Analysis → Main Problem → Driver Categories → Subcontractor Control → Corrective Action**.
 
 Do not simply add more cards; improve hierarchy and workflow; no unnecessary empty space; consistent alignment.
+
+## 15. Category changes (owner, 2026-10-26)
+- Rename "Site & PPE" → **Site Compliance** (PPE items stay in it; "PPE" dropped from the name).
+- Combine all document categories into one: **Documents** = Permits + RAMS + Plans & Documentation.
+- H&S categories become 8: Leadership · Documents · Competence · Subcontractors · Monitoring · Emergency · Site Compliance · Health.
