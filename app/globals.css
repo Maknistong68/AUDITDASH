@@ -1,92 +1,155 @@
 @import "tailwindcss";
 
 /*
- * Design tokens: "clean executive". Editorial, airy, one accent.
- *  - light: warm off-white paper, ink type, hairline rules; no boxed panels.
- *  - dark: deep neutral ink (not navy), warm off-white type.
- * The ONE accent is --gap-hue (gap severity). Green (--positive) appears only on improvement arrows/trails.
- * Band colours are kept for ScoreRing (audit reel / report, later tasks); the hero is neutral.
+ * Design tokens: Apple-style (see the Apple DESIGN.md in .claude/skills/awesome-design-md).
+ *  - light: parchment ground #f5f5f7, white cards, near-black ink #1d1d1f, Action Blue for interaction.
+ *  - dark: true black ground, #1c1c1e cards, #f5f5f7 ink, Sky Blue for interaction.
+ * Depth: soft layered shadows on cards (user brief asks for premium depth), frosted glass on the bar and
+ * the compare sheet. Colour lives on data: the three ring hues and the honest band/status tones.
+ *
+ * Ring hues (A Management / B Site processes / C Planning) were validated with the dataviz skill's
+ * validate_palette.js (--pairs all): light #e5649c,#2b6be8,#0a9fc0 on #fff and dark #dc5d90,#3d72ec,#0d9cb8
+ * on #1c1c1e pass lightness band, chroma floor, CVD (>=8.4 / 8.8) and normal-vision floors, contrast >= 3:1.
+ * Ring position (outer/middle/inner) and the printed values are the secondary encoding.
  */
 :root {
   color-scheme: light;
-  --ground: #f6f5f2;
+  --ground: #f5f5f7;
   --surface: #ffffff;
-  --raised: #f2efea;
+  --surface-2: #f5f5f7;
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-bar: rgba(245, 245, 247, 0.78);
+  --fill: rgba(118, 118, 128, 0.12);
+  --fill-2: rgba(118, 118, 128, 0.08);
+  --hairline: rgba(0, 0, 0, 0.07);
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #86868b;
+  --accent: #0071e3;
+  --on-accent: #ffffff;
+
+  --ring-a: #e5649c;  --ring-a-end: #ff8cc0;
+  --ring-b: #2b6be8;  --ring-b-end: #5fa0ff;
+  --ring-c: #0a9fc0;  --ring-c-end: #3fd2e8;
+  --ring-track: 0.15;
+
+  --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
+  --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
+  --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #ff8a1f;
+  --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
+  --up: #1f7a36;
+  --down: #c0141c;
+  --gap: #e2533a;
+
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.035), 0 1px 2px rgba(0, 0, 0, 0.04), 0 3px 10px -2px rgba(0, 0, 0, 0.05), 0 6px 30px -6px rgba(0, 0, 0, 0.08);
+  --shadow-lift: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.05), 0 10px 24px -4px rgba(0, 0, 0, 0.09), 0 28px 56px -16px rgba(0, 0, 0, 0.18);
+  --shadow-sheet: 0 -1px 0 rgba(0, 0, 0, 0.06), 0 -18px 50px -10px rgba(0, 0, 0, 0.2);
+  --ambient-1: rgba(43, 107, 232, 0.07);
+  --ambient-2: rgba(229, 100, 156, 0.06);
+
+  /* Kept for components that later tasks reuse (GapRadar, ScoreRing). */
+  --raised: #f5f5f7;
   --active: #ffffff;
-  --border: #e6e1d9;
-  --rule: #e6e1d9;
-  --control: #d6d0c6;
-  --text: #161513;
-  --muted: #6b665e;
-  --faint: #77726a;
-  --positive: #1f7a45;
-  --negative: #c4242a;
-  --track: #ebe7e0;
-  --zone: #f3f0eb;
-  --gap-hue: #d9461b;
+  --border: #e5e5ea;
+  --rule: #e5e5ea;
+  --control: #d1d1d6;
+  --track: #ececf0;
+  --zone: #f5f5f7;
+  --positive: var(--up);
+  --negative: var(--down);
+  --gap-hue: var(--gap);
+  --band-excellent: var(--good-dot);
+  --band-good: var(--good-dot);
+  --band-partial: var(--partial-dot);
+  --band-minimal: var(--minimal-dot);
+  --band-non: var(--non-dot);
 
-  --band-excellent: #0f8a4a;
-  --band-good: #1f7fc4;
-  --band-partial: #d39b00;
-  --band-minimal: #e0483a;
-  --band-non: #a3174f;
-
-  --topbar: 64px;
-  --gutter: clamp(24px, 3.2vw, 64px);
-  --gap: 16px;
-  --radius-card: 8px;
-  --radius-control: 6px;
+  --topbar: 56px;
+  --gutter: clamp(20px, 2.6vw, 52px);
+  --gap-grid: clamp(12px, 1.1vw, 22px);
+  --radius-card: 22px;
+  --radius-control: 999px;
+  --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter), "Helvetica Neue", system-ui, sans-serif;
 }
 
+/* Dark tokens: applied by the toggle stamp, and by the OS when no light stamp is present (no-JS fallback). */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --ground: #0f1012;
-  --surface: #16171a;
-  --raised: #1a1b1e;
-  --active: #26272b;
-  --border: #26272b;
-  --rule: #26272b;
-  --control: #3a3b40;
-  --text: #f3f1ec;
-  --muted: #a29e96;
-  --faint: #8f8b83;
-  --positive: #4cc285;
-  --negative: #f06a6a;
-  --track: #232428;
-  --zone: #141518;
-  --gap-hue: #f0612f;
-
-  --band-excellent: #1fa463;
-  --band-good: #3b93e0;
-  --band-partial: #b28d10;
-  --band-minimal: #cf3a2a;
-  --band-non: #c850b0;
+  --ground: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --glass: rgba(28, 28, 30, 0.7);
+  --glass-bar: rgba(0, 0, 0, 0.72);
+  --fill: rgba(118, 118, 128, 0.24);
+  --fill-2: rgba(118, 118, 128, 0.16);
+  --hairline: rgba(255, 255, 255, 0.09);
+  --text: #f5f5f7;
+  --muted: #a1a1a6;
+  --faint: #8e8e93;
+  --accent: #2997ff;
+  --on-accent: #ffffff;
+  --ring-a: #dc5d90;  --ring-a-end: #ff7fb3;
+  --ring-b: #3d72ec;  --ring-b-end: #6fa6ff;
+  --ring-c: #0d9cb8;  --ring-c-end: #3fd6ea;
+  --ring-track: 0.24;
+  --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
+  --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
+  --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
+  --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
+  --up: #4fdc78;
+  --down: #ff7b72;
+  --gap: #ff6a4d;
+  --shadow-card: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 28px -6px rgba(0, 0, 0, 0.4);
+  --shadow-lift: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.6), 0 28px 60px -18px rgba(0, 0, 0, 0.9);
+  --shadow-sheet: 0 -1px 0 rgba(255, 255, 255, 0.08), 0 -24px 60px -12px rgba(0, 0, 0, 0.85);
+  --ambient-1: rgba(61, 114, 236, 0.13);
+  --ambient-2: rgba(220, 93, 144, 0.09);
+  --raised: #2c2c2e;
+  --active: #3a3a3c;
+  --border: #2c2c2e;
+  --rule: #2c2c2e;
+  --control: #48484a;
+  --track: #2c2c2e;
+  --zone: #1c1c1e;
 }
-
-/* No-JS fallback: follow the OS unless a light stamp is present (the inline script always stamps). */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --ground: #0f1012;
-    --surface: #16171a;
-    --raised: #1a1b1e;
-    --active: #26272b;
-    --border: #26272b;
-    --rule: #26272b;
-    --control: #3a3b40;
-    --text: #f3f1ec;
-    --muted: #a29e96;
-    --faint: #8f8b83;
-    --positive: #4cc285;
-    --negative: #f06a6a;
-    --track: #232428;
-    --zone: #141518;
-    --gap-hue: #f0612f;
-    --band-excellent: #1fa463;
-    --band-good: #3b93e0;
-    --band-partial: #b28d10;
-    --band-minimal: #cf3a2a;
-    --band-non: #c850b0;
+    --ground: #000000;
+    --surface: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --glass: rgba(28, 28, 30, 0.7);
+    --glass-bar: rgba(0, 0, 0, 0.72);
+    --fill: rgba(118, 118, 128, 0.24);
+    --fill-2: rgba(118, 118, 128, 0.16);
+    --hairline: rgba(255, 255, 255, 0.09);
+    --text: #f5f5f7;
+    --muted: #a1a1a6;
+    --faint: #8e8e93;
+    --accent: #2997ff;
+    --ring-a: #dc5d90;  --ring-a-end: #ff7fb3;
+    --ring-b: #3d72ec;  --ring-b-end: #6fa6ff;
+    --ring-c: #0d9cb8;  --ring-c-end: #3fd6ea;
+    --ring-track: 0.24;
+    --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
+    --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
+    --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
+    --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
+    --up: #4fdc78;
+    --down: #ff7b72;
+    --gap: #ff6a4d;
+    --shadow-card: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 28px -6px rgba(0, 0, 0, 0.4);
+    --shadow-lift: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.6), 0 28px 60px -18px rgba(0, 0, 0, 0.9);
+    --shadow-sheet: 0 -1px 0 rgba(255, 255, 255, 0.08), 0 -24px 60px -12px rgba(0, 0, 0, 0.85);
+    --ambient-1: rgba(61, 114, 236, 0.13);
+    --ambient-2: rgba(220, 93, 144, 0.09);
+    --raised: #2c2c2e;
+    --active: #3a3a3c;
+    --border: #2c2c2e;
+    --rule: #2c2c2e;
+    --control: #48484a;
+    --track: #2c2c2e;
+    --zone: #1c1c1e;
   }
 }
 
@@ -95,19 +158,20 @@
 @theme inline {
   --color-ground: var(--ground);
   --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
   --color-raised: var(--raised);
-  --color-active: var(--active);
-  --color-border: var(--border);
+  --color-fill: var(--fill);
+  --color-fill-2: var(--fill-2);
+  --color-hairline: var(--hairline);
   --color-rule: var(--rule);
-  --color-control: var(--control);
   --color-ink: var(--text);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
-  --color-positive: var(--positive);
-  --color-negative: var(--negative);
-  --color-accent: var(--gap-hue);
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-display: var(--font-instrument), Georgia, serif;
+  --color-accent: var(--accent);
+  --color-positive: var(--up);
+  --color-negative: var(--down);
+  --font-sans: var(--font-sf);
+  --font-display: var(--font-sf);
 }
 
 html,
@@ -117,26 +181,88 @@ body {
 }
 
 body {
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-sf);
+  font-optical-sizing: auto;
+  letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* A faint ambient wash so the frosted surfaces have something to frost. */
+  background-image:
+    radial-gradient(1100px 520px at 8% -8%, var(--ambient-1), transparent 70%), /* taste-skill-ignore: brief asks for gentle gradients */
+    radial-gradient(900px 480px at 96% -12%, var(--ambient-2), transparent 70%); /* taste-skill-ignore: brief asks for gentle gradients */
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 .num {
   font-variant-numeric: tabular-nums;
 }
 
-/* Small-caps kicker: the one label style of the hero. */
-.kicker {
-  font-size: 13px;
-  line-height: 16px;
-  font-weight: 500;
-  font-variant-caps: all-small-caps;
-  letter-spacing: 0.08em;
-  color: var(--muted);
+/* Display figures: Apple-tight tracking, tabular so count-ups do not jitter. */
+.figure {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+  box-shadow: var(--shadow-card);
+}
+
+.glass-bar {
+  background: var(--glass-bar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Band / status badge: pale tint, dark text of the same hue (never green for a bad state). */
+.tone-good { --tone: var(--good); --tone-bg: var(--good-bg); --tone-dot: var(--good-dot); }
+.tone-partial { --tone: var(--partial); --tone-bg: var(--partial-bg); --tone-dot: var(--partial-dot); }
+.tone-minimal { --tone: var(--minimal); --tone-bg: var(--minimal-bg); --tone-dot: var(--minimal-dot); }
+.tone-non { --tone: var(--non); --tone-bg: var(--non-bg); --tone-dot: var(--non-dot); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  background: var(--tone-bg);
+  color: var(--tone);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Contractor card: lift on hover, press scale (Apple's system micro-interaction). */
+.lift {
+  transition: transform 380ms cubic-bezier(0.2, 0.9, 0.25, 1), box-shadow 380ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+.lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+.lift:active {
+  transform: translateY(-1px) scale(0.985);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lift,
+  .lift:hover,
+  .lift:active {
+    transition: none;
+    transform: none;
+  }
 }
 
 :focus-visible {
-  outline: 2px solid var(--text);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
 }
 
@@ -145,48 +271,14 @@ html.js [data-countup]:not([data-ready]) {
   visibility: hidden;
 }
 
-/* Gap row expansion (CSS-driven so it never re-renders React): hover or keyboard focus grows the row. */
-.gap-row {
-  flex: 1 1 0;
-  transition: flex-grow 320ms cubic-bezier(0.16, 1, 0.3, 1), opacity 200ms ease;
-}
-.gap-list:has(.gap-row:hover, .gap-row:focus-visible) .gap-row:not(:hover):not(:focus-visible) {
-  opacity: 0.55;
-}
-.gap-row:hover,
-.gap-row:focus-visible {
-  flex-grow: 1.9;
-}
-.gap-chips-wrap {
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 320ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.gap-row:hover .gap-chips-wrap,
-.gap-row:focus-visible .gap-chips-wrap {
-  grid-template-rows: 1fr;
-}
-.gap-chips {
-  visibility: hidden;
-  opacity: 0;
-  transform: translateY(4px);
-  transition: opacity 220ms ease, transform 220ms ease, visibility 0s linear 220ms;
-}
-.gap-row:hover .gap-chips,
-.gap-row:focus-visible .gap-chips {
-  visibility: visible;
-  opacity: 1;
-  transform: none;
-  transition: opacity 220ms ease 80ms, transform 220ms ease 80ms, visibility 0s;
-}
-@media (prefers-reduced-motion: reduce) {
-  .gap-row,
-  .gap-chips,
-  .gap-chips-wrap {
-    transition: none !important;
-  }
-}
-
 /* Sun shows in dark (click for light), moon in light. CSS-driven so SSR markup never mismatches. */
 .theme-icon-sun { display: none; }
 :root[data-theme="dark"] .theme-icon-sun { display: block; }
 :root[data-theme="dark"] .theme-icon-moon { display: none; }
+
+/* The compare sheet carries dense data: a more opaque frost so the cards behind read as texture, not blobs. */
+.sheet {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(40px);
+  backdrop-filter: saturate(160%) blur(40px);
+}

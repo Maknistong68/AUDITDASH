@@ -1,4 +1,5 @@
 'use client';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { QUARTERS, REGIONS, filterToQuery } from '@/lib/filters';
@@ -6,19 +7,25 @@ import type { Filter, Subregion } from '@/lib/types';
 
 const QUARTER_LABEL: Record<Filter['quarter'], string> = { 'Q4-2025': 'Q4 2025', 'Q1-2026': 'Q1 2026', all: 'All' };
 
-/** Quarter switch (text + underline) and region toggles (dot = on). State lives in the URL (?q=&r=). */
+/**
+ * Apple segmented control for the quarter (sliding thumb) and pill toggles for the sub-regions.
+ * State lives in the URL (?q=&r=); a compare selection (?c=) is carried over.
+ */
 export function FilterBar({ filter }: { filter: Filter }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const go = (next: Filter) => start(() => router.push(`/?${filterToQuery(next)}`, { scroll: false }));
+  const go = (next: Filter) => {
+    const c = new URLSearchParams(window.location.search).get('c');
+    start(() => router.push(`/?${filterToQuery(next)}${c ? `&c=${encodeURIComponent(c)}` : ''}`, { scroll: false }));
+  };
   const toggleRegion = (r: Subregion) => {
     const on = filter.regions.includes(r);
     go({ ...filter, regions: REGIONS.filter((x) => (x === r ? !on : filter.regions.includes(x))) });
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-x-7 gap-y-2" aria-busy={pending}>
-      <div role="group" aria-label="Quarter" className="flex items-center gap-5">
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 transition-opacity" aria-busy={pending} style={{ opacity: pending ? 0.7 : 1 }}>
+      <div role="group" aria-label="Quarter" className="flex h-8 items-center rounded-full bg-fill p-[2px]">
         {([...QUARTERS, 'all'] as Filter['quarter'][]).map((q) => {
           const on = filter.quarter === q;
           return (
@@ -27,16 +34,21 @@ export function FilterBar({ filter }: { filter: Filter }) {
               type="button"
               aria-pressed={on}
               onClick={() => go({ ...filter, quarter: q })}
-              className={`relative h-9 text-[14px] transition-colors after:absolute after:inset-x-0 after:bottom-1 after:h-[1.5px] after:origin-left after:bg-ink after:transition-transform after:duration-300 motion-reduce:after:transition-none ${
-                on ? 'font-medium text-ink after:scale-x-100' : 'text-muted after:scale-x-0 hover:text-ink'
-              }`}
+              className={`relative h-7 rounded-full px-3.5 text-[13px] transition-colors ${on ? 'font-semibold text-ink' : 'text-muted hover:text-ink'}`}
             >
-              {QUARTER_LABEL[q]}
+              {on && (
+                <motion.span
+                  layoutId="quarter-thumb"
+                  className="absolute inset-0 rounded-full bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#636366]"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                />
+              )}
+              <span className="relative">{QUARTER_LABEL[q]}</span>
             </button>
           );
         })}
       </div>
-      <div role="group" aria-label="Sub-region" className="flex items-center gap-4">
+      <div role="group" aria-label="Sub-region" className="flex items-center gap-1.5">
         {REGIONS.map((r) => {
           const on = filter.regions.includes(r);
           return (
@@ -45,12 +57,10 @@ export function FilterBar({ filter }: { filter: Filter }) {
               type="button"
               aria-pressed={on}
               onClick={() => toggleRegion(r)}
-              className={`flex h-9 items-center gap-2 text-[14px] transition-colors ${on ? 'font-medium text-ink' : 'text-muted hover:text-ink'}`}
+              className={`h-8 rounded-full px-3.5 text-[13px] transition-[background-color,color,transform] active:scale-95 ${
+                on ? 'bg-ink font-semibold text-ground' : 'bg-fill text-muted hover:text-ink'
+              }`}
             >
-              <span
-                aria-hidden
-                className={`size-2 rounded-full border transition-colors ${on ? 'border-ink bg-ink' : 'border-faint bg-transparent'}`}
-              />
               {r}
             </button>
           );

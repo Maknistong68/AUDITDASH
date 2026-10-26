@@ -15,10 +15,10 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-label="Toggle colour theme"
       title="Toggle theme"
-      className="grid size-9 place-items-center rounded-[var(--radius-control)] text-muted transition-colors hover:bg-raised hover:text-ink active:scale-95"
+      className="grid size-8 place-items-center rounded-full bg-fill text-muted transition-[color,transform] hover:text-ink active:scale-90"
     >
-      <Moon size={18} className="theme-icon-moon" aria-hidden />
-      <Sun size={18} className="theme-icon-sun" aria-hidden />
+      <Moon size={16} className="theme-icon-moon" aria-hidden />
+      <Sun size={16} className="theme-icon-sun" aria-hidden />
     </button>
   );
 }

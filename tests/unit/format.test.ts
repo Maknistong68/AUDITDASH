@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { bandColor, int, pct, pts } from '@/lib/format';
+import { bandColor, bandShort, bandTone, deltaPoints, int, pct, prevQuarterShort, pts } from '@/lib/format';
 
 describe('format', () => {
   it('pct rounds and never prints NaN', () => {
@@ -18,5 +18,29 @@ describe('format', () => {
   it('bandColor maps every band to a token', () => {
     expect(bandColor('Excellent')).toBe('var(--band-excellent)');
     expect(bandColor('Non-Compliant')).toBe('var(--band-non)');
+  });
+});
+
+describe('scoreboard format', () => {
+  it('bandTone is semantically honest: only Good/Excellent are good', () => {
+    expect(bandTone('Excellent')).toBe('good');
+    expect(bandTone('Good')).toBe('good');
+    expect(bandTone('Partially Compliant')).toBe('partial');
+    expect(bandTone('Minimally Compliant')).toBe('minimal');
+    expect(bandTone('Non-Compliant')).toBe('non');
+  });
+  it('bandShort', () => {
+    expect(bandShort('Minimally Compliant')).toBe('Minimal');
+    expect(bandShort('Non-Compliant')).toBe('Non-compliant');
+  });
+  it('deltaPoints is the difference of the displayed whole percentages; null without previous', () => {
+    expect(deltaPoints(0.85, 0.74)).toBe(11);
+    expect(deltaPoints(0.6, 0.620940170940171)).toBe(-2);
+    expect(deltaPoints(0.6, null)).toBeNull();
+    expect(deltaPoints(0.6, Number.NaN)).toBeNull();
+  });
+  it('prevQuarterShort names the quarter before an audit id quarter', () => {
+    expect(prevQuarterShort('4800001131-Q1-2026-20260210')).toBe('Q4');
+    expect(prevQuarterShort('4800001131-Q4-2025-20251110')).toBeNull();
   });
 });
