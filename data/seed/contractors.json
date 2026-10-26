@@ -1,0 +1,74 @@
+[
+  {
+    "id": "4800001134",
+    "name": "Abyatona (Box Culvert H55)",
+    "contractNo": "4800001134",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4800001112",
+    "name": "Abyatona (Zone F Culvert)",
+    "contractNo": "4800001112",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4800000901",
+    "name": "Al-Biriki",
+    "contractNo": "4800000901",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4800000838",
+    "name": "SIBS",
+    "contractNo": "4800000838",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4800001322",
+    "name": "PPCO",
+    "contractNo": "4800001322",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4800000882",
+    "name": "Al Fahd (SBC Expansion)",
+    "contractNo": "4800000882",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4200000026",
+    "name": "NBC",
+    "contractNo": "4200000026",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4800001440",
+    "name": "RPCO",
+    "contractNo": "4800001440",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4800000892",
+    "name": "TDP",
+    "contractNo": "4800000892",
+    "subregion": "SR1"
+  },
+  {
+    "id": "4800001272",
+    "name": "Al Fahd (Coast Guard)",
+    "contractNo": "4800001272",
+    "subregion": "SR2"
+  },
+  {
+    "id": "4800001131",
+    "name": "JV-ECH (Port T1)",
+    "contractNo": "4800001131",
+    "subregion": "SR2"
+  },
+  {
+    "id": "4800000876",
+    "name": "Sarco Disa (Port T2)",
+    "contractNo": "4800000876",
+    "subregion": "SR2"
+  }
+]

@@ -1,0 +1,360 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens: Apple-style (see the Apple DESIGN.md in .claude/skills/awesome-design-md).
+ *  - light: parchment ground #f5f5f7, white cards, near-black ink #1d1d1f, Action Blue for interaction.
+ *  - dark: true black ground, #1c1c1e cards, #f5f5f7 ink, Sky Blue for interaction.
+ * Depth: soft layered shadows on cards (user brief asks for premium depth), frosted glass on the bar and
+ * the compare sheet. Colour lives on data: the three ring hues and the honest band/status tones.
+ *
+ * Data colour: one bar hue (--bar) for neutral magnitudes (A/B/C section bars); band tones for scores;
+ * --gap for gap severity. The main-problem tile is the inverted Apple tile (--hero-*), dark in both themes.
+ */
+:root {
+  color-scheme: light;
+  --ground: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #f5f5f7;
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-bar: rgba(245, 245, 247, 0.78);
+  --fill: rgba(118, 118, 128, 0.12);
+  --fill-2: rgba(118, 118, 128, 0.08);
+  --hairline: rgba(0, 0, 0, 0.07);
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #6f6f74; /* >= 4.5:1 for small text on --ground, --surface and --surface-2 */
+  --accent: #0071e3;
+  --on-accent: #ffffff;
+
+  --bar: #2f6fe0;
+  --hero-bg: #1d1d1f; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.12);
+  --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
+
+  --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
+  --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
+  --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #ff8a1f;
+  --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
+  --up: #1f7a36;
+  --down: #c0141c;
+  --gap: #e2533a;
+
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.035), 0 1px 2px rgba(0, 0, 0, 0.04), 0 3px 10px -2px rgba(0, 0, 0, 0.05), 0 6px 30px -6px rgba(0, 0, 0, 0.08);
+  --shadow-lift: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.05), 0 10px 24px -4px rgba(0, 0, 0, 0.09), 0 28px 56px -16px rgba(0, 0, 0, 0.18);
+  --shadow-sheet: 0 -1px 0 rgba(0, 0, 0, 0.06), 0 -18px 50px -10px rgba(0, 0, 0, 0.2);
+  --ambient-1: rgba(43, 107, 232, 0.07);
+  --ambient-2: rgba(229, 100, 156, 0.06);
+
+  /* Secondary tokens: --control (carousel dots, compare toggle ring, N/A marks) and --track (bar tracks) are in use;
+     the rest are aliases of the tokens above. */
+  --raised: #f5f5f7;
+  --active: #ffffff;
+  --border: #e5e5ea;
+  --rule: #e5e5ea;
+  --control: #d1d1d6;
+  --track: #ececf0;
+  --zone: #f5f5f7;
+  --positive: var(--up);
+  --negative: var(--down);
+  --gap-hue: var(--gap);
+  --band-excellent: var(--good-dot);
+  --band-good: var(--good-dot);
+  --band-partial: var(--partial-dot);
+  --band-minimal: var(--minimal-dot);
+  --band-non: var(--non-dot);
+
+  --topbar: 56px;
+  --gutter: clamp(20px, 2.6vw, 52px);
+  --gap-grid: clamp(12px, 1.1vw, 22px);
+  --radius-card: 22px;
+  --radius-control: 999px;
+  --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter), "Helvetica Neue", system-ui, sans-serif;
+}
+
+/* Dark tokens: applied by the toggle stamp, and by the OS when no light stamp is present (no-JS fallback). */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --glass: rgba(28, 28, 30, 0.7);
+  --glass-bar: rgba(0, 0, 0, 0.72);
+  --fill: rgba(118, 118, 128, 0.24);
+  --fill-2: rgba(118, 118, 128, 0.16);
+  --hairline: rgba(255, 255, 255, 0.09);
+  --text: #f5f5f7;
+  --muted: #a1a1a6;
+  --faint: #98989d; /* >= 4.5:1 on --surface and --surface-2 */
+  --accent: #2997ff;
+  --on-accent: #000000; /* white on Sky Blue is ~3:1; black is ~7:1 */
+  --bar: #5b8cff;
+  --hero-bg: #2c2c2e; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.1);
+  --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
+  --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
+  --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
+  --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
+  --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
+  --up: #4fdc78;
+  --down: #ff7b72;
+  --gap: #ff6a4d;
+  --shadow-card: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 28px -6px rgba(0, 0, 0, 0.4);
+  --shadow-lift: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.6), 0 28px 60px -18px rgba(0, 0, 0, 0.9);
+  --shadow-sheet: 0 -1px 0 rgba(255, 255, 255, 0.08), 0 -24px 60px -12px rgba(0, 0, 0, 0.85);
+  --ambient-1: rgba(61, 114, 236, 0.13);
+  --ambient-2: rgba(220, 93, 144, 0.09);
+  --raised: #2c2c2e;
+  --active: #3a3a3c;
+  --border: #2c2c2e;
+  --rule: #2c2c2e;
+  --control: #48484a;
+  --track: #2c2c2e;
+  --zone: #1c1c1e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #000000;
+    --surface: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --glass: rgba(28, 28, 30, 0.7);
+    --glass-bar: rgba(0, 0, 0, 0.72);
+    --fill: rgba(118, 118, 128, 0.24);
+    --fill-2: rgba(118, 118, 128, 0.16);
+    --hairline: rgba(255, 255, 255, 0.09);
+    --text: #f5f5f7;
+    --muted: #a1a1a6;
+    --faint: #98989d;
+    --accent: #2997ff;
+    --on-accent: #000000;
+    --bar: #5b8cff;
+    --hero-bg: #2c2c2e; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.1);
+    --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
+    --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
+    --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
+    --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
+    --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
+    --up: #4fdc78;
+    --down: #ff7b72;
+    --gap: #ff6a4d;
+    --shadow-card: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 28px -6px rgba(0, 0, 0, 0.4);
+    --shadow-lift: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.6), 0 28px 60px -18px rgba(0, 0, 0, 0.9);
+    --shadow-sheet: 0 -1px 0 rgba(255, 255, 255, 0.08), 0 -24px 60px -12px rgba(0, 0, 0, 0.85);
+    --ambient-1: rgba(61, 114, 236, 0.13);
+    --ambient-2: rgba(220, 93, 144, 0.09);
+    --raised: #2c2c2e;
+    --active: #3a3a3c;
+    --border: #2c2c2e;
+    --rule: #2c2c2e;
+    --control: #48484a;
+    --track: #2c2c2e;
+    --zone: #1c1c1e;
+  }
+}
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-raised: var(--raised);
+  --color-fill: var(--fill);
+  --color-fill-2: var(--fill-2);
+  --color-hairline: var(--hairline);
+  --color-rule: var(--rule);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-accent: var(--accent);
+  --color-positive: var(--up);
+  --color-negative: var(--down);
+  --font-sans: var(--font-sf);
+  --font-display: var(--font-sf);
+}
+
+html,
+body {
+  background: var(--ground);
+  color: var(--text);
+}
+
+body {
+  font-family: var(--font-sf);
+  font-optical-sizing: auto;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* A faint ambient wash so the frosted surfaces have something to frost. */
+  background-image:
+    radial-gradient(1100px 520px at 8% -8%, var(--ambient-1), transparent 70%), /* taste-skill-ignore: brief asks for gentle gradients */
+    radial-gradient(900px 480px at 96% -12%, var(--ambient-2), transparent 70%); /* taste-skill-ignore: brief asks for gentle gradients */
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Display figures: Apple-tight tracking, tabular so count-ups do not jitter. */
+.figure {
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+}
+
+.glass {
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+  box-shadow: var(--shadow-card);
+}
+
+.glass-bar {
+  background: var(--glass-bar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Band / status badge: pale tint, dark text of the same hue (never green for a bad state). */
+.tone-good { --tone: var(--good); --tone-bg: var(--good-bg); --tone-dot: var(--good-dot); }
+.tone-partial { --tone: var(--partial); --tone-bg: var(--partial-bg); --tone-dot: var(--partial-dot); }
+.tone-minimal { --tone: var(--minimal); --tone-bg: var(--minimal-bg); --tone-dot: var(--minimal-dot); }
+.tone-non { --tone: var(--non); --tone-bg: var(--non-bg); --tone-dot: var(--non-dot); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  background: var(--tone-bg);
+  color: var(--tone);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Hover shadow for clickable tiles. The lift itself (translate/press) is driven by framer-motion
+   (whileHover / whileTap): framer writes inline transforms, which would override a CSS :hover transform. */
+.lift {
+  transition: box-shadow 380ms cubic-bezier(0.2, 0.9, 0.25, 1);
+}
+.lift:hover {
+  box-shadow: var(--shadow-lift);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lift {
+    transition: none;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Count-up: with JS the server value is hidden before first paint, then counted once from 0. */
+html.js [data-countup]:not([data-ready]) {
+  visibility: hidden;
+}
+
+/* Sun shows in dark (click for light), moon in light. CSS-driven so SSR markup never mismatches. */
+.theme-icon-sun { display: none; }
+:root[data-theme="dark"] .theme-icon-sun { display: block; }
+:root[data-theme="dark"] .theme-icon-moon { display: none; }
+
+/* The compare sheet carries dense data: a more opaque frost so the cards behind read as texture, not blobs. */
+.sheet {
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(40px);
+  backdrop-filter: saturate(160%) blur(40px);
+}
+
+/* The inverted Apple tile: the right side's hero (main problem). */
+.hero-tile {
+  background: var(--hero-bg);
+  color: var(--hero-text);
+  box-shadow: var(--shadow-card);
+}
+
+/*
+ * Reduced motion, globally: every CSS transition/animation becomes instant and hover/press transforms are
+ * dropped (dot widths, chevron nudges, active:scale presses, and anything added later). framer-motion is
+ * handled separately by MotionConfig reducedMotion="user".
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  /* Tailwind v4 writes its translate and scale utilities to the individual `translate`/`scale` properties; framer writes
+     `transform`, so this leaves framer alone. */
+  /* Scoped to the hover/press motion utilities only, so positioning translates (band ticks, the compare-sheet
+     handle, the GapRadar dot, the carousel's pre-hydration offset) are untouched. */
+  [class*="hover:translate"]:hover,
+  [class*="hover:-translate"]:hover,
+  .group:hover [class*="group-hover:translate"],
+  .group:hover [class*="group-hover:-translate"],
+  [class*="active:scale"]:active,
+  [class*="hover:scale"]:hover {
+    translate: none !important;
+    scale: none !important;
+  }
+}
+
+/*
+ * Print (the audit report is the page meant for paper): white page, light tokens whatever the theme, no frost,
+ * shadows or ambient wash, cards as hairline boxes, bars keep their colour, entries never split across pages.
+ * Navigation chrome (top bar, breadcrumb, tabs, chips, buttons) is hidden with Tailwind's print: variant.
+ */
+@media print {
+  :root,
+  :root[data-theme],
+  :root:not([data-theme="light"]) {
+    color-scheme: light;
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f5f5f7;
+    --fill: rgba(118, 118, 128, 0.12);
+    --fill-2: rgba(118, 118, 128, 0.08);
+    --hairline: rgba(0, 0, 0, 0.12);
+    --text: #000000;
+    --muted: #515154;
+    --faint: #6e6e73;
+    --bar: #2f6fe0;
+    --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
+    --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
+    --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #ff8a1f;
+    --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
+    --up: #1f7a36;
+    --down: #c0141c;
+    --gap: #e2533a;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #000000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .card {
+    box-shadow: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    break-inside: auto;
+  }
+  [data-testid="report-entry"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
