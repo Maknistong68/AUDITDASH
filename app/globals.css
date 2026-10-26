@@ -24,6 +24,7 @@
   --positive: #1f7a45;
   --negative: #c4242a;
   --track: #eceef1;
+  --gap-hue: #d9461b; /* gap severity: one warm hue, density = gap rate */
 
   --band-excellent: #0f8a4a;
   --band-good: #1f7fc4;
@@ -52,6 +53,7 @@
   --positive: #3fc07a;
   --negative: #f06a6a;
   --track: #222222;
+  --gap-hue: #f0612f;
 
   --band-excellent: #1fa463;
   --band-good: #3b93e0;
@@ -77,6 +79,7 @@
     --positive: #3fc07a;
     --negative: #f06a6a;
     --track: #222222;
+    --gap-hue: #f0612f;
     --band-excellent: #1fa463;
     --band-good: #3b93e0;
     --band-partial: #b28d10;
@@ -112,7 +115,6 @@ body {
 body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
 .num {
