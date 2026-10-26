@@ -221,14 +221,3 @@ test('the Q4 main-problem tile opens its category on Q4 with the same gap and it
   await expect(active(page).getByTestId('slide-score')).toHaveText(`${gap}%`);
   await expect(active(page).locator('[id^="item-"]').first()).toBeAttached();
 });
-
-test('a Q4 main-issue card lands on the Q4 slide with its item anchor', async ({ page }) => {
-  await page.goto('/?q=Q4-2025&r=SR1%2CSR2');
-  const card = page.getByTestId('issue-card').first();
-  const target = (await card.getAttribute('href'))!;
-  const code = target.split('#item-')[1];
-  await page.goto(target);
-  await ready(page);
-  await expect(page.getByTestId('carousel')).toHaveAttribute('data-index', '1');
-  await expect(active(page).locator(`[id="item-${code}"]`)).toBeAttached();
-});

@@ -54,19 +54,6 @@ test('an unknown audit id returns 404', async ({ page }) => {
   await expect(page.getByTestId('not-found')).toBeVisible();
 });
 
-test('a reel card on the overview opens a report that renders', async ({ page }) => {
-  await page.goto('/');
-  const card = page.getByTestId('reel-card').first();
-  await card.scrollIntoViewIfNeeded();
-  const link = (await card.getAttribute('href'))!;
-  expect(link).toMatch(/\?q=all&r=SR1%2CSR2$/);
-  const id = link.replace(/^\/audit\//, '').split('?')[0];
-  await card.click();
-  await expect(page).toHaveURL(new RegExp(`/audit/${id}`));
-  await expect(page.getByTestId('report-total')).toHaveText(/^\d+%$/);
-  await expect(page.getByTestId('report-observations')).toBeVisible();
-});
-
 test('"Full report" on a contractor page opens its report; Esc goes back to the contractor', async ({ page }) => {
   await page.goto('/contractor/4800001131');
   await expect(page.getByTestId('carousel')).toHaveAttribute('data-ready', '');
@@ -104,11 +91,4 @@ test('the report total carries the official-total note', async ({ page }) => {
   await expect(page.getByTestId('report-total-note')).toHaveText('Official total from the audit workbook');
   await expect(page.getByRole('tab', { name: /^Observations/ })).toBeVisible();
   await expect(page.getByText(/Negative observations/)).toHaveCount(0);
-});
-
-test('reel links keep the quarter and region filter', async ({ page }) => {
-  await page.goto('/?q=Q4-2025&r=SR2');
-  const hrefs = await page.getByTestId('reel-card').evaluateAll((els) => els.map((e) => e.getAttribute('href')));
-  expect(hrefs.length).toBeGreaterThan(0);
-  for (const h of hrefs) expect(h).toMatch(/^\/audit\/[\w-]+\?q=Q4-2025&r=SR2$/);
 });

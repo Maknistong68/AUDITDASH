@@ -42,8 +42,8 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) 
   const f = (await fig.boundingBox())!;
   expect(f.y).toBeGreaterThanOrEqual(card.y);
   expect(f.y + f.height).toBeLessThanOrEqual(card.y + card.height);
-  // the figure and the gap / Δ labels stay side by side inside the left column
-  const label = (await mp.getByText('gap', { exact: true }).boundingBox())!;
+  // the figure and the "score lost" / Δ labels stay side by side inside the left column
+  const label = (await mp.getByText('score lost', { exact: true }).boundingBox())!;
   expect(label.x).toBeGreaterThanOrEqual(f.x + f.width - 1);
   expect(await mp.locator('div.grid').evaluate((e) => e.scrollHeight <= e.clientHeight + 1)).toBe(true);
   expect(await fig.evaluate((e) => e.scrollWidth <= (e.parentElement as HTMLElement).clientWidth + 1)).toBe(true);

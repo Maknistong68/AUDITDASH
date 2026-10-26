@@ -128,7 +128,7 @@ export function ProblemCardContent({
             </p>
           </div>
           <div className="flex shrink-0 flex-col gap-1 whitespace-nowrap pb-[0.6em] text-[clamp(13px,1.5svh,15px)]">
-            <span style={{ color: 'var(--hero-muted)' }}>gap</span>
+            <span style={{ color: 'var(--hero-muted)' }}>score lost</span>
             {d !== null && (
               <span
                 className="num inline-flex items-center gap-0.5 font-semibold"

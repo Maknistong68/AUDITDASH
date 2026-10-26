@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { regionComparison } from '../../lib/analytics';
+import { highRiskCount, regionComparison, systemicRepeats } from '../../lib/analytics';
+
+const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
 import { pct } from '../../lib/format';
 
 const hydrated = async (page: import('@playwright/test').Page) =>
@@ -92,25 +94,65 @@ test('the high-risk tile opens Documents with the filter', async ({ page }) => {
   await expect(page.getByTestId('carousel')).toBeVisible();
 });
 
-test('repeat rows link to the repeated item', async ({ page }) => {
+test('repeats card: questions repeating at ≥5 contractors, with a dot row per top issue', async ({ page }) => {
+  const rows = systemicRepeats(getRepo(), ALL);
+  expect(rows).toHaveLength(28);
   await page.goto('/');
-  await hydrated(page);
-  await expect(page.getByTestId('kpi-repeats')).toContainText('noted again in a later quarter');
-  await expect(page.getByTestId('kpi-repeats')).not.toContainText(/fail/i);
-  const rows = page.getByTestId('repeat-row');
-  await expect(rows).toHaveCount(3);
-  for (const h of await rows.evaluateAll((els) => els.map((e) => e.getAttribute('href')!))) {
-    expect(h).toMatch(/^\/category\/[a-z]+(\/\d{10}\/[\w.%]+\?q=all&r=SR1%2CSR2|\?q=all&r=SR1%2CSR2#item-[\w.]+)$/);
+  const card = page.getByTestId('kpi-repeats');
+  await expect(card.getByTestId('repeats-count')).toHaveText('28');
+  await expect(card).toContainText('questions repeating');
+  await expect(card.getByTestId('repeat-row')).toHaveCount(0);
+  await expect(card.getByRole('img', { name: /^Top 5 repeating issues across contractors/ })).toBeVisible();
+  const dotRows = card.getByTestId('repeats-dot-row');
+  await expect(dotRows).toHaveCount(5);
+  for (const [i, r] of rows.slice(0, 5).entries()) {
+    await expect(dotRows.nth(i).locator('span')).toHaveCount(r.eligibleContractors);
+    await expect(dotRows.nth(i).locator('span[data-filled]')).toHaveCount(r.contractorCount);
   }
-  const first = (await rows.first().getAttribute('href'))!;
-  await rows.first().click();
-  await expect(page).toHaveURL(first);
-  if (first.includes('#item-')) {
-    await expect(page.getByTestId('carousel')).toHaveAttribute('data-ready', '');
-    await expect(page.locator('[data-testid="slide"][data-active]').locator(`[id="item-${first.split('#item-')[1]}"]`)).toBeAttached();
-  } else {
-    await expect(page.getByTestId('item-timeline')).toBeVisible();
+  // no earlier quarter: "—" and no infographic
+  await page.goto('/?q=Q4-2025&r=SR1,SR2');
+  await expect(card.getByTestId('repeats-count')).toHaveText('—');
+  await expect(card.getByTestId('repeats-dots')).toHaveCount(0);
+});
+
+test('high-risk card: number, label and a Q4 vs Q1 two-bar, no caption sentence', async ({ page }) => {
+  await page.goto('/');
+  const card = page.getByTestId('kpi-highrisk');
+  await expect(card).toContainText('high-risk findings');
+  await expect(card).not.toContainText(/Permits, lifting/);
+  await expect(card.getByTestId('highrisk-bar')).toHaveCount(2);
+  const q = (quarter: 'Q4-2025' | 'Q1-2026') => highRiskCount(getRepo(), { ...ALL, quarter });
+  await expect(card.getByTestId('highrisk-bars')).toHaveAttribute('aria-label', `Q4 2025: ${q('Q4-2025')}, Q1 2026: ${q('Q1-2026')}`);
+  await expect(card.getByTestId('highrisk-bars')).toContainText('Q4');
+  await expect(card.getByTestId('highrisk-bars')).toContainText('Q1');
+});
+
+test('main problem reads "score lost" beside the %', async ({ page }) => {
+  await page.goto('/');
+  const mp = page.getByTestId('main-problem');
+  await expect(mp.getByText('score lost', { exact: true })).toBeVisible();
+  await expect(mp.getByText('gap', { exact: true })).toHaveCount(0);
+  await expect(mp).toContainText(/vs Q4/);
+});
+
+test('no checklist codes anywhere in the hero', async ({ page }) => {
+  for (const url of ['/', '/?q=Q1-2026&r=SR1,SR2', '/?q=Q4-2025&r=SR1,SR2']) {
+    await page.goto(url);
+    await expect(page.getByTestId('contractor-row').first()).toBeVisible();
+    expect(await page.getByTestId('hero').textContent()).not.toMatch(/\b[ABC]\d+(\.\d+)?\b/);
   }
+});
+
+for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) test(`one page: no vertical or horizontal page scroll at ${vp.width}`, async ({ page }) => {
+  await page.setViewportSize(vp);
+  await page.goto('/');
+  await expect(page.getByTestId('contractor-row')).toHaveCount(12);
+  await page.waitForTimeout(1500); // entrance done
+  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  for (const id of ['main-issues', 'issue-card', 'reel', 'reel-card']) await expect(page.getByTestId(id)).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: /Recurring issues|Past audits/ })).toHaveCount(0);
+  await expect(page.locator('text=NaN')).toHaveCount(0);
 });
 
 test('reduced motion only strips hover/press motion utilities, never positioning translates', async ({ page }) => {

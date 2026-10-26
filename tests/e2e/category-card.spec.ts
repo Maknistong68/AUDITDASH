@@ -255,9 +255,9 @@ test('the dashboard Main problem card renders exactly as before the refactor', a
   await page.goto('/');
   const mp = page.getByTestId('main-problem');
   await expect(mp.getByTestId('main-problem-gap')).toHaveText('73%');
-  // captured from the dashboard at b43b7ad, before the card was factored out
+  // captured from the dashboard at b43b7ad, before the card was factored out; "gap" became "score lost" (one-page step)
   await expect.poll(() => mp.innerText()).toBe(
-    'Main problem · Q1 2026\n\nSubcontractor Control\n\n73%\n\ngap\n−2 pts\nvs Q4\n\nDriven by\n\n' +
+    'Main problem · Q1 2026\n\nSubcontractor Control\n\n73%\n\nscore lost\n−2 pts\nvs Q4\n\nDriven by\n\n' +
       'Subcontractor screening & evaluation\n11 of 11 audits\nSubcontractor pre-start safety check\n11 of 11 audits\n' +
       'Subcontractor past safety record\n11 of 11 audits',
   );
