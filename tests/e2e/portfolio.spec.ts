@@ -9,11 +9,16 @@ const hydrated = async (page: import('@playwright/test').Page) =>
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) test(`hero fits ${vp.width}`, async ({ page }) => {
   await page.setViewportSize(vp); await page.goto('/');
   await expect(page.getByTestId('score-ring')).toBeVisible();
-  for (const id of ['main-problem', 'kpi-score', 'kpi-repeats', 'kpi-highrisk', 'kpi-bands', 'region-compare']) {
+  for (const id of ['main-problem', 'audit-overview', 'audit-trends', 'findings-actions', 'kpi-score', 'kpi-repeats', 'kpi-highrisk', 'open-actions', 'kpi-bands', 'region-compare']) {
     await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
   }
   await expect(page.getByTestId('contractor-row')).toHaveCount(12);
   await expect(page.getByTestId('contractor-row').last()).toBeInViewport({ ratio: 1 });
+  // nothing spills out of its card
+  for (const id of ['contractors', 'main-problem', 'audit-overview', 'audit-trends', 'findings-actions']) {
+    const over = await page.getByTestId(id).evaluate((el) => el.scrollHeight - el.clientHeight);
+    expect(over, id).toBeLessThanOrEqual(1);
+  }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   const box = await page.getByTestId('hero').boundingBox(); expect(box!.y + box!.height).toBeLessThanOrEqual(vp.height + 1);
 });

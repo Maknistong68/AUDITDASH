@@ -1,4 +1,4 @@
-import { isAuditType } from './auditTypes';
+import { isAuditType } from './auditTypeIds';
 import type { Filter, Quarter, Subregion } from './types';
 
 export const QUARTERS: Quarter[] = ['Q4-2025', 'Q1-2026'];

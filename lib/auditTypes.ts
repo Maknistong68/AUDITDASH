@@ -6,15 +6,7 @@ import crc from '../data/seed/checklists/crc.json';
 import { CATEGORIES } from './categories';
 import type { AuditType, TypedChecklistItem, TypeSection } from './types';
 
-export interface AuditTypeInfo { id: AuditType; label: string; short: string }
-
-export const AUDIT_TYPES: AuditTypeInfo[] = [
-  { id: 'hs', label: 'Health & Safety', short: 'H&S' },
-  { id: 'security', label: 'Security', short: 'Security' },
-  { id: 'environmental', label: 'Environmental', short: 'Environmental' },
-  { id: 'welfare', label: 'Welfare', short: 'Welfare' },
-  { id: 'crc', label: 'CRC', short: 'CRC' },
-];
+export { AUDIT_TYPES, isAuditType, type AuditTypeInfo } from './auditTypeIds';
 
 /** Category-like entry for any type: H&S uses the ten CategoryIds, other types use their sections (`security:A`). */
 export interface TypeCategory { id: string; name: string; short: string; color: string; icon: string }
@@ -24,8 +16,6 @@ const FILES: Record<AuditType, ChecklistFile> = {
   hs: hs as ChecklistFile, security: security as ChecklistFile, environmental: environmental as ChecklistFile,
   welfare: welfare as ChecklistFile, crc: crc as ChecklistFile,
 };
-
-export const isAuditType = (v: unknown): v is AuditType => AUDIT_TYPES.some((t) => t.id === v);
 
 export function checklistFor(type: AuditType): TypedChecklistItem[] { return FILES[type].items; }
 

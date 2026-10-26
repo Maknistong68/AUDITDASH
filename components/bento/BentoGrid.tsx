@@ -48,15 +48,18 @@ export function TileLabel({ children, tone, className = '' }: { children: React.
 }
 
 /**
- * Bento layout. ≥1200px: XL contractors tile on the left at full hero height; the right half is a 6-column
- * grid: L main problem (6) / M score (3) + M repeats (3) / S high-risk, bands, region (2 each).
+ * Dashboard grid. ≥1200px, one viewport: Contractors (ranked) fill the left column at full hero height; the right
+ * column is a 12-column grid of three aligned rows — Main problem (12, the most prominent) / Audit overview (7) +
+ * Audit trends (5) / Findings · open actions (12). The two lower rows take their content height and the main
+ * problem takes the rest, so spare height goes to the most important card instead of gaps inside small ones.
+ * One gutter everywhere; every card fills its cell.
  * Narrower: everything stacks and the page scrolls.
  */
 export function BentoGrid({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:grid-cols-[minmax(0,1.18fr)_minmax(0,1fr)]">
+    <div className="grid min-h-0 flex-1 grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)]">
       {left}
-      <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[640px]:grid-cols-6 min-[1200px]:grid-rows-[minmax(0,1.38fr)_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[640px]:grid-cols-12 min-[1200px]:grid-rows-[minmax(0,1fr)_auto_auto]">
         {right}
       </div>
     </div>

@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import checklistJson from '@/data/seed/checklist.json';
 import fixture from './fixtures/abyatona-1112-responses.json';
-import { bandFor, scoreAppAudit, scoreResponses } from '@/lib/scoring';
+import { bandFor, scoreResponses } from '@/lib/scoring';
+import { scoreAppAudit } from '@/lib/appScoring';
 import { checklistFor } from '@/lib/auditTypes';
 import type { AppAnswer, ChecklistItem, Compliance } from '@/lib/types';
 

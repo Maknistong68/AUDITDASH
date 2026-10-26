@@ -18,17 +18,18 @@ import { AuditReel } from '@/components/sections/AuditReel';
 import { SectionHead } from '@/components/sections/SectionHead';
 import { ContractorsCard } from '@/components/bento/ContractorsCard';
 import { MainProblemCard } from '@/components/bento/MainProblemCard';
-import { ScoreCard } from '@/components/bento/ScoreCard';
-import { RepeatsCard } from '@/components/bento/RepeatsCard';
-import { HighRiskCard } from '@/components/bento/HighRiskCard';
-import { BandsCard } from '@/components/bento/BandsCard';
-import { RegionCard } from '@/components/bento/RegionCard';
+import { AuditOverviewCard } from '@/components/bento/AuditOverviewCard';
+import { AuditTrendsCard } from '@/components/bento/AuditTrendsCard';
+import { FindingsCard } from '@/components/bento/FindingsCard';
+import { TypeEmpty } from '@/components/shell/TypeEmpty';
 
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<SP> }) {
   const filter = parseFilter(toSearchParams(await searchParams));
   const repo = getRepo();
   const summary = portfolioSummary(repo, filter);
   const empty = summary.audits === 0;
+  // A non-H&S tab has no imported audits; its dashboard fills from audits entered in the app (Task 14).
+  const typeEmpty = empty && filter.type !== undefined && filter.type !== 'hs' ? filter.type : null;
   const cards = empty ? [] : contractorCards(repo, filter);
 
   // Compare data for every contractor, so selecting is instant (selection lives in ?c= on the client).
@@ -83,7 +84,9 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
           data-testid="hero"
           className="flex flex-col px-[var(--gutter)] pb-[clamp(14px,2.4svh,32px)] pt-[clamp(6px,1.2svh,16px)] min-[1200px]:h-[calc(100svh-var(--topbar))]"
         >
-          {empty ? (
+          {typeEmpty ? (
+            <TypeEmpty type={typeEmpty} />
+          ) : empty ? (
             <EmptyState />
           ) : (
             <BentoGrid
@@ -97,11 +100,19 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                       query={query}
                     />
                   )}
-                  <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} />
-                  <RepeatsCard repeats={repeats ? repeats.length : null} top={topRepeats} />
-                  <HighRiskCard count={highRiskCount(repo, filter)} href={href('/category/permits', query)} />
-                  <BandsCard bands={bandDistribution(repo, filter)} />
-                  <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} />
+                  <AuditOverviewCard
+                    avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter}
+                    byQuarter={byQuarter} bands={bandDistribution(repo, filter)}
+                  />
+                  <AuditTrendsCard
+                    byQuarter={QUARTERS.map((q, k) => ({ quarter: q, value: byQuarter[k].value }))}
+                    rows={regionComparison(repo, filter)}
+                    quarter={filter.quarter}
+                  />
+                  <FindingsCard
+                    repeats={repeats ? repeats.length : null} top={topRepeats}
+                    highRisk={highRiskCount(repo, filter)} highRiskHref={href('/category/permits', query)}
+                  />
                 </>
               }
             />

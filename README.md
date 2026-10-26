@@ -1,4 +1,4 @@
-# HSE Audit Dashboard
+# Audits Only
 
 A dashboard for directors that turns contractor HSE (health, safety and environment) audit results into a quick, honest picture: who is doing well, where the gaps are, and what to do about them. Built with Next.js 15 on mock data generated from the real audit workbooks.
 

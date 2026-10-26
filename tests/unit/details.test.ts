@@ -25,4 +25,11 @@ describe('repeatHref', () => {
   it('opens the item in the category view when several contractors repeat it', () => {
     expect(repeatHref('leadership', 'A2', ['1', '2'], 'q=Q1-2026&r=SR1')).toBe('/category/leadership?q=Q1-2026&r=SR1#item-A2');
   });
+  it('keeps the audit type in the query and in links', () => {
+    const c = detailContext({ q: 'Q1-2026', r: 'SR1', t: 'welfare' });
+    expect(c.filter).toEqual({ quarter: 'Q1-2026', regions: ['SR1'], type: 'welfare' });
+    expect(c.query).toBe('q=Q1-2026&r=SR1&t=welfare');
+    expect(href('/category/rams', c.query, { s: 1 })).toBe('/category/rams?q=Q1-2026&r=SR1&t=welfare&s=1');
+    expect(repeatHref('rams', 'B1.1', ['1', '2'], c.query)).toBe('/category/rams?q=Q1-2026&r=SR1&t=welfare#item-B1.1');
+  });
 });

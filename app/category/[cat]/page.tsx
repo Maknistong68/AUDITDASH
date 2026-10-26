@@ -16,7 +16,7 @@ type Params = { cat: string };
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const id = findCategory((await params).cat);
-  return { title: id ? `${categoryById(id).name} · HSE Audits` : 'Not found · HSE Audits' };
+  return { title: id ? categoryById(id).name : 'Not found' };
 }
 
 /** Category details: a carousel by quarter (latest first) within the filter's regions. */

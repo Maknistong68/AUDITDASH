@@ -67,7 +67,7 @@ function Row({
       transition={{ ...SPRING, delay }}
       data-testid="contractor-row"
       data-score={total}
-      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.6em_minmax(0,1.6fr)_minmax(0,1fr)_3.3em_6.4em_3.6em_24px] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
+      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.6em_minmax(0,1fr)_3.3em_3.4em_24px] min-[640px]:grid-cols-[1.6em_minmax(0,2.2fr)_minmax(0,1fr)_3.3em_5em_3.4em_24px] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
         selected ? 'bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]' : ''
       }`}
     >
@@ -78,7 +78,7 @@ function Row({
         </span>
         <span className="text-[12px] leading-tight text-muted">{contractor.subregion}</span>
       </span>
-      <span className="relative h-[clamp(6px,0.9svh,9px)] rounded-full bg-fill-2" aria-hidden>
+      <span className="relative h-[clamp(6px,0.9svh,9px)] rounded-full bg-fill-2 max-[639px]:hidden" aria-hidden>
         {BAND_TICKS.map((t) => (
           <span key={t} className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-surface" style={{ left: `${t * 100}%` }} />
         ))}
@@ -94,7 +94,7 @@ function Row({
         <CountUp value={total * 100} format={whole} duration={1} delay={delay} />
         <span className="text-[0.5em] tracking-normal text-muted">%</span>
       </span>
-      <span className="flex justify-start">
+      <span className="flex justify-start max-[639px]:hidden">
         <span className="badge px-2 py-[2px] text-[13px]" title={band}>
           {bandShort(band)}
         </span>
