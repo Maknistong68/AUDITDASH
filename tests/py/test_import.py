@@ -66,7 +66,7 @@ def test_checklist_weights(seed):
     assert sum(v for k,v in w.items() if k.startswith('A')) == 45 and w['B2.2'] == 2 and w['C2.17'] == 3
 def test_every_item_has_category(seed): assert all(i['category'] for i in seed.checklist)
 def test_no_phone_numbers(seed_text): assert '055-' not in seed_text
-def test_site_keywords(): assert category_for(None,'site','Tower light found operational without earthing') == 'permits'
+def test_site_keywords(): assert category_for(None,'site','Tower light found operational without earthing') == 'site'
 def test_site_keywords_health(): assert category_for(None,'site','Mosquito presence was observed') == 'health'
 def test_site_default(): assert category_for(None,'site','Parking area requires expansion') == 'site'
 def test_positive_has_no_category(): assert category_for(None,'positive','Neat offices') is None
@@ -170,3 +170,8 @@ def test_crc_thirteen_areas(typed):
     assert all(i["weight"] == 1 and i["section"] == "A" and i["category"] == "crc:A" for i in items)
     assert items[0]["question"] == "Confined Space"
     assert items[8]["question"] == items[12]["question"] == "Working in the Heat"
+
+
+def test_lifting_site_finding_maps_to_site():
+    assert category_for(None, 'site', 'Lifting operation without a lift plan') == 'site'
+    assert category_for('B4.1', 'negative', 'x') == 'documents'

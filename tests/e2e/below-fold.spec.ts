@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { CATEGORIES } from '../../lib/categories';
 import { getRepo } from '../../lib/data/repo';
 import { topIssues } from '../../lib/analytics';
 
@@ -59,10 +60,10 @@ test('main issues: six cards in impact order, linked to the item', async ({ page
   await expect(page.getByTestId('main-issues')).not.toContainText(/fail/i);
 });
 
-test('ten gap tiles below the hero, worst gap first', async ({ page }) => {
+test('one gap tile per category below the hero, worst gap first', async ({ page }) => {
   await page.goto('/');
   const tiles = page.getByTestId('gap-tile');
-  await expect(tiles).toHaveCount(10);
+  await expect(tiles).toHaveCount(CATEGORIES.length);
   const hero = (await page.getByTestId('hero').boundingBox())!;
   expect((await tiles.first().boundingBox())!.y).toBeGreaterThanOrEqual(hero.y + hero.height);
   const gaps = await tiles.evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-gap') ?? -1)));

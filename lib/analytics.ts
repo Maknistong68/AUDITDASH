@@ -365,7 +365,7 @@ export function repeatFindings(repo: Repo, filter: Filter): {
   return rows.map((r) => r.row);
 }
 
-/** High-risk (permits / keyword site) non-positive observations over filtered audits, N/A subsections excluded. */
+/** High-risk (B4/B5 items, keyword site findings) non-positive observations over filtered audits, N/A subsections excluded. */
 export function highRiskCount(repo: Repo, filter: Filter): number {
   const audits = select(repo, filter);
   const items = itemMap(repo);

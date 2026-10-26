@@ -24,7 +24,7 @@
       "subsection": null,
       "question": "Is there a strategic plan detailing the program vision, strategic aims, HSSE objectives and targets?",
       "weight": 3,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "A2",
@@ -32,7 +32,7 @@
       "subsection": null,
       "question": "Is there a HSSE execution plan (Bridging Document) outlining how Contractor Management deliver their roles & responsibilities?",
       "weight": 3,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "A3",
@@ -64,7 +64,7 @@
       "subsection": null,
       "question": "Enablon process, management and utilization (users, review and validation process etc.?)",
       "weight": 3,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "A7",
@@ -120,7 +120,7 @@
       "subsection": null,
       "question": "Is there a Contractors / Work Order start up / close out process that ensures HSSE requirements are met. Is there a Subcontractor Consent process managed by Contractor? (Readiness Reviews)",
       "weight": 3,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "A14",
@@ -144,7 +144,7 @@
       "subsection": "B1",
       "question": "Are approved risks assessments and method statements (RAMS) available for all current tasks?",
       "weight": 3,
-      "category": "rams"
+      "category": "documents"
     },
     {
       "code": "B1.2",
@@ -152,7 +152,7 @@
       "subsection": "B1",
       "question": "Are pre start briefings being delivered to employees by supervisors (not H&S) before daily activities start? Records available at point of work and relevant to tasks?",
       "weight": 3,
-      "category": "rams"
+      "category": "documents"
     },
     {
       "code": "B2.1",
@@ -216,7 +216,7 @@
       "subsection": "B4",
       "question": "Is there a permit to work system? A permit office/process for coordination, issue and closure?",
       "weight": 3,
-      "category": "permits"
+      "category": "documents"
     },
     {
       "code": "B4.2",
@@ -224,7 +224,7 @@
       "subsection": "B4",
       "question": "Does the permit system require positive verification of the safe condition on completion of works?",
       "weight": 1,
-      "category": "permits"
+      "category": "documents"
     },
     {
       "code": "B5.1",
@@ -232,7 +232,7 @@
       "subsection": "B5",
       "question": "Is there a system for identification of underground utilities?",
       "weight": 3,
-      "category": "permits"
+      "category": "documents"
     },
     {
       "code": "B5.2",
@@ -240,7 +240,7 @@
       "subsection": "B5",
       "question": "Is the utility clearance system integrated with the work permit system?",
       "weight": 1,
-      "category": "permits"
+      "category": "documents"
     },
     {
       "code": "B5.3",
@@ -248,7 +248,7 @@
       "subsection": "B5",
       "question": "Does the utility clearance system apply to all ground and structure penetration activities?",
       "weight": 1,
-      "category": "permits"
+      "category": "documents"
     },
     {
       "code": "B6.1",
@@ -496,7 +496,7 @@
       "subsection": "C1",
       "question": "Do managers and supervisors ensure that Risk Assessments and Method Statements (RAMS) are approved, communicated, and implemented for all work activities?",
       "weight": 1,
-      "category": "rams"
+      "category": "documents"
     },
     {
       "code": "C1.10",
@@ -504,7 +504,7 @@
       "subsection": "C1",
       "question": "Are RAMS available for all activities (check the RAMS register)? Take sample of activities on site, a copy of the RAMS must be available on site.",
       "weight": 1,
-      "category": "rams"
+      "category": "documents"
     },
     {
       "code": "C1.11",
@@ -512,7 +512,7 @@
       "subsection": "C1",
       "question": "Do the requirements specified in the RAMS accurately reflect the work activity being conducted? (Specific activity covered, all relevant significant hazards identified, all mandated controls in place)",
       "weight": 2,
-      "category": "rams"
+      "category": "documents"
     },
     {
       "code": "C1.12",
@@ -520,7 +520,7 @@
       "subsection": "C1",
       "question": "Is there a documented review process for RAMS and does it include authorization by the relevant Construction Manager / Employer?",
       "weight": 1,
-      "category": "rams"
+      "category": "documents"
     },
     {
       "code": "C2.2",
@@ -528,7 +528,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Code A Employer (Oxagon Projects) approved HSSE plan ?",
       "weight": 2,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.3",
@@ -536,7 +536,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved HSSE Monitoring Schedule?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.4",
@@ -544,7 +544,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Training Matrix, Records and Plan and Is there upto date and Employer (Oxagon Projects) approved Induction Presentation?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.5",
@@ -552,7 +552,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved HSSE Personnel CV's?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.6",
@@ -568,7 +568,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Emergency Management and Emergency Response Plan?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.8",
@@ -576,7 +576,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Injury / Illness Management Plan?",
       "weight": 2,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.9",
@@ -584,7 +584,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Subcontractor Management Plan?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.10",
@@ -592,7 +592,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Traffic Management and Logistics Plan?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.11",
@@ -600,7 +600,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Lifting Operations Management Plan and Lift Plan?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.12",
@@ -608,7 +608,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Fatigue Management Plan?",
       "weight": 2,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.13",
@@ -616,7 +616,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Fire Prevention Plan?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.14",
@@ -624,7 +624,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Temporary Electrical Management Safety Plan?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.15",
@@ -632,7 +632,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Testing Commissioning Plans?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.16",
@@ -640,7 +640,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Temporary Works Procedure / Register / Management Plan?",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.17",
@@ -648,7 +648,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Weather working Plan?",
       "weight": 3,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.18",
@@ -656,7 +656,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Equipment Inspection Program",
       "weight": 3,
-      "category": "plans"
+      "category": "documents"
     },
     {
       "code": "C2.19",
@@ -664,7 +664,7 @@
       "subsection": "C2",
       "question": "Is there upto date and Employer (Oxagon Projects) approved Mobilization & Demobilization Plan",
       "weight": 1,
-      "category": "plans"
+      "category": "documents"
     }
   ]
 }

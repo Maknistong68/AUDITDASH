@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { CATEGORIES } from '../../lib/categories';
 
 const compare = (name: string) => ({ name: `Compare ${name}`, exact: true });
 
@@ -12,7 +13,7 @@ test('selecting two cards opens the tray with two columns', async ({ page }) => 
   const tray = page.getByTestId('compare-tray');
   await expect(tray).toBeVisible();
   await expect(tray.getByTestId('compare-column')).toHaveCount(2);
-  await expect(tray.getByTestId('compare-column').first().getByTestId('compare-gap')).toHaveCount(10);
+  await expect(tray.getByTestId('compare-column').first().getByTestId('compare-gap')).toHaveCount(CATEGORIES.length);
   await expect(page).toHaveURL(/c=4800001131%2C4800001322|c=4800001131,4800001322/);
   // toggling does not navigate to the contractor page
   await expect(page).not.toHaveURL(/contractor\//);

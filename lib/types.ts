@@ -1,5 +1,5 @@
 export type Compliance = 'full' | 'partial' | 'no' | 'na';
-export type CategoryId = 'leadership'|'plans'|'rams'|'permits'|'competence'|'subcontractor'|'monitoring'|'incident'|'site'|'health';
+export type CategoryId = 'leadership'|'documents'|'competence'|'subcontractor'|'monitoring'|'incident'|'site'|'health';
 export type Subregion = 'SR1' | 'SR2';
 export type Quarter = 'Q4-2025' | 'Q1-2026';
 export type Band = 'Excellent'|'Good'|'Partially Compliant'|'Minimally Compliant'|'Non-Compliant';

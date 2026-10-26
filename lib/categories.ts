@@ -2,7 +2,7 @@ import type { Category, CategoryId } from './types';
 
 /**
  * Category hues are the dataviz skill's validated categorical palette
- * (slots 1-8 verbatim, slots 9-10 added and validated with
+ * (slots 1-8 verbatim, re-validated for the 8-category order with
  * scripts/validate_palette.js: light + dark pass lightness band, chroma floor,
  * adjacent CVD and normal-vision separation). Fixed order, never cycled.
  * `color` is the light-theme step; CATEGORY_COLORS_DARK holds the dark-theme step.
@@ -10,19 +10,17 @@ import type { Category, CategoryId } from './types';
  */
 export const CATEGORIES: Category[] = [
   { id: 'leadership',    name: 'Leadership & Commitment',          short: 'Leadership',    color: '#2a78d6', icon: 'Flag' },
-  { id: 'plans',         name: 'Plans & Documentation',            short: 'Plans',         color: '#eb6834', icon: 'FileText' },
-  { id: 'rams',          name: 'Risk Assessment (RAMS)',           short: 'RAMS',          color: '#1baf7a', icon: 'ShieldAlert' },
-  { id: 'permits',       name: 'Permits & High-Risk Work',         short: 'Permits',       color: '#eda100', icon: 'ClipboardCheck' },
+  { id: 'documents',     name: 'Documents',                        short: 'Documents',     color: '#eda100', icon: 'FileText' },
   { id: 'competence',    name: 'Competence & Training',            short: 'Competence',    color: '#e87ba4', icon: 'GraduationCap' },
   { id: 'subcontractor', name: 'Subcontractor Control',            short: 'Subcontractors', color: '#008300', icon: 'Users' },
   { id: 'monitoring',    name: 'Monitoring & Corrective Action',   short: 'Monitoring',    color: '#6250d6', icon: 'Eye' },
   { id: 'incident',      name: 'Incident & Emergency Readiness',   short: 'Emergency',     color: '#e34948', icon: 'Siren' },
-  { id: 'site',          name: 'Site Conditions, PPE & Equipment', short: 'Site & PPE',    color: '#1496ad', icon: 'HardHat' },
+  { id: 'site',          name: 'Site Compliance',                short: 'Site',          color: '#1496ad', icon: 'HardHat' },
   { id: 'health',        name: 'Health & Welfare',                 short: 'Health',        color: '#a3592b', icon: 'HeartPulse' },
 ];
 
 export const CATEGORY_COLORS_DARK: Record<CategoryId, string> = {
-  leadership: '#3987e5', plans: '#d95926', rams: '#199e70', permits: '#c98500', competence: '#d55181',
+  leadership: '#3987e5', documents: '#c98500', competence: '#d55181',
   subcontractor: '#008300', monitoring: '#9085e9', incident: '#e66767', site: '#1da1b6', health: '#c27a4a',
 };
 
@@ -40,9 +38,11 @@ const range = (prefix: string, from: number, to: number) =>
   Array.from({ length: to - from + 1 }, (_, i) => `${prefix}${from + i}`);
 
 assign('leadership', ['A9', 'A11', 'A12', 'A15', 'C1.1', 'C1.2', 'C1.3', 'C1.5', 'C1.7', 'C1.8', 'C2.6']);
-assign('plans', ['A1', 'A2', 'A6', 'A13', ...range('C2.', 2, 5), ...range('C2.', 7, 19)]);
-assign('rams', ['B1.1', 'B1.2', ...range('C1.', 9, 12)]);
-assign('permits', ['B4.1', 'B4.2', 'B5.1', 'B5.2', 'B5.3']);
+assign('documents', [
+  'A1', 'A2', 'A6', 'A13', ...range('C2.', 2, 5), ...range('C2.', 7, 19),
+  'B1.1', 'B1.2', ...range('C1.', 9, 12),
+  'B4.1', 'B4.2', 'B5.1', 'B5.2', 'B5.3',
+]);
 assign('competence', ['A3', 'B2.1', 'B2.2', 'B2.3', 'B2.4', 'B6.7', 'B7.1', 'B7.2']);
 assign('subcontractor', ['B6.1', 'B6.2', 'B6.3', 'B6.4', 'B6.5', 'B6.6', 'B6.9']);
 assign('monitoring', ['A4', 'A5', 'A8', 'A10', 'A14', 'C1.4', 'C1.6']);

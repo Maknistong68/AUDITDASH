@@ -21,7 +21,7 @@ describe('auditTypes', () => {
     expect(checklistFor('crc')).toHaveLength(13);
     expect(checklistFor('hs')).toHaveLength(81);
   });
-  test('categories: H&S = existing ten, others = sections', () => {
+  test('categories: H&S = the CATEGORIES, others = sections', () => {
     expect(categoriesFor('hs').map((c) => c.id)).toEqual(CATEGORIES.map((c) => c.id));
     const sec = categoriesFor('security');
     expect(sec).toHaveLength(17);

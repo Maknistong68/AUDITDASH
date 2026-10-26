@@ -8,7 +8,7 @@ import type { AppAnswer, ChecklistItem, Compliance } from '@/lib/types';
 
 const checklist = checklistJson as ChecklistItem[];
 const mk = (code: string, weight: number, section: 'A' | 'B' | 'C' = 'A', subsection: string | null = null): ChecklistItem => ({
-  code, section, subsection, question: 'q', weight, category: 'plans',
+  code, section, subsection, question: 'q', weight, category: 'documents',
 });
 
 describe('scoreResponses', () => {

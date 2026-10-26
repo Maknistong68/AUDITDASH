@@ -8,7 +8,7 @@ import type { AuditType, TypedChecklistItem, TypeSection } from './types';
 
 export { AUDIT_TYPES, isAuditType, type AuditTypeInfo } from './auditTypeIds';
 
-/** Category-like entry for any type: H&S uses the ten CategoryIds, other types use their sections (`security:A`). */
+/** Category-like entry for any type: H&S uses the CategoryIds, other types use their sections (`security:A`). */
 export interface TypeCategory { id: string; name: string; short: string; color: string; icon: string }
 
 interface ChecklistFile { type: AuditType; sections: TypeSection[]; items: TypedChecklistItem[] }

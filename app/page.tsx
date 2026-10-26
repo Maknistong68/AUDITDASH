@@ -111,7 +111,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                   />
                   <FindingsCard
                     repeats={repeats ? repeats.length : null} top={topRepeats}
-                    highRisk={highRiskCount(repo, filter)} highRiskHref={href('/category/permits', query)}
+                    highRisk={highRiskCount(repo, filter)} highRiskHref={href('/category/documents', query)}
                   />
                 </>
               }

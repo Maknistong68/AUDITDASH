@@ -10,7 +10,7 @@ const DIVIDE = 'min-[640px]:border-l min-[640px]:border-[var(--hairline)] min-[6
 
 /**
  * Findings / open actions: repeat findings (with the items repeated by the most contractors, each linking to
- * the item), high-risk work findings (opens Permits & High-Risk Work) and open corrective actions, which come
+ * the item), high-risk work findings (opens Documents) and open corrective actions, which come
  * from audits entered in the app (none yet, so "—").
  */
 export function FindingsCard({ repeats, top, highRisk, highRiskHref }: {
@@ -57,7 +57,7 @@ export function FindingsCard({ repeats, top, highRisk, highRiskHref }: {
         <div data-testid="kpi-highrisk" className={`tone-non relative flex min-w-0 flex-col justify-between gap-[clamp(4px,0.8svh,10px)] ${DIVIDE}`}>
           <Link
             href={highRiskHref}
-            aria-label={`High-risk work: ${highRisk} findings. Open Permits & High-Risk Work`}
+            aria-label={`High-risk work: ${highRisk} findings. Open Documents`}
             className="absolute -inset-y-1.5 inset-x-0 z-[1] rounded-xl transition-colors hover:bg-fill-2 min-[640px]:left-[clamp(4px,0.6vw,12px)]"
           />
           <SubLabel tone="var(--tone)">

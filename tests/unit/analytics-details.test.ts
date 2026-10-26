@@ -3,6 +3,7 @@ import { getRepo } from '@/lib/data/repo';
 import {
   auditFindings, auditGaps, auditItemStates, categoryQuarters, itemTimeline, contractorAudits, isNaObservation, sectionRatios,
 } from '@/lib/analytics';
+import { CATEGORIES } from '@/lib/categories';
 import type { Filter } from '@/lib/types';
 
 const repo = getRepo();
@@ -26,10 +27,10 @@ describe('contractorAudits', () => {
 });
 
 describe('auditGaps', () => {
-  it('lists ten categories worst first, N/A last, gaps within 0..1', () => {
+  it('lists every category worst first, N/A last, gaps within 0..1', () => {
     const a = repo.audits()[0];
     const g = auditGaps(repo, a);
-    expect(g).toHaveLength(10);
+    expect(g).toHaveLength(CATEGORIES.length);
     const vals = g.map((x) => x.gapRate).filter((x): x is number => x !== null);
     expect(vals).toEqual([...vals].sort((x, y) => y - x));
     for (const v of vals) expect(v >= 0 && v <= 1).toBe(true);
@@ -63,14 +64,14 @@ describe('categoryQuarters', () => {
     expect(Math.round(qs[0].gapRate! * 100)).toBe(73);
   });
   it('skips quarters without audits in the regions', () => {
-    expect(categoryQuarters(repo, { ...ALL, regions: [] }, 'plans')).toEqual([]);
+    expect(categoryQuarters(repo, { ...ALL, regions: [] }, 'documents')).toEqual([]);
   });
 });
 
 describe('auditItemStates', () => {
   it('marks N/A subsections and findings', () => {
     const a = repo.audits().find((x) => x.sections.some((s) => s.code === 'B5' && s.possible === 0));
-    if (a) expect(auditItemStates(repo, a, 'permits').filter((r) => r.item.subsection === 'B5').every((r) => r.state === 'na')).toBe(true);
+    if (a) expect(auditItemStates(repo, a, 'documents').filter((r) => r.item.subsection === 'B5').every((r) => r.state === 'na')).toBe(true);
     const b = repo.audits()[0];
     const rows = auditItemStates(repo, b, 'subcontractor');
     expect(rows.length).toBeGreaterThan(0);

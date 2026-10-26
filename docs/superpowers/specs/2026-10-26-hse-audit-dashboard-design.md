@@ -212,3 +212,12 @@ non-H&S tabs empty until audits are entered; Driven By = top weak categories; no
 - **Categories for non-H&S types** = their checklist sections (from the workbook), so Driven By/Where it fails are data-driven per type.
 - **Where browser audits appear:** "My audits" (drafts + submitted) on every tab; non-H&S tabs compute their dashboard client-side from
   submitted browser audits; the H&S tab shows imported data plus "My audits" (merged into H&S aggregates after Supabase).
+
+### Revision 3a — categories (2026-10-26)
+Owner request (requirements §15). H&S now has **8 categories**, in this order: Leadership · **Documents** · Competence ·
+Subcontractors · Monitoring · Emergency · **Site Compliance** · Health.
+- `documents` replaces `plans`, `rams` and `permits` (codes: A1, A2, A6, A13, C2.2–C2.5, C2.7–C2.19, B1.1, B1.2, C1.9–C1.12, B4.1, B4.2, B5.1–B5.3). Colour amber `#eda100` (dark `#c98500`), icon FileText, re-validated for adjacency in the new order.
+- `site` keeps its id; renamed "Site Compliance" (short "Site"); PPE items stay in it. Site findings no longer map to a permits category: the keyword pass now only routes training/competent/certificate to Competence and mosquito/toilet/clinic/heat/water to Health; everything else is Site.
+- High-risk work = item code B4.* / B5.* (permit and utility-clearance items) or a site finding matching the high-risk keywords; the tile links to `/category/documents`.
+- `/category/plans|rams|permits[/...]` redirect (308) to `/category/documents`, query kept.
+- Code is count-agnostic (`CATEGORIES.length`); the gap grid is 4×2 on wide screens.

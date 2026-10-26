@@ -14,7 +14,7 @@ const MotionLink = motion.create(Link);
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 /**
- * "Where it fails": the ten categories as bento tiles, worst score-based gap first (gap = share of the
+ * "Where it fails": the categories as bento tiles, worst score-based gap first (gap = share of the
  * category's weighted score lost; 0 = none). Severity is drawn only in the single `--gap` hue. Each tile shows
  * the gap %, the findings count and, when there is a previous quarter in the filter, the Δ in whole points
  * (a rising gap is bad, so it reads red). Tiles stagger in when the grid scrolls into view.
@@ -24,7 +24,7 @@ export function GapRadar({ gaps, query }: { gaps: GapRow[]; query: string }) {
   const ranked = [...gaps].sort((a, b) => (b.gapRate ?? -1) - (a.gapRate ?? -1));
   return (
     <motion.ol
-      className="grid grid-cols-2 gap-[var(--gap-grid)] min-[760px]:grid-cols-3 min-[1000px]:grid-cols-5"
+      className="grid grid-cols-2 gap-[var(--gap-grid)] min-[760px]:grid-cols-3 min-[1000px]:grid-cols-4"
       initial={reduce ? false : 'hidden'}
       whileInView="show"
       viewport={{ once: true, amount: 0.15 }}

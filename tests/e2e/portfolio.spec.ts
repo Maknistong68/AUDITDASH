@@ -87,13 +87,13 @@ test('main problem tile lifts on hover', async ({ page }) => {
   await expect.poll(async () => y0 - (await mp.boundingBox())!.y).toBeGreaterThan(2);
 });
 
-test('the high-risk tile opens Permits & High-Risk Work with the filter', async ({ page }) => {
+test('the high-risk tile opens Documents with the filter', async ({ page }) => {
   await page.goto('/?q=Q1-2026&r=SR1');
   await hydrated(page);
   const link = page.getByTestId('kpi-highrisk').getByRole('link');
-  await expect(link).toHaveAttribute('href', '/category/permits?q=Q1-2026&r=SR1');
+  await expect(link).toHaveAttribute('href', '/category/documents?q=Q1-2026&r=SR1');
   await link.click();
-  await expect(page).toHaveURL(/\/category\/permits\?q=Q1-2026&r=SR1$/);
+  await expect(page).toHaveURL(/\/category\/documents\?q=Q1-2026&r=SR1$/);
   await expect(page.getByTestId('carousel')).toBeVisible();
 });
 
@@ -134,4 +134,12 @@ test('reduced motion only strips hover/press motion utilities, never positioning
   });
   expect(selectors.length).toBeGreaterThan(0);
   for (const sel of selectors) expect(sel).toMatch(/\[class\*="(group-)?hover:-?translate"\]|\[class\*="(active|hover):scale"\]/);
+});
+
+test('old category URLs redirect to Documents, keeping the query', async ({ page }) => {
+  for (const old of ['permits', 'plans', 'rams']) {
+    await page.goto(`/category/${old}?q=Q1-2026&r=SR1`);
+    await expect(page).toHaveURL(/\/category\/documents\?q=Q1-2026&r=SR1$/);
+    await expect(page.getByTestId('carousel')).toBeVisible();
+  }
 });

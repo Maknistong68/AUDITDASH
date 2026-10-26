@@ -38,7 +38,7 @@ export function AuditLine({ audit }: { audit: Audit }) {
   );
 }
 
-/** One audit: score tile (slide header), the ten category gaps, findings by category. */
+/** One audit: score tile (slide header), the category gaps, findings by category. */
 export function ContractorSlide({ d }: { d: ContractorSlideData }) {
   const { audit, previous } = d;
   const band = bandFor(audit.totalScore);
