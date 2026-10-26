@@ -9,9 +9,14 @@ const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const obs = (o: Partial<Observation>): Observation => ({ id: 'x', auditId: 'a', itemCode: null, kind: 'site', text: '', category: null, hasPhoto: false, ...o });
 
 describe('hazardOf', () => {
-  test('B4/B5 items are permits & utility clearance, whatever the text says', () => {
-    expect(hazardOf(obs({ kind: 'negative', itemCode: 'B4.2', text: 'No hot work permit' }))).toBe('permits');
-    expect(hazardOf(obs({ kind: 'negative', itemCode: 'B5.1', text: 'Excavation without clearance' }))).toBe('permits');
+  test('keyword first: a permit / utility item naming a hazard goes to that hazard', () => {
+    expect(hazardOf(obs({ kind: 'negative', itemCode: 'B4.2', text: 'No hot work permit' }))).toBe('hotwork');
+    expect(hazardOf(obs({ kind: 'negative', itemCode: 'B5.1', text: 'Excavation without utility clearance' }))).toBe('excavation');
+    expect(hazardOf(obs({ kind: 'negative', itemCode: 'B4.1', text: 'Lifting plan missing for the crane' }))).toBe('lifting');
+  });
+  test('a permit / utility item naming no hazard is permits & utility clearance', () => {
+    expect(hazardOf(obs({ kind: 'negative', itemCode: 'B4.1', text: 'Permit to work not displayed' }))).toBe('permits');
+    expect(hazardOf(obs({ kind: 'negative', itemCode: 'B5.3', text: 'Clearance form unsigned' }))).toBe('permits');
   });
   test('site findings go to the keyword family that appears first', () => {
     expect(hazardOf(obs({ text: 'Mobile crane lifting near the trench' }))).toBe('lifting');
@@ -37,7 +42,10 @@ describe('highRiskByHazard', () => {
     expect(rows.map((r) => r.hazard)).toEqual(HAZARDS.map((h) => h.id));
     expect(rows.reduce((s, r) => s + r.count, 0)).toBe(127);
     expect(rows.reduce((s, r) => s + r.share, 0)).toBeCloseTo(1, 9);
-    expect(rows.find((r) => r.hazard === 'permits')!.count).toBeGreaterThan(0);
+    // keyword first: permits holds only permit / utility items that name no hazard
+    expect(Object.fromEntries(rows.map((r) => [r.hazard, r.count]))).toEqual({
+      lifting: 9, height: 18, electrical: 28, excavation: 34, confined: 2, hotwork: 14, permits: 22, other: 0,
+    });
   });
   test('sums hold under quarter and region filters', () => {
     for (const f of [{ ...ALL, quarter: 'Q4-2025' }, { ...ALL, quarter: 'Q1-2026' }, { ...ALL, regions: ['SR2'] }] as Filter[]) {

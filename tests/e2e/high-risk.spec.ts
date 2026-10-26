@@ -91,6 +91,9 @@ test('by hazard: plain labels with count and %, buckets sum to 127', async ({ pa
     await expect(row).toContainText(h.label);
     await expect(row).toContainText(`${Math.round(h.share * 100)}%`);
   }
+  // keyword first: a permit item naming a hazard counts under that hazard; permits keeps only the rest
+  await expect(page.locator('[data-testid="hazard"][data-hazard="excavation"]')).toHaveAttribute('data-count', '34');
+  await expect(page.locator('[data-testid="hazard"][data-hazard="permits"]')).toHaveAttribute('data-count', '22');
   await expect(page.getByTestId('hazard-segment')).toHaveCount(shown.length);
   await expect(page.getByTestId('hazard-center')).toHaveText('127');
 });

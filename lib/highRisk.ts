@@ -15,7 +15,8 @@ export type HazardId = 'lifting' | 'height' | 'electrical' | 'excavation' | 'con
 
 /**
  * The hazard types of /high-risk, in display order. The keyword families split HIGH_RISK_KEYWORDS (together they cover
- * every keyword); the permit / utility-clearance items (B4/B5) are a type of their own; "other" catches anything left.
+ * every keyword); permit / utility-clearance items (B4/B5) naming no hazard are a type of their own; "other" catches
+ * anything left.
  */
 export const HAZARDS: { id: HazardId; label: string; keywords?: RegExp }[] = [
   { id: 'lifting', label: 'Lifting & cranes', keywords: /\b(lifting|crane)/i },
@@ -31,17 +32,17 @@ export const HAZARDS: { id: HazardId; label: string; keywords?: RegExp }[] = [
 export const isHazardId = (s: string | null | undefined): s is HazardId => HAZARDS.some((h) => h.id === s);
 
 /**
- * The one hazard type of a high-risk observation. Permit / utility items (B4/B5) are "permits" (the checklist item is
- * what made them high-risk); a site finding goes to the keyword family that appears first in its text; else "other".
+ * The one hazard type of a high-risk observation, keyword first: the keyword family that appears first in its text
+ * (a hot work permit item is "Hot work & gas"); a permit / utility item (B4/B5) that names no hazard is "permits";
+ * anything else "other".
  */
 export function hazardOf(o: Observation): HazardId {
-  if (PERMIT_ITEM.test(o.itemCode ?? '')) return 'permits';
   let best: { id: HazardId; at: number } | null = null;
   for (const h of HAZARDS) {
     const m = h.keywords?.exec(o.text);
     if (m && (!best || m.index < best.at)) best = { id: h.id, at: m.index };
   }
-  return best?.id ?? 'other';
+  return best?.id ?? (PERMIT_ITEM.test(o.itemCode ?? '') ? 'permits' : 'other');
 }
 
 /** One contractor's high-risk findings per quarter of the filter (only quarters it was audited in). */
