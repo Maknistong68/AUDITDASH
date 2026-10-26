@@ -198,7 +198,15 @@ export function topIssues(repo: Repo, filter: Filter, n = 6): {
     return [{ itemCode: code, question: item.question, category: item.category, auditsHit: set.size, auditsTotal: audits.length, impact, byQuarter }];
   });
   rows.sort((a, b) => b.impact - a.impact || b.auditsHit - a.auditsHit || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
-  return rows.slice(0, n);
+  // at most one item per subsection key (highest impact wins; rows are already sorted)
+  const seen = new Set<string>();
+  const unique = rows.filter((r) => {
+    const key = items.get(r.itemCode)!.subsection ?? 'A';
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return unique.slice(0, n);
 }
 
 export function categoryDetail(repo: Repo, filter: Filter, cat: CategoryId): {

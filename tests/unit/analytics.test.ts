@@ -134,6 +134,13 @@ describe('topIssues', () => {
       expect(x.byQuarter['Q4-2025'] + x.byQuarter['Q1-2026']).toBe(x.auditsHit);
     });
   });
+  test('one item per subsection, still impact-sorted', () => {
+    const t = topIssues(repo, ALL);
+    const items = new Map(repo.checklist().map((i) => [i.code, i]));
+    const keys = t.map((x) => items.get(x.itemCode)!.subsection ?? 'A');
+    expect(new Set(keys).size).toBe(6);
+    for (let i = 1; i < t.length; i++) expect(t[i - 1].impact).toBeGreaterThanOrEqual(t[i].impact);
+  });
   test('empty filter -> []', () => expect(topIssues(repo, { quarter: 'all', regions: [] })).toEqual([]));
 });
 
