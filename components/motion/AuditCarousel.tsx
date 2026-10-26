@@ -194,7 +194,7 @@ export function AuditCarousel({
   );
 }
 
-function NavButton({ label, hint, disabled, onClick, children }: { label: string; hint: string; disabled: boolean; onClick: () => void; children: React.ReactNode }) {
+export function NavButton({ label, hint, disabled, onClick, children }: { label: string; hint: string; disabled: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"

@@ -435,6 +435,40 @@ export function mainProblem(repo: Repo, filter: Filter): {
   };
 }
 
+type CategoryCard = NonNullable<ReturnType<typeof mainProblem>>;
+
+/**
+ * The main-problem card's figures for any category: the same latest quarter, score-based gap, previous-quarter gap
+ * and top 3 driving items as mainProblem, so mainProblem's category gives exactly the dashboard card.
+ * Null when the filter has no audits or the category has no applicable item in that quarter.
+ */
+export function categoryCard(repo: Repo, filter: Filter, cat: CategoryId): CategoryCard | null {
+  return categoryCards(repo, filter).find((c) => c.category === cat) ?? null;
+}
+
+/**
+ * Every category's card (see categoryCard), worst latest-quarter gap first; ties keep the category order, so
+ * card #1 is mainProblem. Categories with no applicable item in that quarter are left out. [] for an empty filter.
+ */
+export function categoryCards(repo: Repo, filter: Filter): CategoryCard[] {
+  const audits = select(repo, filter);
+  if (!audits.length) return [];
+  const quarter = QUARTER_ORDER.filter((q) => audits.some((a) => a.quarter === q)).at(-1)!;
+  const qf: Filter = { ...filter, quarter };
+  const qi = QUARTER_ORDER.indexOf(quarter);
+  const prevAudits = qi > 0 ? select(repo, filter, QUARTER_ORDER[qi - 1]) : [];
+  return categoryGaps(repo, qf)
+    .filter((g): g is typeof g & { gapRate: number } => g.gapRate !== null)
+    .sort((a, b) => b.gapRate - a.gapRate)
+    .map((g) => ({
+      category: g.category,
+      gapRate: g.gapRate,
+      prevGapRate: prevAudits.length ? scoreGap(repo, prevAudits, g.category) : null,
+      quarter,
+      items: categoryDetail(repo, qf, g.category).items.slice(0, 3),
+    }));
+}
+
 /**
  * "Driven by": how much of the latest quarter's lost score each category accounts for (same quarter as mainProblem).
  *

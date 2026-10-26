@@ -76,3 +76,8 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
 ## 18. Owner feedback 2026-10-26 (front kept as approved; only these changes)
 1. **Main problem dark card — same design.** Make the gap % larger. Replace the "B6.1 / B6.4 / B6.5 + truncated question" rows with plain, informative lines (what the issue is, in words a director reads in 2 seconds, plus how many audits noted it). No codes.
 2. **Remove "Where it fails" from the bottom of the dashboard entirely.** Its category cards move to the page opened by clicking Main problem: an animated slider/carousel under the header with gradient and fading effect.
+
+## 19. Correction (owner, 2026-10-26) — replaces the §18.2 slider strip
+- Remove the strip of small category cards from the category page.
+- Use the **same dark Main-problem card** (same design as on the dashboard) at the top of the category page as card **#1** (worst category).
+- That same card is **movable/draggable** left/right to show **#2, #3, …** (next categories, same card design); the page content below follows the card shown.
