@@ -304,3 +304,50 @@ html.js [data-countup]:not([data-ready]) {
     scale: none !important;
   }
 }
+
+/*
+ * Print (the audit report is the page meant for paper): white page, light tokens whatever the theme, no frost,
+ * shadows or ambient wash, cards as hairline boxes, bars keep their colour, entries never split across pages.
+ * Navigation chrome (top bar, breadcrumb, tabs, chips, buttons) is hidden with Tailwind's print: variant.
+ */
+@media print {
+  :root,
+  :root[data-theme],
+  :root:not([data-theme="light"]) {
+    color-scheme: light;
+    --ground: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f5f5f7;
+    --fill: rgba(118, 118, 128, 0.12);
+    --fill-2: rgba(118, 118, 128, 0.08);
+    --hairline: rgba(0, 0, 0, 0.12);
+    --text: #000000;
+    --muted: #515154;
+    --faint: #6e6e73;
+    --bar: #2f6fe0;
+    --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
+    --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
+    --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #ff8a1f;
+    --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
+    --up: #1f7a36;
+    --down: #c0141c;
+    --gap: #e2533a;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #000000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .card {
+    box-shadow: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    break-inside: auto;
+  }
+  [data-testid="report-entry"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

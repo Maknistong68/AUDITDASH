@@ -20,7 +20,7 @@ function Mark() {
  */
 export function TopBar({ filter, detail = false }: { filter: Filter; detail?: boolean }) {
   return (
-    <header className="glass-bar sticky top-0 z-30 flex min-h-[var(--topbar)] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-[var(--gutter)] py-2 min-[1200px]:h-[var(--topbar)] min-[1200px]:py-0">
+    <header data-testid="topbar" className="glass-bar sticky top-0 z-30 flex print:hidden min-h-[var(--topbar)] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-[var(--gutter)] py-2 min-[1200px]:h-[var(--topbar)] min-[1200px]:py-0">
       {detail ? (
         <Link href={`/?${filterToQuery(filter)}`} className="flex min-w-0 items-center gap-2.5 rounded-lg" aria-label="HSE Audits overview">
           <Mark />

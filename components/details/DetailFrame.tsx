@@ -13,7 +13,7 @@ export function DetailFrame({ filter, crumbs, parent, children }: { filter: Filt
       <TopBar filter={filter} detail />
       <EscToParent href={parent} />
       <main data-testid="details" className="flex flex-col pb-[clamp(28px,5svh,64px)] pt-[clamp(8px,1.4svh,18px)]">
-        <div className="px-[var(--gutter)] pb-[clamp(6px,1svh,12px)]">
+        <div className="px-[var(--gutter)] pb-[clamp(6px,1svh,12px)] print:hidden">
           <Breadcrumb items={crumbs} />
         </div>
         {children}

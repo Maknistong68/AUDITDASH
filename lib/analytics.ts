@@ -531,3 +531,39 @@ export function isNaObservation(repo: Repo, o: Observation): boolean {
   const audit = repo.audits().find((a) => a.id === o.auditId);
   return !!audit && onNaItem(o, itemMap(repo), new Map([[audit.id, naSubsections(audit)]]));
 }
+
+// ---------------------------------------------------------------- audit report
+
+/** The official subsection rows of the report table, in report order (the A/B/C totals are shown as bars). */
+const REPORT_SECTIONS = ['A', ...Array.from({ length: 12 }, (_, i) => `B${i + 1}`), 'C1', 'C2'];
+
+export interface AuditReport {
+  /** Chronologically previous audit of the same contractor (any region or quarter); null for a first audit. */
+  previous: Audit | null;
+  /** A, B1..B12, C1, C2: official possible / scored; ratio null when not applicable (possible 0). */
+  sections: { code: string; label: string; possible: number; scored: number; ratio: number | null }[];
+  /** Negative observations and site findings in report order, N/A-subsection notes excluded. */
+  negatives: Observation[];
+  positives: Observation[];
+}
+
+/** Everything the full audit report shows for one audit (the official total score is read, never recomputed). */
+export function auditReport(repo: Repo, audit: Audit): AuditReport {
+  const chrono = select(repo, { quarter: 'all', regions: ['SR1', 'SR2'], contractorId: audit.contractorId }, 'all');
+  const i = chrono.findIndex((a) => a.id === audit.id);
+  const obs = obsByAudit(repo, [audit]);
+  const items = itemMap(repo);
+  const na = new Map([[audit.id, naSubsections(audit)]]);
+  const sections = REPORT_SECTIONS.flatMap((code) => {
+    const s = audit.sections.find((x) => x.code === code);
+    if (!s) return [];
+    const label = code === 'A' ? 'Management' : s.label;
+    return [{ code, label, possible: s.possible, scored: s.scored, ratio: s.possible > 0 ? s.scored / s.possible : null }];
+  });
+  return {
+    previous: i > 0 ? chrono[i - 1] : null,
+    sections,
+    negatives: obs.filter((o) => (o.kind === 'negative' || o.kind === 'site') && !onNaItem(o, items, na)),
+    positives: obs.filter((o) => o.kind === 'positive'),
+  };
+}
