@@ -117,3 +117,5 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
   marked COMPLIANT / N/A in the evidence column, and its section lost points in that audit (Q4 2025 notes proved exact
   against ABYATONA-1112's Part 1: 50 notes = 50 Partial/No). Repeat = finding in a contractor's audit and again in its
   next audit; "times repeated" counts consecutive repeats. Labelled "based on auditor notes".
+- Owner decision 2026-10-27: SIBS's two Q4 2025 audits (12 Nov and 19 Nov) are treated as ONE Q4 visit for repeats —
+  a finding in either counts once — so SIBS has a single Q4 → Q1 comparison.
