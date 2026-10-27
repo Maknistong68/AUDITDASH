@@ -32,6 +32,21 @@ describe('contractorCards', () => {
     const A = a.sections.find((s) => s.code === 'A')!;
     expect(c.rings.A).toBeCloseTo(A.scored / A.possible, 10);
   });
+  test('history: every audit of the contractor in date order, quarter filter ignored, regions respected', () => {
+    for (const f of [ALL, { ...ALL, quarter: 'Q1-2026' } as Filter, { ...ALL, quarter: 'Q4-2025' } as Filter]) {
+      const cards = contractorCards(repo, f);
+      const jv = cards.find((x) => x.contractor.id === '4800001131')!;
+      expect(jv.history.map((h) => h.total)).toEqual([0.74, 0.85]);
+      for (const c of cards) {
+        const all = repo.audits().filter((a) => a.contractorId === c.contractor.id);
+        expect(c.history).toHaveLength(all.length);
+        expect(c.history.map((h) => h.date)).toEqual([...c.history.map((h) => h.date)].sort());
+      }
+    }
+    const nbc = contractorCards(repo, ALL).find((x) => x.contractor.name === 'NBC')!;
+    expect(nbc.history).toHaveLength(1);
+    expect(contractorCards(repo, { ...ALL, regions: ['SR1'] }).every((c) => c.contractor.subregion === 'SR1')).toBe(true);
+  });
   test('empty -> []', () => expect(contractorCards(repo, NONE)).toEqual([]));
 });
 

@@ -2,8 +2,8 @@ import { getRepo } from '@/lib/data/repo';
 import { href, toSearchParams, type SP } from '@/lib/details';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
-  bandDistribution, compareContractors, contractorCards, filterAudits, followUps, mainProblem, portfolioSummary,
-  positiveSummary, regionComparison, repeatFindings,
+  compareContractors, contractorCards, filterAudits, followUps, mainProblem, portfolioSummary, positiveSummary,
+  repeatFindings,
 } from '@/lib/analytics';
 import { MAX_COMPARE } from '@/lib/compare';
 import { TopBar } from '@/components/shell/TopBar';
@@ -15,8 +15,6 @@ import { MainProblemCard } from '@/components/bento/MainProblemCard';
 import { ScoreCard } from '@/components/bento/ScoreCard';
 import { RepeatsCard } from '@/components/bento/RepeatsCard';
 import { PositivesCard } from '@/components/bento/PositivesCard';
-import { BandsCard } from '@/components/bento/BandsCard';
-import { RegionCard } from '@/components/bento/RegionCard';
 import { TypeEmpty } from '@/components/shell/TypeEmpty';
 
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<SP> }) {
@@ -74,7 +72,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                       query={query}
                     />
                   )}
-                  <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} href={href('/audits', query)} />
+                  <ScoreCard avgScore={summary.avgScore} band={summary.band} audits={summary.audits} byQuarter={byQuarter} href={href('/audits', query)} />
                   <RepeatsCard
                     repeats={repeats ? repeats.length : null}
                     questions={new Set(repeats?.map((r) => r.itemCode)).size}
@@ -83,8 +81,6 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                     href={href('/repeats', query)}
                   />
                   <PositivesCard summary={positiveSummary(repo, filter)} href={href('/positives', query)} />
-                  <BandsCard bands={bandDistribution(repo, filter)} href={`${href('/audits', query)}&focus=bands`} />
-                  <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} href={`${href('/audits', query)}&focus=regions`} />
                 </>
               }
             />

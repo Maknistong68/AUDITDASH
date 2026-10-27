@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { BandBar } from '@/components/bento/BandsCard';
+import { BandBar } from '@/components/charts/BandBar';
 import { QuarterBar } from '@/components/charts/QuarterBar';
 import { Signed } from '@/components/bento/parts';
 import { HandoffLanding } from '@/components/motion/HandoffLink';

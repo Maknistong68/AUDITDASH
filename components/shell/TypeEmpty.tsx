@@ -19,7 +19,7 @@ export function TypeEmpty({ type }: { type: AuditType }) {
         <p className="text-[15px] font-semibold text-muted">{info.label}</p>
         <h2 id="type-empty-title" className="text-[clamp(28px,4.4svh,44px)] font-semibold leading-[1.05] tracking-[-0.035em]">No audits yet</h2>
         <p className="mx-auto max-w-[42ch] text-[15px] leading-snug text-muted">
-          {info.label} audits entered here will fill this dashboard: score, main problem, trends and open actions.
+          {info.label} audits entered here will fill this dashboard: score, main problem and trends.
         </p>
       </div>
       <NewAuditButton type={type} size="lg" />

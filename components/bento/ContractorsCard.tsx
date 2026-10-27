@@ -7,6 +7,7 @@ import { CountUp } from '@/components/motion/CountUp';
 import { HandoffLink } from '@/components/motion/HandoffLink';
 import { CompareTray, type CompareEntry } from '@/components/sections/CompareTray';
 import { MAX_COMPARE, parseCompare, toggleCompare, withCompare } from '@/lib/compare';
+import { Sparkline, trendLabel } from '@/components/charts/Trend';
 import { CONTRACTOR_NAME, CONTRACTOR_SCORE } from '@/lib/handoff';
 import { bandShort, bandTone, deltaPoints, pct, prevQuarterShort } from '@/lib/format';
 import type { ContractorCard as Card } from '@/lib/analytics';
@@ -15,8 +16,8 @@ import { SPRING, TileLabel } from './BentoGrid';
 const whole = (n: number) => String(Math.round(n));
 const BAND_TICKS = [0.6, 0.7, 0.8, 0.9];
 
-/** Δ in whole points vs the previous audit (computed from the displayed totals); nothing without a previous. */
-export function Delta({ total, previous, auditId, size = 13, bare = false }: { total: number; previous: number | null; auditId: string; size?: number; bare?: boolean }) {
+/** Δ in whole points vs the previous audit (computed from the displayed totals); nothing without a previous. Used by the compare tray. */
+export function Delta({ total, previous, auditId, size = 13 }: { total: number; previous: number | null; auditId: string; size?: number }) {
   const d = deltaPoints(total, previous);
   if (d === null) return null;
   const vs = prevQuarterShort(auditId);
@@ -33,7 +34,7 @@ export function Delta({ total, previous, auditId, size = 13, bare = false }: { t
         {d > 0 ? '+' : d < 0 ? '−' : '±'}
         {Math.abs(d)}
       </span>
-      {vs && !bare && <span className="ml-0.5 font-normal text-muted">vs {vs}</span>}
+      {vs && <span className="ml-0.5 font-normal text-muted">vs {vs}</span>}
     </span>
   );
 }
@@ -56,7 +57,8 @@ function Row({
   animateIn: boolean;
 }) {
   const reduce = useReducedMotion();
-  const { contractor, total, band, previous, rank, auditId } = card;
+  const { contractor, total, band, rank, history } = card;
+  const scores = history.map((h) => h.total);
   const tone = bandTone(band);
   const delay = animateIn ? 0.2 + i * 0.04 : 0;
   return (
@@ -69,7 +71,7 @@ function Row({
       data-testid="contractor-row"
       data-handoff-card=""
       data-score={total}
-      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.6em_minmax(0,1.6fr)_minmax(0,1fr)_3.3em_6.4em_3.6em_24px] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
+      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.6em_minmax(0,1.6fr)_minmax(0,1fr)_3.3em_6.4em_60px_24px] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
         selected ? 'bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]' : ''
       }`}
     >
@@ -103,8 +105,8 @@ function Row({
           {bandShort(band)}
         </span>
       </span>
-      <span className="flex justify-start">
-        <Delta total={total} previous={previous} auditId={auditId} size={13} bare />
+      <span className="flex justify-start" title={`Audit scores, oldest first: ${trendLabel(scores)}`}>
+        <Sparkline values={scores} delay={delay + 0.2} />
       </span>
       <HandoffLink
         href={`/contractor/${contractor.id}${query}`}
@@ -175,7 +177,7 @@ export function ContractorsCard({ cards, compare }: { cards: Card[]; compare: Re
         </div>
         <TileLabel className="!font-normal">
           <span aria-live="polite">
-            {selected.length === 0 ? 'Latest audit · Δ vs Q4 · + to compare' : `${selected.length} of ${MAX_COMPARE} selected to compare`}
+            {selected.length === 0 ? 'Latest audit · score trend · + to compare' : `${selected.length} of ${MAX_COMPARE} selected to compare`}
           </span>
         </TileLabel>
       </div>

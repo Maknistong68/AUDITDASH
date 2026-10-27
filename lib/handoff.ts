@@ -16,7 +16,7 @@ export const REPEATS_FIGURE = 'rp-figure';
 /** Positive observations card → the /positives header strip, and its figure → the header figure. */
 export const POSITIVES_CARD = 'po-card';
 export const POSITIVES_FIGURE = 'po-figure';
-/** Portfolio score card → the /audits header strip, and its figure → the header figure; the Bands and Region cards → their panels. */
+/** Portfolio score card → the /audits header strip, and its figure → the header figure. The /audits bands and regions panels keep their own names. */
 export const PORTFOLIO_CARD = 'ps-card';
 export const PORTFOLIO_FIGURE = 'ps-figure';
 export const BANDS_CARD = 'ps-bands';

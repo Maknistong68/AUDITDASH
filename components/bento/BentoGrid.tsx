@@ -61,14 +61,14 @@ export function TileLabel({ children, tone, className = '' }: { children: React.
 
 /**
  * Bento layout. ≥1200px: XL contractors tile on the left at full hero height; the right half is a 6-column
- * grid: L main problem (6) / M score (3) + M repeats (3) / S positives, bands, region (2 each).
+ * grid: L main problem (6) / M portfolio score (3) + M repeats (3) / wide positives (6). Bands and regions live on /audits.
  * Narrower: everything stacks and the page scrolls.
  */
 export function BentoGrid({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   return (
     <div className="grid min-h-0 flex-1 grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:grid-cols-[minmax(0,1.18fr)_minmax(0,1fr)]">
       {left}
-      <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[640px]:grid-cols-6 min-[1200px]:grid-rows-[minmax(0,1.38fr)_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[640px]:grid-cols-6 min-[1200px]:grid-rows-[minmax(0,1.5fr)_minmax(0,1fr)_auto]">
         {right}
       </div>
     </div>

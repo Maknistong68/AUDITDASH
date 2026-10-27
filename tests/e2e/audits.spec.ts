@@ -66,21 +66,15 @@ test('the Portfolio score card opens /audits with a ~1 s shared hand-off; the he
   await expect.poll(() => page.evaluate(() => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement).length)).toBe(0);
 });
 
-for (const [testid, focus, panel] of [['kpi-bands', 'bands', 'audits-bands'], ['region-compare', 'regions', 'audits-regions']] as const) {
-  test(`the ${testid} card lands on /audits with its panel highlighted (focus=${focus})`, async ({ page }) => {
+for (const [focus, panel] of [['bands', 'audits-bands'], ['regions', 'audits-regions']] as const) {
+  test(`/audits?focus=${focus} highlights its panel briefly`, async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 768 });
-    await page.goto('/');
-    const card = page.getByTestId(testid);
-    await expect(card.getByTestId('card-chevron')).toHaveCount(1);
-    await watchTransitions(page);
-    await card.getByRole('link').click();
-    await expect(page).toHaveURL(new RegExp(`/audits\\?${Q}&focus=${focus}$`));
+    await page.goto(`/audits?${Q}&focus=${focus}`);
     await expect(page.getByTestId(panel)).toHaveAttribute('data-focused', 'true');
     await expect(page.getByTestId(panel)).toHaveClass(/ps-focus/);
     const other = panel === 'audits-bands' ? 'audits-regions' : 'audits-bands';
     await expect(page.getByTestId(other)).not.toHaveAttribute('data-focused', 'true');
     await expect(page.getByTestId('audits-figure')).toHaveText('67%');
-    expect((await transitions(page)).handoffs).toBe(1);
     // the highlight is brief
     await expect(page.getByTestId(panel)).not.toHaveAttribute('data-focused', 'true', { timeout: 6000 });
   });
@@ -190,17 +184,15 @@ test('/audits: Esc returns to the overview with the filter', async ({ page }) =>
   await expect(page).toHaveURL(/\/\?q=Q1-2026&r=SR1$/);
 });
 
-test('reduced motion: the three cards still navigate, with no transition', async ({ browser }) => {
+test('reduced motion: the Portfolio card still navigates, with no transition', async ({ browser }) => {
   const ctx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1366, height: 768 } });
   const page = await ctx.newPage();
-  for (const [testid, suffix] of [['kpi-score', ''], ['kpi-bands', '&focus=bands'], ['region-compare', '&focus=regions']] as const) {
-    await page.goto('/');
-    await watchTransitions(page);
-    await page.getByTestId(testid).getByRole('link').click();
-    await expect(page).toHaveURL(new RegExp(`/audits\\?${Q}${suffix}$`));
-    await expect(page.getByTestId('audits-figure')).toHaveText('67%');
-    expect((await transitions(page)).handoffs).toBe(0);
-  }
+  await page.goto('/');
+  await watchTransitions(page);
+  await page.getByTestId('kpi-score').getByRole('link').click();
+  await expect(page).toHaveURL(new RegExp(`/audits\\?${Q}$`));
+  await expect(page.getByTestId('audits-figure')).toHaveText('67%');
+  expect((await transitions(page)).handoffs).toBe(0);
   await ctx.close();
 });
 
@@ -239,13 +231,10 @@ test('/audits under a non-H&S type, an empty filter or an empty band: calm empty
   await noPageScroll(page);
 });
 
-test('units and names: timeline scores in %, region changes in pts, Score/Bands/Region cards all "Open portfolio"', async ({ page }) => {
+test('units and names: timeline scores in %, region changes in pts, the Portfolio card reads "Open portfolio"', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
-  for (const id of ['kpi-score', 'kpi-bands', 'region-compare']) {
-    await expect(page.getByTestId(id).getByRole('link').first()).toHaveAttribute('aria-label', /\. Open portfolio$/);
-  }
-  for (const t of await page.getByTestId('region-row').allInnerTexts()) if (/[+−±]\d/.test(t)) expect(t).toMatch(/[+−±]\d+ pts?/);
+  await expect(page.getByTestId('kpi-score').getByRole('link').first()).toHaveAttribute('aria-label', /\. Open portfolio$/);
   await page.goto('/audits?q=all&r=SR1%2CSR2');
   for (const t of (await page.getByTestId('audit-dot').allInnerTexts()).slice(0, 6)) expect(t.trim()).toMatch(/^\d+%$/);
   for (const t of await page.getByTestId('region-filter').allInnerTexts()) if (/[+−±]\d/.test(t)) expect(t).toMatch(/[+−±]\d+ pts?/);

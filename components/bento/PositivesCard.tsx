@@ -8,7 +8,7 @@ import { BentoCard, TileLabel } from './BentoGrid';
 import { BIG, CardChevron, PAD } from './parts';
 
 /**
- * S: positive observations (good practice the auditors noted), with how widely they were recorded: a bar of the audits
+ * Wide (the bento's bottom row): positive observations (good practice the auditors noted), with how widely they were recorded: a bar of the audits
  * that noted at least one, and the contractors behind them. Coverage, not a quarter trend: how many positives an auditor
  * writes down varies by auditor more than by site. The whole tile opens /positives with the shared hand-off: the tile
  * grows into the view's header strip and the figure flies into its header figure (lib/handoff).
@@ -20,7 +20,7 @@ export function PositivesCard({ summary, href }: {
   const reduce = useReducedMotion();
   const { total, audits, auditsWith, contractors, contractorsWith } = summary;
   return (
-    <BentoCard i={4} testid="kpi-positives" handoff={POSITIVES_CARD} className={`tone-good ${PAD} lift group justify-between gap-1 min-[640px]:col-span-2`}>
+    <BentoCard i={4} testid="kpi-positives" handoff={POSITIVES_CARD} className={`tone-good ${PAD} lift group justify-between gap-1 min-[640px]:col-span-6`}>
       <HandoffLink
         href={href}
         aria-label={`Positive observations: ${total}, in ${auditsWith} of ${audits} audits. Open details`}
@@ -28,10 +28,11 @@ export function PositivesCard({ summary, href }: {
       />
       <CardChevron />
       <TileLabel tone="var(--tone)" className="pr-8">Positive observations</TileLabel>
-      <p data-testid="positives-count" data-handoff={POSITIVES_FIGURE} className={BIG}>
+      <div className="flex flex-col gap-1 min-[640px]:flex-row min-[640px]:items-end min-[640px]:gap-[clamp(16px,2vw,40px)]">
+      <p data-testid="positives-count" data-handoff={POSITIVES_FIGURE} className={`${BIG} shrink-0`}>
         <CountUp value={total} format={int} duration={1.2} delay={0.36} />
       </p>
-      <div className="flex flex-col gap-1.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 min-[640px]:pb-[clamp(6px,1.2svh,14px)]">
         <span
           role="img"
           aria-label={`Noted in ${auditsWith} of ${audits} audits`}
@@ -50,6 +51,7 @@ export function PositivesCard({ summary, href }: {
           <span className="whitespace-nowrap"><span className="num font-semibold text-ink">{auditsWith}</span> of {audits} audits</span> ·{' '}
           <span className="whitespace-nowrap"><span className="num font-semibold text-ink">{contractorsWith}</span> of {contractors} contractors</span>
         </p>
+      </div>
       </div>
     </BentoCard>
   );

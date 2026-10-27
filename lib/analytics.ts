@@ -259,6 +259,8 @@ export function itemHistory(repo: Repo, contractorId: string, itemCode: string):
 export interface ContractorCard {
   contractor: Contractor; auditId: string; total: number; band: Band;
   rings: { A: number | null; B: number | null; C: number | null }; previous: number | null; rank: number;
+  /** Every audit score of this contractor in date order: regions respected, quarter filter ignored (the row sparkline). */
+  history: { auditId: string; date: string; total: number }[];
 }
 
 const ring = (a: Audit, code: string): number | null => {
@@ -269,6 +271,7 @@ const ring = (a: Audit, code: string): number | null => {
 /** One card per contractor with a filtered audit (latest), best first; ties share a rank. */
 export function contractorCards(repo: Repo, filter: Filter): ContractorCard[] {
   const audits = select(repo, filter);
+  const pool = select(repo, filter, 'all');
   const cards: ContractorCard[] = [];
   let prevTotal: number | null = null;
   let rank = 0;
@@ -279,6 +282,7 @@ export function contractorCards(repo: Repo, filter: Filter): ContractorCard[] {
     cards.push({
       contractor: row.contractor, auditId: latest.id, total: latest.totalScore, band: bandFor(latest.totalScore),
       rings: { A: ring(latest, 'A'), B: ring(latest, 'B'), C: ring(latest, 'C') }, previous: row.previous, rank,
+      history: pool.filter((a) => a.contractorId === row.contractor.id).map((a) => ({ auditId: a.id, date: a.date, total: a.totalScore })),
     });
   });
   return cards;
