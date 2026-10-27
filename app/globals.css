@@ -34,10 +34,10 @@
   --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
   /* --minimal-dot fills bars and dots (graphics): #d96c00 is 3.45:1 on white (WCAG 1.4.11 >= 3:1), same orange hue. */
   --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #d96c00;
-  /* /repeats dot tint by score lost (darker = more lost), RepeatsView: every step >= 3:1 on the white card (3.4 to 12.2) */
-  --rp-0: #d4700f; --rp-1: #b35a0c; --rp-2: #8a430a; --rp-3: #552a04;
-  /* Outline of the washed segments of the repeats reach bar: the full orange, >= 3:1 on white. None in dark. */
-  --seg-edge: var(--minimal-dot);
+  /* /repeats heat map fill by times repeated (1, 2, 3, 4+): one warm hue, light → dark, every step >= 3:1 on the white
+     card (3.45 to 13.9); --heat-on-* is the number's ink on that fill (>= 4.5:1). Ordinal ramp, dataviz-validated. */
+  --heat-1: #d96c00; --heat-2: #a3480a; --heat-3: #7a3407; --heat-4: #4f2003;
+  --heat-on-1: #1d1d1f; --heat-on-2: #ffffff; --heat-on-3: #ffffff; --heat-on-4: #ffffff;
   --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
   --up: #1f7a36;
   --down: #c0141c;
@@ -97,8 +97,9 @@
   --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
   --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
   --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
-  /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
-  --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18; --seg-edge: transparent;
+  /* /repeats heat map on the dark card: more repeats = brighter; the dimmest step is 3.66:1 on --surface */
+  --heat-1: #b85a18; --heat-2: #e2782a; --heat-3: #f59a45; --heat-4: #ffd6ad;
+  --heat-on-1: #ffffff; --heat-on-2: #000000; --heat-on-3: #000000; --heat-on-4: #000000;
   --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
   --up: #4fdc78;
   --down: #ff7b72;
@@ -139,7 +140,8 @@
     --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
     --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
     /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
-    --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18; --seg-edge: transparent;
+    --heat-1: #b85a18; --heat-2: #e2782a; --heat-3: #f59a45; --heat-4: #ffd6ad;
+    --heat-on-1: #ffffff; --heat-on-2: #000000; --heat-on-3: #000000; --heat-on-4: #000000;
     --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
     --up: #4fdc78;
     --down: #ff7b72;
@@ -430,7 +432,7 @@ html.js [data-countup]:not([data-ready]) {
   0% { opacity: 1; }
   40%, 100% { opacity: 0; }
 }
-/* /repeats: the matrix dots pop in, staggered by --d, as the hand-off lands; .rp-grow bars (the /positives contractor
+/* /repeats: the heat-map cells pop in, staggered by --d, as the hand-off lands (also the /audits dots); .rp-grow bars (the /positives contractor
    bars) grow from the left. */
 .rp-dot {
   animation: rp-pop 520ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms) both;
@@ -454,6 +456,27 @@ html.js [data-countup]:not([data-ready]) {
   18%, 70% { box-shadow: var(--shadow-card), 0 0 0 3px var(--accent); }
   100% { box-shadow: var(--shadow-card), 0 0 0 0 transparent; }
 }
+/* /repeats heat map (RepeatsView): Excel-like cells. The grid scrolls inside its card; the header row, the label column
+   and the totals row stay put (sticky, on the card's own surface so cells pass under them). */
+.heat { --heat-row: clamp(22px, 2.75svh, 30px); }
+.heat .heat-head { position: sticky; top: 0; z-index: 2; background: var(--surface); }
+.heat .heat-corner { left: 0; z-index: 3; }
+.heat .heat-label-cell,
+.heat .heat-corner-foot { position: sticky; left: 0; z-index: 1; background: var(--surface); }
+.heat .heat-corner-foot { z-index: 3; }
+.heat .heat-foot { position: sticky; bottom: 0; z-index: 2; background: var(--surface); height: calc(var(--heat-row) + 8px); padding-top: 4px; }
+.heat .heat-group { height: calc(var(--heat-row) * 0.95); padding-top: 6px; vertical-align: bottom; }
+.heat .heat-sticky-label { position: sticky; left: 8px; }
+.heat .heat-fill { height: calc(var(--heat-row) - 3px); }
+.heat .heat-empty { background: var(--fill-2); }
+.heat .heat-label { line-height: calc(var(--heat-row) - 3px); }
+.heat .heat-fill:focus-visible { outline-offset: 1px; }
+.heat a.heat-fill { transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1); }
+.heat a.heat-fill:hover { transform: scale(1.06); }
+/* crosshair: the hovered cell's row label and column head */
+.heat tr[data-hot] .heat-label { background: var(--fill-2); }
+.heat th[data-hot] .heat-col-link { background: var(--fill-2); }
+.heat td[data-hot] { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
 @keyframes rp-pop {
   from { opacity: 0; transform: scale(0.2); }
   to { opacity: 1; transform: scale(1); }
@@ -534,8 +557,9 @@ html.js [data-countup]:not([data-ready]) {
     --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
     --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
     --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #d96c00;
-    /* /repeats dot tint by score lost (darker = more lost), RepeatsView */
-    --rp-0: #d4700f; --rp-1: #b35a0c; --rp-2: #8a430a; --rp-3: #552a04;
+    /* /repeats heat map fill (RepeatsView) */
+    --heat-1: #d96c00; --heat-2: #a3480a; --heat-3: #7a3407; --heat-4: #4f2003;
+    --heat-on-1: #1d1d1f; --heat-on-2: #ffffff; --heat-on-3: #ffffff; --heat-on-4: #ffffff;
     --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
     --up: #1f7a36;
     --down: #c0141c;

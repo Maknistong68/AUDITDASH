@@ -13,5 +13,7 @@ export interface TypeSection { code: string; title: string; category: string | n
 export interface Contractor { id: string; name: string; contractNo: string; subregion: Subregion }
 export interface SectionScore { code: string; label: string; possible: number; scored: number }
 export interface Audit { id: string; type?: AuditType; contractorId: string; quarter: Quarter; date: string; location: string; inspectionNo: string; auditors: string[]; totalScore: number; sections: SectionScore[] }
-export interface Observation { id: string; auditId: string; itemCode: string | null; kind: 'negative'|'positive'|'site'; text: string; category: CategoryId | null; hasPhoto: boolean }
+export interface Observation { id: string; auditId: string; itemCode: string | null; kind: 'negative'|'positive'|'site'; text: string; category: CategoryId | null; hasPhoto: boolean;
+  /** Evidence-column marker on the SR# row: the auditor typed COMPLIANT or N/A there (not a finding). Absent = none. */
+  marker?: 'compliant' | 'na' | null }
 export interface Filter { quarter: Quarter | 'all'; regions: Subregion[]; contractorId?: string; type?: AuditType }  // contractorId not in URL; used by contractor profile

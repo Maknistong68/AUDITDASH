@@ -175,3 +175,46 @@ def test_crc_thirteen_areas(typed):
 def test_lifting_site_finding_maps_to_site():
     assert category_for(None, 'site', 'Lifting operation without a lift plan') == 'site'
     assert category_for('B4.1', 'negative', 'x') == 'documents'
+
+
+# --------------------------------------------------------------------------- evidence markers (COMPLIANT / N/A)
+
+NBC_Q1 = "4200000026-Q1-2026-20260208"
+
+
+@pytest.fixture(scope="session")
+def marker_tally():
+    tally = {}
+    checklist = import_excel.parse_checklist(CHECKLIST)
+    import_excel.parse_results(RESULTS, checklist, CHECKLIST, tally)
+    return tally
+
+
+@pytest.mark.parametrize("cells, expected", [
+    (["COMPLIANT"], "compliant"), (["Compliant"], "compliant"), (["compliant - see photo"], "compliant"),
+    (["NON-COMPLIANT"], None), (["Non Compliant"], None), (["non-compliant"], None),
+    (["N/A"], "na"), (["NA"], "na"), (["na"], "na"), (["Not Applicable"], "na"), (["NOT APPLICABLE - no rigs"], "na"),
+    (["Picture"], None), (["First audit schedule in first quarter"], None), (["Addressed in A9"], None),
+    ([None, 3, "Picture", "COMPLIANT"], "compliant"), ([], None), (["NATIONAL standard"], None),
+])
+def test_evidence_marker(cells, expected):
+    assert import_excel.evidence_marker(cells) == expected
+
+
+def test_nbc_q1_markers(marker_tally):
+    t = marker_tally[NBC_Q1]
+    assert t["compliant"] >= 16 and t["na"] >= 10, t
+
+
+def test_marker_totals_reported_per_audit(marker_tally, seed):
+    assert set(marker_tally) == {a["id"] for a in seed.audits}
+    assert all(set(t) == {"compliant", "na"} for t in marker_tally.values())
+    assert sum(t["compliant"] for t in marker_tally.values()) > sum(t["na"] for t in marker_tally.values()) > 0
+
+
+def test_observations_carry_marker(seed):
+    assert all(o["marker"] in (None, "compliant", "na") for o in seed.observations)
+    nbc = {o["itemCode"]: o["marker"] for o in seed.observations if o["auditId"] == NBC_Q1 and o["itemCode"]}
+    assert nbc["B2.2"] == nbc["B3.1"] == nbc["C2.16"] == "compliant"
+    assert nbc["B6.1"] == "na"
+    assert nbc["A1"] is None

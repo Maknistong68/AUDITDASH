@@ -3,7 +3,7 @@ import { href, toSearchParams, type SP } from '@/lib/details';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
   compareContractors, contractorCards, filterAudits, followUps, mainProblem, portfolioSummary, positiveSummary,
-  repeatFindings,
+  repeatMatrix,
 } from '@/lib/analytics';
 import { MAX_COMPARE } from '@/lib/compare';
 import { TopBar } from '@/components/shell/TopBar';
@@ -41,9 +41,9 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   }
 
   const problem = empty ? null : mainProblem(repo, filter);
-  // Repeat findings: the same question noted again at the contractor's next audit; null without a follow-up audit ("—").
+  // Repeat findings: a question that is a finding again at the contractor's next audit; null without a follow-up audit ("—").
   const pairs = empty ? [] : followUps(repo, filter);
-  const repeats = pairs.length ? repeatFindings(repo, filter) : null;
+  const matrix = pairs.length ? repeatMatrix(repo, filter) : null;
   const query = filterToQuery(filter);
   const byQuarter = QUARTERS.map((q) => ({ label: q.replace('-', ' '), value: portfolioSummary(repo, { ...filter, quarter: q }).avgScore }));
 
@@ -74,10 +74,8 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                   )}
                   <ScoreCard avgScore={summary.avgScore} band={summary.band} audits={summary.audits} byQuarter={byQuarter} href={href('/audits', query)} />
                   <RepeatsCard
-                    repeats={repeats ? repeats.length : null}
-                    questions={new Set(repeats?.map((r) => r.itemCode)).size}
-                    contractors={new Set(repeats?.map((r) => r.contractor.id)).size}
-                    followUps={pairs.length}
+                    repeats={matrix ? matrix.questions.reduce((s, q) => s + q.total, 0) : null}
+                    top={(matrix?.questions ?? []).slice(0, 3).map((q) => ({ key: q.itemCode, label: q.label, times: q.total }))}
                     href={href('/repeats', query)}
                   />
                   <PositivesCard summary={positiveSummary(repo, filter)} href={href('/positives', query)} />

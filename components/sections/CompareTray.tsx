@@ -174,7 +174,7 @@ export function CompareTray({
                           'No earlier audit to repeat'
                         ) : (
                           <>
-                            <span className="num font-semibold text-ink">{e.repeatCount}</span> repeated {e.repeatCount === 1 ? 'item' : 'items'}
+                            <span data-testid="compare-repeat-count" className="num font-semibold text-ink">{e.repeatCount}</span> repeated {e.repeatCount === 1 ? 'item' : 'items'}
                           </>
                         )}
                       </p>

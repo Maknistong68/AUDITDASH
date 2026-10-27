@@ -298,7 +298,7 @@ def _match_question(notes, questions):
     return None
 
 
-def _parse_observations(rows, start, audit_id, questions=(), findings=()):
+def _parse_observations(rows, start, audit_id, questions=(), findings=(), tally=None):
     hdr = _find(rows, start, "SR#")
     com = _find(rows, start, "Observation/Comment", hdr[0])
     sr_col, com_col = hdr[1], com[1]
@@ -310,6 +310,8 @@ def _parse_observations(rows, start, audit_id, questions=(), findings=()):
         text = row[start + com_col] if start + com_col < len(row) else None
         text = text.rstrip() if isinstance(text, str) and text.strip() else ""
         photo = any(o > com_col and "picture" in str(v).lower() for o, v in cells)
+        # The evidence cell and anything after it; a comment that is only "NA" / "COMPLIANT" says the same.
+        marker = evidence_marker(v for o, v in cells if o > com_col) or (evidence_marker([text]) if _BARE_MARK.match(text) else None)
         code = kind = None
         numbered = False
         sr = next((v for o, v in left if o == sr_col), None)
@@ -326,7 +328,7 @@ def _parse_observations(rows, start, audit_id, questions=(), findings=()):
         if kind:
             notes = " ".join(str(v) for o, v in left if o > sr_col and not _classify_kind(str(v)))
             entries.append({"kind": kind, "code": code, "numbered": numbered, "notes": notes,
-                            "parts": [text] if text else [], "photo": photo})
+                            "parts": [text] if text else [], "photo": photo, "marker": marker})
         elif entries and (text or photo):
             if text:
                 entries[-1]["parts"].append(text)
@@ -344,6 +346,12 @@ def _parse_observations(rows, start, audit_id, questions=(), findings=()):
                 e["code"] = (_match_question(e["notes"], questions)
                              or _match_comment(" ".join(e["parts"]), pool))
 
+    if tally is not None:  # evidence markers per SR# row of the block, kept observations or not
+        t = tally.setdefault(audit_id, {"compliant": 0, "na": 0})
+        for e in entries:
+            if e["code"] and e["marker"]:
+                t[e["marker"]] += 1
+
     # Template rows: a checklist code with no comment and no photo is not an observation.
     # Ids are numbered before dropping "Not Applicable" notes, so ids stay stable (gaps allowed).
     entries = [e for e in entries if e["parts"] or e["photo"]]
@@ -358,8 +366,34 @@ def _parse_observations(rows, start, audit_id, questions=(), findings=()):
             "text": text,
             "category": category_for(e["code"], e["kind"], text),
             "hasPhoto": e["photo"],
+            "marker": e["marker"],
         })
     return [o for o in out if not is_na_note(o["text"])]
+
+
+_COMPLIANT = re.compile(r"(?<![a-z])compliant(?![a-z])", re.I)
+_NON_COMPLIANT = re.compile(r"non[\s\-]*compliant", re.I)
+_NA_MARK = re.compile(r"^\W*(n\s*/\s*a|na|not\s+applicable)(?![a-z])", re.I)
+
+
+def evidence_marker(values):
+    """'compliant' / 'na' / None from the evidence cell(s) right of the comment on an SR# row.
+
+    Auditors type "COMPLIANT" (not "NON-COMPLIANT") or "N/A" / "NA" / "NOT APPLICABLE" there to say the item
+    needs no finding; anything else ("Picture", free text, a document name) is no marker. Case-insensitive.
+    """
+    for v in values:
+        if not isinstance(v, str):
+            continue
+        t = " ".join(v.split())
+        if _NA_MARK.match(t):
+            return "na"
+        if _COMPLIANT.search(t) and not _NON_COMPLIANT.search(t):
+            return "compliant"
+    return None
+
+
+_BARE_MARK = re.compile(r"^\W*(n\s*/\s*a|na|not\s+applicable|compliant)\W*$", re.I)
 
 
 _NA_NOTE = re.compile(r"^(not\s+applicable|n/a|na[ -])", re.I)
@@ -374,7 +408,9 @@ def is_na_note(text):
     return bool(_NA_NOTE.match(t)) or t.strip().lower() in ("n/a", "na", "not applicable")
 
 
-def parse_results(path, checklist=(), checklist_path=None):
+def parse_results(path, checklist=(), checklist_path=None, tally=None):
+    """(contractors, audits, observations). `tally`, when a dict, receives {auditId: {"compliant": n, "na": n}}:
+    the evidence markers on the SR# rows of each audit's block (rows without a comment included)."""
     questions = [(" ".join(i["question"].lower().split()), i["code"]) for i in checklist]
     wb = _load(path)
     findings = _summary_findings(checklist_path, checklist) if checklist_path else []
@@ -412,7 +448,7 @@ def parse_results(path, checklist=(), checklist_path=None):
             contractors.setdefault(info["contractNo"], {
                 "id": info["contractNo"], "name": info["name"],
                 "contractNo": info["contractNo"], "subregion": info["subregion"]})
-            observations.extend(_parse_observations(rows, start, audit_id, questions, findings))
+            observations.extend(_parse_observations(rows, start, audit_id, questions, findings, tally))
     order = {no: i for i, no in enumerate(CONTRACTS)}
     return (sorted(contractors.values(), key=lambda c: order[c["id"]]), audits, observations)
 
@@ -426,7 +462,8 @@ def main(argv=None):
     ap.add_argument("--out", required=True)
     args = ap.parse_args(argv)
     checklist = parse_checklist(args.checklist)
-    contractors, audits, observations = parse_results(args.results, checklist, args.checklist)
+    tally = {}
+    contractors, audits, observations = parse_results(args.results, checklist, args.checklist, tally)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for name, data in (("checklist", checklist), ("contractors", contractors),
@@ -436,6 +473,9 @@ def main(argv=None):
     for kind, doc in parse_all_checklists(args.checklist, checklist).items():
         (out / "checklists" / f"{kind}.json").write_text(
             json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    for audit_id, t in tally.items():
+        if t["compliant"] or t["na"]:
+            print(f"  {audit_id}: {t['compliant']} COMPLIANT, {t['na']} N/A evidence markers")
     print(f"{len(contractors)} contractors, {len(audits)} audits, "
           f"{len(observations)} observations, {len(checklist)} checklist items")
 

@@ -316,31 +316,68 @@ export function followUps(repo: Repo, filter: Filter): FollowUp[] {
   return out;
 }
 
+// ---------------------------------------------------------------- findings (interim rule) and repeats
+
+/** The scored subsection an item code sits in: 'A' for A items, else the code before the dot ('B5.1' → 'B5'). */
+export const subsectionOf = (itemCode: string): string => (itemCode.startsWith('A') ? 'A' : itemCode.split('.')[0]);
+
+/**
+ * Interim finding rule (owner direction §21, until Part 1 answers exist): an auditor note is a finding of its audit when
+ * it is an item note (negative, itemCode set), the evidence column was not marked COMPLIANT / N/A, it has text, and the
+ * item's subsection ('A' for A items) lost points in that audit (possible > 0 and scored < possible).
+ */
+export function isFinding(audit: Audit, o: Observation): boolean {
+  if (o.kind !== 'negative' || !o.itemCode || o.auditId !== audit.id) return false;
+  if (o.marker) return false;
+  if (!o.text.trim()) return false;
+  const code = subsectionOf(o.itemCode);
+  const sec = audit.sections.find((s) => s.code === code);
+  return !!sec && sec.possible > 0 && sec.scored < sec.possible;
+}
+
+/** Finding item codes per audit id (deduped per audit and item), for an explicit audit set. */
+function findingCodes(repo: Repo, audits: Audit[]): Map<string, Set<string>> {
+  const byId = new Map(audits.map((a) => [a.id, a]));
+  const items = itemMap(repo);
+  const out = new Map(audits.map((a) => [a.id, new Set<string>()]));
+  for (const o of repo.observations()) {
+    const a = byId.get(o.auditId);
+    if (a && items.has(o.itemCode ?? '') && isFinding(a, o)) out.get(a.id)!.add(o.itemCode!);
+  }
+  return out;
+}
+
+/** Findings of every audit in the filter: the distinct item codes (isFinding) per audit, in date order. */
+export function findingsByAudit(repo: Repo, filter: Filter): { audit: Audit; itemCodes: string[] }[] {
+  const audits = select(repo, filter);
+  const codes = findingCodes(repo, audits);
+  const num = (a: string, b: string) => a.localeCompare(b, undefined, { numeric: true });
+  return audits.map((audit) => ({ audit, itemCodes: [...codes.get(audit.id)!].sort(num) }));
+}
+
 export interface RepeatFinding {
   contractor: Contractor; itemCode: string; question: string; category: CategoryId; prevAuditId: string; auditId: string;
 }
 
 /**
- * Repeat findings: the same question noted in a contractor's audit AND in that contractor's previous audit of the same
- * type (followUps). Applicable item notes only (N/A subsections and site notes excluded). One row per follow-up pair and
- * question; worst contractor (lowest latest total in the filter) first, then date, then itemCode.
+ * Repeat findings: a question that is a finding (isFinding) in a contractor's audit AND in that contractor's previous
+ * audit of the same type (followUps). One row per follow-up pair and question, so a question repeated across three
+ * consecutive audits counts twice. Worst contractor (lowest latest total in the filter) first, then date, then itemCode.
  */
 export function repeatFindings(repo: Repo, filter: Filter): RepeatFinding[] {
   const pairs = followUps(repo, filter);
   if (!pairs.length) return [];
   const audits = [...new Map(pairs.flatMap((p) => [p.prev, p.next]).map((a) => [a.id, a])).values()];
   const items = itemMap(repo);
-  const noted = new Map<string, Set<string>>();
-  for (const o of itemNegatives(audits, obsByAudit(repo, audits), items)) (noted.get(o.auditId) ?? noted.set(o.auditId, new Set()).get(o.auditId)!).add(o.itemCode!);
+  const noted = findingCodes(repo, audits);
   const latest = new Map<string, number>();
   for (const p of pairs) latest.set(p.contractor.id, p.next.totalScore);
   const rows: { total: number; date: string; row: RepeatFinding }[] = [];
   for (const p of pairs) {
-    const before = noted.get(p.prev.id);
-    if (!before) continue;
-    for (const code of noted.get(p.next.id) ?? []) {
-      const item = items.get(code);
-      if (!item || !before.has(code)) continue;
+    const before = noted.get(p.prev.id)!;
+    for (const code of noted.get(p.next.id)!) {
+      const item = items.get(code)!;
+      if (!before.has(code)) continue;
       rows.push({
         total: latest.get(p.contractor.id)!,
         date: p.next.date,
@@ -399,11 +436,38 @@ export function repeatContractors(repo: Repo, filter: Filter): Contractor[] {
   return repo.contractors().filter((c) => ids.has(c.id)).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/** How widespread repeats are: questions per reach (contractors that repeated them), widest first. */
-export function repeatSpread(rows: RepeatQuestion[], of: number): { reach: number; of: number; questions: number }[] {
-  return [...new Set(rows.map((r) => r.contractorCount))]
-    .sort((a, b) => b - a)
-    .map((reach) => ({ reach, of, questions: rows.filter((r) => r.contractorCount === reach).length }));
+export interface RepeatMatrix {
+  /** Repeated questions: most repeats first, then category (CATEGORIES order), then code. */
+  questions: { itemCode: string; label: string; category: CategoryId; total: number }[];
+  /** Contractors with a follow-up audit in the filter (repeatContractors), most repeats first, then name. */
+  contractors: { id: string; name: string; total: number }[];
+  /** Times repeated per contractor and question (consecutive audit pairs it repeats in); absent = 0. */
+  cells: Record<string, Record<string, number>>;
+}
+
+/** repeatFindings as a questions × contractors grid of times repeated, with row and column totals. */
+export function repeatMatrix(repo: Repo, filter: Filter): RepeatMatrix {
+  const repeats = repeatFindings(repo, filter);
+  const cells: Record<string, Record<string, number>> = {};
+  const qTotal = new Map<string, RepeatFinding>();
+  const byQ = new Map<string, number>();
+  const byC = new Map<string, number>();
+  for (const r of repeats) {
+    const row = (cells[r.contractor.id] ??= {});
+    row[r.itemCode] = (row[r.itemCode] ?? 0) + 1;
+    qTotal.set(r.itemCode, r);
+    byQ.set(r.itemCode, (byQ.get(r.itemCode) ?? 0) + 1);
+    byC.set(r.contractor.id, (byC.get(r.contractor.id) ?? 0) + 1);
+  }
+  const catOrder = new Map(CATEGORIES.map((c, i) => [c.id, i]));
+  const questions = [...qTotal.values()]
+    .map((r) => ({ itemCode: r.itemCode, label: itemLabel(r.itemCode, r.question), category: r.category, total: byQ.get(r.itemCode)! }))
+    .sort((a, b) => b.total - a.total || catOrder.get(a.category)! - catOrder.get(b.category)!
+      || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
+  const contractors = repeatContractors(repo, filter)
+    .map((c) => ({ id: c.id, name: c.name, total: byC.get(c.id) ?? 0 }))
+    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name));
+  return { questions, contractors, cells };
 }
 
 // ---------------------------------------------------------------- positive observations

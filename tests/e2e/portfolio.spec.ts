@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { followUps, positiveSummary, repeatFindings, repeatQuestions } from '../../lib/analytics';
+import { expectNothingClipped } from './clip';
+import { positiveSummary, repeatFindings, repeatMatrix } from '../../lib/analytics';
 import type { Filter } from '../../lib/types';
 
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
@@ -78,21 +79,27 @@ test('the positives tile opens /positives with the filter', async ({ page }) => 
   await expect(page.getByTestId('positives-header')).toBeVisible();
 });
 
-test('repeats card: findings noted again at the next audit, and what they are made of', async ({ page }) => {
+test('repeats card: total repeats, a plain caption and the three most repeated questions (no codes)', async ({ page }) => {
   const repo = getRepo();
   const count = (f: Filter) => repeatFindings(repo, f).length;
-  expect(count(ALL)).toBe(345);
+  const m = repeatMatrix(repo, ALL);
+  expect(count(ALL)).toBe(291);
   await page.goto('/');
   const card = page.getByTestId('kpi-repeats');
-  await expect(card.getByTestId('repeats-count')).toHaveText('345');
-  await expect(card.getByTestId('repeats-rule')).toHaveText("same question noted again at the contractor's next audit");
-  await expect(card.getByTestId('repeats-questions')).toHaveText(`${repeatQuestions(repo, ALL).length} questions`);
-  await expect(card.getByTestId('repeats-contractors')).toHaveText('7 contractors');
-  await expect(card.getByTestId('repeats-followups')).toHaveText(`${followUps(repo, ALL).length} follow-up audits`);
+  await expect(card.getByTestId('repeats-count')).toHaveText('291');
+  await expect(card.getByTestId('repeats-rule')).toHaveText('questions noted again in the next audit');
+  const rows = card.getByTestId('repeats-top-row');
+  await expect(rows).toHaveCount(3);
+  for (let i = 0; i < 3; i++) {
+    await expect(rows.nth(i)).toHaveAttribute('title', m.questions[i].label);
+    await expect(rows.nth(i).getByTestId('repeats-top-times')).toHaveText(`×${m.questions[i].total}`);
+  }
+  expect(await card.innerText()).not.toMatch(/\b[ABC]\d+(\.\d+)?\b/);
+  await expectNothingClipped(page, 'dashboard repeats card');
   // Q4 has a follow-up too (SIBS, audited twice in November): never "—" while a pair exists
   await page.goto('/?q=Q4-2025&r=SR1,SR2');
   await expect(card.getByTestId('repeats-count')).toHaveText(String(count({ ...ALL, quarter: 'Q4-2025' })));
-  await expect(card.getByTestId('repeats-contractors')).toHaveText('1 contractor');
+  await expect(card.getByTestId('repeats-top-row')).toHaveCount(Math.min(3, repeatMatrix(repo, { ...ALL, quarter: 'Q4-2025' }).questions.length));
   for (const r of ['SR1', 'SR2'] as const) {
     await page.goto(`/?q=all&r=${r}`);
     await expect(card.getByTestId('repeats-count')).toHaveText(String(count({ quarter: 'all', regions: [r] })));
