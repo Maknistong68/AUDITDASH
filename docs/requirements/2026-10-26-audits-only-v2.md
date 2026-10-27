@@ -95,3 +95,20 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
 5. **No logo mark** in the header; nothing in its place.
 6. **Repeat findings, one rule:** the same question noted in a contractor's audit and again in that contractor's **next** audit of the same type. The later audit sets the quarter; the earlier may be in any quarter (two audits in one quarter count). No "≥5 of 7 contractors" threshold. Supersedes the repeat logic of §17.
 7. **Drill-down animation:** every drill below a category (contractor → question → note) uses the same card-opens morph as the first drill (Main problem → category).
+
+## 21. Owner direction 2026-10-27 — "only what the Excel can tell us"
+- **Input & scoring = Excel.** The app's audit input and scoring must match the Excel checklist exactly: per-question
+  Full / Partial / No / N/A with the workbook weights and the workbook formula.
+- **Remove data that cannot be derived from the Excel** (e.g. keyword-inferred "high-risk work", "open actions").
+  **Keep the 8 H&S categories** (owner's explicit exception).
+- **Repeats = per question:** the same question that was a finding in the previous audit of the same contractor and is a
+  finding again → counts as one repeat; show how many times it repeated, per contractor.
+  Accuracy requires Part 1 (per-question Full/Partial/No/N/A) for every audit — the owner will supply the completed
+  checklist workbooks; until then repeats are not shown as exact.
+- **Repeat view = heat map like Excel cells:** rows = questions, columns = contractors, cell = times repeated (colour
+  intensity). Replace the dot matrix.
+- **Portfolio redundancy:** one Portfolio score card on the dashboard (with a small up/down chart); Bands and Region move
+  into the Portfolio page (timeline + bands + regions). Nothing shown twice.
+- **Dashboard contractor list:** replace "+1 / −2" text with a small up/down line chart per contractor.
+- **Contractor page:** fill the open space at the top with a bigger up/down score chart across audits; move the A/B/C bars
+  lower; replace the third card (observations by category) with the **top 3 repeated observations** for that contractor.
