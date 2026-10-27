@@ -29,7 +29,20 @@ const opacities = (page: Page) =>
   );
 
 /** Press on the active card, move by dx in small steps, hold still (no flick momentum), release. */
+/** Hydrated and still: the deck reports data-ready, and the active card has stopped moving (two equal reads, no fixed wait). */
+async function settled(page: Page) {
+  await ready(page);
+  let last = NaN;
+  await expect.poll(async () => {
+    const x = (await active(page).boundingBox())?.x ?? NaN;
+    const same = x === last;
+    last = x;
+    return same;
+  }, { timeout: 10_000, intervals: [100, 100, 200, 250] }).toBe(true);
+}
+
 async function drag(page: Page, dx: number, steps = 16) {
+  await settled(page);
   const b = (await active(page).boundingBox())!;
   const x = b.x + b.width / 2;
   const y = b.y + b.height / 2;
@@ -173,22 +186,21 @@ test('clicking card #3 opens its category, keeping the filter, and it becomes ac
 test('dragging the carousel then releasing snaps to a card and navigates', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto(`/category/${ORDER[0]}?${Q}`);
-  await ready(page);
+  await settled(page);
   const b = (await active(page).boundingBox())!;
   // about one and a bit cards to the left: lands on #2
   await drag(page, -b.width * 1.1, 24);
-  await expect(page).toHaveURL(catUrl(ORDER[1]));
-  await expect(active(page)).toHaveAttribute('data-rank', '2');
-  await expect.poll(async () => Math.round((await active(page).boundingBox())!.x)).toBe(Math.round(b.x));
+  await expect(page).toHaveURL(catUrl(ORDER[1]), { timeout: 10_000 });
+  await expect(active(page)).toHaveAttribute('data-rank', '2', { timeout: 10_000 });
+  await expect.poll(async () => Math.round((await active(page).boundingBox())!.x), { timeout: 10_000 }).toBe(Math.round(b.x));
   // a small drag springs back and stays
   await drag(page, -b.width * 0.15, 6);
-  await page.waitForTimeout(900);
+  await expect.poll(async () => Math.abs((await active(page).boundingBox())!.x - b.x), { timeout: 10_000 }).toBeLessThan(1.5);
   await expect(page).toHaveURL(catUrl(ORDER[1]));
-  expect(Math.abs((await active(page).boundingBox())!.x - b.x)).toBeLessThan(1.5);
   // dragging right past #1 stays on #1
   await drag(page, b.width * 3, 20);
-  await expect(page).toHaveURL(catUrl(ORDER[0]));
-  await expect(active(page)).toHaveAttribute('data-rank', '1');
+  await expect(page).toHaveURL(catUrl(ORDER[0]), { timeout: 10_000 });
+  await expect(active(page)).toHaveAttribute('data-rank', '1', { timeout: 10_000 });
 });
 
 test('ArrowRight on the carousel moves to #2 (and on), ArrowLeft back; the quarter carousel below ignores them', async ({ page }) => {

@@ -50,7 +50,7 @@ async function noPageScroll(page: Page) {
 }
 
 test('the dashboard Repeat findings card opens /repeats with a ~1 s shared hand-off; the header shows the same count', async ({ page }) => {
-  expect(TOTAL).toBe('291');
+  expect(TOTAL).toBe('228');
   expect(TOTAL).toBe(String(repeatFindings(getRepo(), ALL).length));
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
@@ -210,14 +210,13 @@ test('/repeats header: "N repeats", questions · contractors, the basis; no reac
   expect(await page.locator('main').innerText()).not.toMatch(/\bof 7\b|≥\s*5/);
 });
 
-test('/repeats Q4 only: the same-quarter follow-up (SIBS) shows its repeats, no NaN', async ({ page }) => {
+test('/repeats Q4 only: no follow-up visit (SIBS\'s two Q4 audits are one visit), calm empty state, no NaN', async ({ page }) => {
   const f: Filter = { ...ALL, quarter: 'Q4-2025' };
-  const m = repeatMatrix(getRepo(), f);
+  expect(repeatFindings(getRepo(), f)).toEqual([]);
   await page.goto('/repeats?q=Q4-2025&r=SR1%2CSR2');
-  await expect(page.getByTestId('repeats-figure')).toHaveText(String(repeatFindings(getRepo(), f).length));
-  await expect(page.getByTestId('heat-col')).toHaveCount(1);
-  await expect(page.getByTestId('heat-cell')).toHaveCount(m.questions.length);
-  await expect(page.getByTestId('heat-total')).toHaveText(String(repeatFindings(getRepo(), f).length));
+  await expect(page.getByTestId('repeats-figure')).toHaveText('—');
+  await expect(page.getByTestId('empty-state')).toContainText('Needs a follow-up audit');
+  await expect(page.getByTestId('repeats-heatmap')).toHaveCount(0);
   expect(await page.locator('main').innerText()).not.toMatch(/NaN|undefined/);
 });
 

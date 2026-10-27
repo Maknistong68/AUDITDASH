@@ -22,7 +22,13 @@ function expectedTop3(id: string) {
   const m = repeatMatrix(repo, ALL);
   const row = m.cells[id] ?? {};
   // the latest audit in which the question repeated (a finding there and in the audit before)
-  const found = findingsByAudit(repo, { ...ALL, contractorId: id });
+  // one visit per quarter: a finding in either of a quarter's audits counts once
+  const byQuarter = new Map<string, { audit: { date: string }; itemCodes: string[] }>();
+  for (const f of findingsByAudit(repo, { ...ALL, contractorId: id })) {
+    const v = byQuarter.get(f.audit.quarter);
+    byQuarter.set(f.audit.quarter, { audit: f.audit, itemCodes: [...(v?.itemCodes ?? []), ...f.itemCodes] });
+  }
+  const found = [...byQuarter.values()];
   const last = (code: string) => {
     let d = '';
     for (let i = 1; i < found.length; i++) if (found[i].itemCodes.includes(code) && found[i - 1].itemCodes.includes(code)) d = found[i].audit.date;
@@ -156,7 +162,7 @@ test('Top 3 repeated observations match repeatMatrix for JV-ECH and SIBS; NBC sh
       await expect(rows.nth(i)).toHaveAttribute('href', `/category/${want[i].category}/${id}/${want[i].itemCode}?q=all&r=SR1%2CSR2`);
     }
     // the marker: the quarters of the audits in which the question was a finding
-    expect(await card.getByTestId('top-repeat-marker').allInnerTexts()).toEqual(want.map(() => (id === ID ? 'Q4 → Q1' : 'Q4 → Q4 → Q1')));
+    expect(await card.getByTestId('top-repeat-marker').allInnerTexts()).toEqual(want.map(() => 'Q4 → Q1'));
     await expect(card.getByTestId('top-repeats-empty')).toHaveCount(0);
   }
   await page.goto(`/contractor/${NBC}`);

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { getRepo, type Repo } from '@/lib/data/repo';
 import {
-  compareContractors, contractorCards, findingsByAudit, followUps, isFinding, repeatContractors, repeatFindings, repeatMatrix,
+  compareContractors, visitsOf, contractorCards, findingsByAudit, followUps, isFinding, repeatContractors, repeatFindings, repeatMatrix,
   repeatQuestions, subsectionOf,
 } from '@/lib/analytics';
 import fixture from './fixtures/abyatona-1112-responses.json';
@@ -20,24 +20,26 @@ const noted = (auditId: string) =>
 const ABYATONA_Q4 = '4800001112-Q4-2025-20251015';
 const NBC_Q1 = '4200000026-Q1-2026-20260208';
 
-describe('followUps: each audit paired with the same contractor\'s audit before it', () => {
-  test('8 pairs over all quarters; the later audit sets the quarter', () => {
-    expect(followUps(repo, ALL)).toHaveLength(8);
+describe('followUps: each visit (a quarter\'s audits) paired with the same contractor\'s visit before it', () => {
+  test('7 pairs over all quarters (SIBS\'s two Q4 audits are one visit); the later visit sets the quarter', () => {
+    expect(followUps(repo, ALL)).toHaveLength(7);
     expect(followUps(repo, { ...ALL, quarter: 'Q1-2026' })).toHaveLength(7);
-    const q4 = followUps(repo, { ...ALL, quarter: 'Q4-2025' });
-    expect(q4.map((p) => [p.contractor.id, p.prev.date, p.next.date])).toEqual([[SIBS, '2025-11-12', '2025-11-19']]);
+    expect(followUps(repo, { ...ALL, quarter: 'Q4-2025' })).toEqual([]);
+    const sibs = followUps(repo, ALL).filter((p) => p.contractor.id === SIBS);
+    expect(sibs.map((p) => [p.prevVisit.audits.map((a) => a.date), p.nextVisit.audits.map((a) => a.date)])).toEqual([[['2025-11-12', '2025-11-19'], ['2026-02-01']]]);
   });
   test('consecutive, same contractor, earlier date first', () => {
     for (const p of followUps(repo, ALL)) {
       expect(p.prev.contractorId).toBe(p.contractor.id);
       expect(p.next.contractorId).toBe(p.contractor.id);
       expect(p.prev.date < p.next.date).toBe(true);
+      expect(p.prevVisit.quarter).not.toBe(p.nextVisit.quarter);
       const between = repo.audits().filter((a) => a.contractorId === p.contractor.id && a.date > p.prev.date && a.date < p.next.date);
       expect(between).toEqual([]);
     }
   });
   test('regions respected; empty filter and other audit types have none', () => {
-    expect(followUps(repo, { ...ALL, regions: ['SR1'] })).toHaveLength(5);
+    expect(followUps(repo, { ...ALL, regions: ['SR1'] })).toHaveLength(4);
     expect(followUps(repo, { ...ALL, regions: ['SR2'] })).toHaveLength(3);
     expect(followUps(repo, NONE)).toEqual([]);
     expect(followUps(repo, { ...ALL, type: 'security' })).toEqual([]);
@@ -46,26 +48,39 @@ describe('followUps: each audit paired with the same contractor\'s audit before 
 
 describe('repeatFindings: the same question noted again at the next audit', () => {
   test('seed totals per filter', () => {
-    expect(repeatFindings(repo, ALL)).toHaveLength(291);
+    expect(repeatFindings(repo, ALL)).toHaveLength(228); // was 291 before SIBS's Q4 audits became one visit
     expect(repeatFindings(repo, { ...ALL, quarter: 'Q1-2026' })).toHaveLength(228);
-    expect(repeatFindings(repo, { ...ALL, quarter: 'Q4-2025' })).toHaveLength(63);
-    expect(repeatFindings(repo, { ...ALL, regions: ['SR1'] })).toHaveLength(217);
+    expect(repeatFindings(repo, { ...ALL, quarter: 'Q4-2025' })).toHaveLength(0);
+    expect(repeatFindings(repo, { ...ALL, regions: ['SR1'] })).toHaveLength(154);
     expect(repeatFindings(repo, { ...ALL, regions: ['SR2'] })).toHaveLength(74);
     expect(repeatFindings(repo, NONE)).toEqual([]);
   });
   test('every row is noted in both audits of its pair; every such question is a row', () => {
     const rows = repeatFindings(repo, ALL);
+    const union = (v: { audits: { id: string }[] }) => new Set(v.audits.flatMap((a) => [...noted(a.id)]));
     for (const p of followUps(repo, ALL)) {
-      const before = noted(p.prev.id);
-      const both = [...noted(p.next.id)].filter((c) => before.has(c)).sort();
+      const before = union(p.prevVisit);
+      const both = [...union(p.nextVisit)].filter((c) => before.has(c)).sort();
       const mine = rows.filter((r) => r.auditId === p.next.id).map((r) => r.itemCode).sort();
       expect(mine).toEqual(both);
       for (const r of rows.filter((x) => x.auditId === p.next.id)) expect(r.prevAuditId).toBe(p.prev.id);
     }
   });
-  test('a same-quarter follow-up counts (SIBS, Q4 → Q4)', () => {
-    const q4 = repeatFindings(repo, { ...ALL, quarter: 'Q4-2025' });
-    expect(new Set(q4.map((r) => r.contractor.id))).toEqual(new Set([SIBS]));
+  test('SIBS: one Q4 visit, so repeats = |union(Q4 findings) ∩ Q1 findings| (a finding in either Q4 audit counts once)', () => {
+    const sibs = repo.audits().filter((a) => a.contractorId === SIBS);
+    expect(sibs.map((a) => a.quarter)).toEqual(['Q4-2025', 'Q4-2025', 'Q1-2026']);
+    const q4 = new Set(sibs.slice(0, 2).flatMap((a) => [...noted(a.id)]));
+    const q1 = noted(sibs[2].id);
+    const expected = [...q1].filter((c) => q4.has(c)).sort();
+    const rows = repeatFindings(repo, ALL).filter((r) => r.contractor.id === SIBS);
+    expect(rows.map((r) => r.itemCode).sort()).toEqual(expected);
+    expect(rows).toHaveLength(66);
+    // the union is at least as large as either Q4 audit alone
+    expect(visitsOf(repo, ALL, rows[0].contractor).map((v) => v.audits.length)).toEqual([2, 1]);
+    for (const a of sibs.slice(0, 2)) expect(expected.length).toBeGreaterThanOrEqual([...q1].filter((c) => noted(a.id).has(c)).length);
+  });
+  test('same-quarter audits never pair with each other (SIBS Q4 → Q4 is not a repeat)', () => {
+    expect(repeatFindings(repo, { ...ALL, quarter: 'Q4-2025' })).toEqual([]);
   });
   test('a contractor audited once never repeats', () => {
     expect(repeatFindings(repo, ALL).some((r) => r.contractor.id === TDP)).toBe(false);
@@ -177,9 +192,16 @@ describe('repeatMatrix: questions × contractors, times repeated', () => {
     expect(sum(m.contractors.map((c) => c.total))).toBe(repeatFindings(repo, ALL).length);
     expect(m.contractors).toHaveLength(repeatContractors(repo, ALL).length);
   });
-  test('SIBS (three audits) repeats a question in both of its follow-ups', () => {
-    expect(Math.max(...Object.values(m.cells[SIBS]))).toBeGreaterThanOrEqual(2);
-    expect(Object.entries(m.cells).every(([id, row]) => id === SIBS || Object.values(row).every((n) => n === 1))).toBe(true);
+  test('SIBS (two visits): max times repeated is 1, 66 repeats; every other contractor unchanged', () => {
+    expect(Math.max(...Object.values(m.cells[SIBS]))).toBe(1);
+    expect(m.contractors.find((c) => c.id === SIBS)!.total).toBe(66);
+    expect(Object.entries(m.cells).every(([, row]) => Object.values(row).every((n) => n === 1))).toBe(true);
+    const others = Object.fromEntries(m.contractors.filter((c) => c.id !== SIBS).map((c) => [c.name, c.total]));
+    expect(others).toEqual({
+      'Abyatona (Box Culvert H55)': 39, 'Abyatona (Zone F Culvert)': 32, 'Al Fahd (Coast Guard)': 31,
+      'JV-ECH (Port T1)': 22, 'Sarco Disa (Port T2)': 21, PPCO: 17,
+    });
+    expect(m.questions).toHaveLength(75);
   });
   test('sorted: questions by total, category, code; contractors by total', () => {
     for (let i = 1; i < m.questions.length; i++) expect(m.questions[i - 1].total).toBeGreaterThanOrEqual(m.questions[i].total);
@@ -189,7 +211,7 @@ describe('repeatMatrix: questions × contractors, times repeated', () => {
   test('empty and Q4-only filters: no NaN, consistent', () => {
     expect(repeatMatrix(repo, NONE)).toEqual({ questions: [], contractors: [], cells: {} });
     const q4 = repeatMatrix(repo, { ...ALL, quarter: 'Q4-2025' });
-    expect(q4.contractors.map((c) => c.id)).toEqual([SIBS]);
+    expect(q4).toEqual({ questions: [], contractors: [], cells: {} });
     const nums = [...q4.questions.map((q) => q.total), ...q4.contractors.map((c) => c.total), ...Object.values(q4.cells).flatMap((r) => Object.values(r))];
     expect(nums.every((n) => Number.isFinite(n) && n > 0)).toBe(true);
     expect(sum(q4.questions.map((q) => q.total))).toBe(repeatFindings(repo, { ...ALL, quarter: 'Q4-2025' }).length);

@@ -300,23 +300,43 @@ export function bandDistribution(repo: Repo, filter: Filter): Record<Band, numbe
   return out;
 }
 
-/** One contractor's audit and the audit before it (same contractor, same audit type), the later one in the filter. */
-export interface FollowUp { contractor: Contractor; prev: Audit; next: Audit }
+/** One contractor's audits of one type in one quarter, treated as a single visit (owner decision 2026-10-27: SIBS Q4 2025). */
+export interface Visit { contractor: Contractor; type: string; quarter: Quarter; audits: Audit[]; date: string }
 
 /**
- * Every follow-up pair in the filter: for each contractor, its audits of one type in date order (regions respected,
- * quarter ignored), paired with the audit before; a pair counts when the later audit is in the filter's quarter. The
- * earlier audit may sit in any quarter, the same one included.
+ * A contractor's visits, in date order (regions respected, quarter filter ignored): its audits grouped by type and
+ * quarter. The one place that decides what a "visit" is; every repeat figure goes through it.
+ */
+export function visitsOf(repo: Repo, filter: Filter, contractor: Contractor): Visit[] {
+  const pool = select(repo, filter, 'all').filter((a) => a.contractorId === contractor.id);
+  const out: Visit[] = [];
+  for (const a of pool) {
+    const type = a.type ?? 'hs';
+    const v = out.find((x) => x.type === type && x.quarter === a.quarter);
+    if (v) { v.audits.push(a); v.date = a.date; } else out.push({ contractor, type, quarter: a.quarter, audits: [a], date: a.date });
+  }
+  return out.sort((x, y) => x.date.localeCompare(y.date));
+}
+
+/** One contractor's visit and the visit before it (same audit type), the later one in the filter. */
+export interface FollowUp { contractor: Contractor; prevVisit: Visit; nextVisit: Visit; prev: Audit; next: Audit }
+
+/**
+ * Every follow-up pair in the filter: for each contractor, its visits of one type in date order, paired with the visit
+ * before; a pair counts when the later visit has an audit in the filter. `prev` / `next` are the latest audit of each visit.
  */
 export function followUps(repo: Repo, filter: Filter): FollowUp[] {
   const inFilter = new Set(select(repo, filter).map((a) => a.id));
-  const pool = select(repo, filter, 'all');
   const out: FollowUp[] = [];
   for (const contractor of repo.contractors()) {
-    const byType = new Map<string, Audit[]>();
-    for (const a of pool) if (a.contractorId === contractor.id) (byType.get(a.type ?? 'hs') ?? byType.set(a.type ?? 'hs', []).get(a.type ?? 'hs')!).push(a);
-    for (const list of byType.values()) {
-      for (let i = 1; i < list.length; i++) if (inFilter.has(list[i].id)) out.push({ contractor, prev: list[i - 1], next: list[i] });
+    const visits = visitsOf(repo, filter, contractor);
+    for (const type of new Set(visits.map((v) => v.type))) {
+      const same = visits.filter((v) => v.type === type);
+      for (let i = 1; i < same.length; i++) {
+        if (same[i].audits.some((a) => inFilter.has(a.id))) {
+          out.push({ contractor, prevVisit: same[i - 1], nextVisit: same[i], prev: same[i - 1].audits.at(-1)!, next: same[i].audits.at(-1)! });
+        }
+      }
     }
   }
   return out;
@@ -366,22 +386,23 @@ export interface RepeatFinding {
 }
 
 /**
- * Repeat findings: a question that is a finding (isFinding) in a contractor's audit AND in that contractor's previous
- * audit of the same type (followUps). One row per follow-up pair and question, so a question repeated across three
+ * Repeat findings: a question that is a finding (isFinding) in a contractor's visit (its audits of one quarter, the union
+ * of their findings) AND in the previous visit of the same type (followUps). One row per follow-up pair and question, so a question repeated across three
  * consecutive audits counts twice. Worst contractor (lowest latest total in the filter) first, then date, then itemCode.
  */
 export function repeatFindings(repo: Repo, filter: Filter): RepeatFinding[] {
   const pairs = followUps(repo, filter);
   if (!pairs.length) return [];
-  const audits = [...new Map(pairs.flatMap((p) => [p.prev, p.next]).map((a) => [a.id, a])).values()];
+  const audits = [...new Map(pairs.flatMap((p) => [...p.prevVisit.audits, ...p.nextVisit.audits]).map((a) => [a.id, a])).values()];
   const items = itemMap(repo);
   const noted = findingCodes(repo, audits);
+  const visitCodes = (v: Visit) => new Set(v.audits.flatMap((a) => [...noted.get(a.id)!]));
   const latest = new Map<string, number>();
   for (const p of pairs) latest.set(p.contractor.id, p.next.totalScore);
   const rows: { total: number; date: string; row: RepeatFinding }[] = [];
   for (const p of pairs) {
-    const before = noted.get(p.prev.id)!;
-    for (const code of noted.get(p.next.id)!) {
+    const before = visitCodes(p.prevVisit);
+    for (const code of visitCodes(p.nextVisit)) {
       const item = items.get(code)!;
       if (!before.has(code)) continue;
       rows.push({
@@ -480,7 +501,7 @@ export interface ContractorRepeat {
   itemCode: string; label: string; category: CategoryId;
   /** Times repeated (repeatMatrix cell): consecutive audit pairs in which the question is a finding in both. */
   times: number;
-  /** The contractor's audits in which the question was a finding (isFinding), in date order. */
+  /** The contractor's visits in which the question was a finding (isFinding), in date order; one per quarter. */
   audits: { id: string; date: string; quarter: Quarter }[];
   /** Date of the latest audit that repeated it. */
   lastDate: string;
@@ -503,7 +524,11 @@ export function contractorRepeats(repo: Repo, filter: Filter, contractorId: stri
     const d = date.get(r.auditId)!;
     if (d > (last.get(r.itemCode) ?? '')) last.set(r.itemCode, d);
   }
-  const found = findingsByAudit(repo, { ...f, contractorId });
+  // one entry per visit in which the question was a finding (a visit's two audits count once; id/date = its latest audit)
+  const contractor = repo.contractors().find((c) => c.id === contractorId)!;
+  const visits = visitsOf(repo, f, contractor);
+  const codes = findingCodes(repo, visits.flatMap((v) => v.audits));
+  const found = visits.map((v) => ({ audit: v.audits.at(-1)!, itemCodes: v.audits.flatMap((x) => [...codes.get(x.id)!]) }));
   return m.questions
     .filter((q) => row[q.itemCode])
     .map((q) => ({

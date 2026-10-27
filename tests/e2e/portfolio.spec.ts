@@ -83,10 +83,10 @@ test('repeats card: total repeats, a plain caption and the three most repeated q
   const repo = getRepo();
   const count = (f: Filter) => repeatFindings(repo, f).length;
   const m = repeatMatrix(repo, ALL);
-  expect(count(ALL)).toBe(291);
+  expect(count(ALL)).toBe(228);
   await page.goto('/');
   const card = page.getByTestId('kpi-repeats');
-  await expect(card.getByTestId('repeats-count')).toHaveText('291');
+  await expect(card.getByTestId('repeats-count')).toHaveText('228');
   await expect(card.getByTestId('repeats-rule')).toHaveText('questions noted again in the next audit');
   const rows = card.getByTestId('repeats-top-row');
   await expect(rows).toHaveCount(3);
@@ -96,10 +96,11 @@ test('repeats card: total repeats, a plain caption and the three most repeated q
   }
   expect(await card.innerText()).not.toMatch(/\b[ABC]\d+(\.\d+)?\b/);
   await expectNothingClipped(page, 'dashboard repeats card');
-  // Q4 has a follow-up too (SIBS, audited twice in November): never "—" while a pair exists
+  // Q4 has no follow-up visit (SIBS's two November audits are one visit): "—", never a count
+  expect(count({ ...ALL, quarter: 'Q4-2025' })).toBe(0);
   await page.goto('/?q=Q4-2025&r=SR1,SR2');
-  await expect(card.getByTestId('repeats-count')).toHaveText(String(count({ ...ALL, quarter: 'Q4-2025' })));
-  await expect(card.getByTestId('repeats-top-row')).toHaveCount(Math.min(3, repeatMatrix(repo, { ...ALL, quarter: 'Q4-2025' }).questions.length));
+  await expect(card.getByTestId('repeats-count')).toHaveText('—');
+  await expect(card.getByTestId('repeats-top-row')).toHaveCount(0);
   for (const r of ['SR1', 'SR2'] as const) {
     await page.goto(`/?q=all&r=${r}`);
     await expect(card.getByTestId('repeats-count')).toHaveText(String(count({ quarter: 'all', regions: [r] })));
