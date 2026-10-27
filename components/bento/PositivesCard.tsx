@@ -1,6 +1,5 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ThumbsUp } from 'lucide-react';
 import { CountUp } from '@/components/motion/CountUp';
 import { HandoffLink } from '@/components/motion/HandoffLink';
 import { int } from '@/lib/format';
@@ -28,10 +27,7 @@ export function PositivesCard({ summary, href }: {
         className="absolute inset-0 z-[1] rounded-[var(--radius-card)]"
       />
       <CardChevron />
-      <TileLabel tone="var(--tone)">
-        <ThumbsUp size={15} strokeWidth={2.4} aria-hidden />
-        Positive observations
-      </TileLabel>
+      <TileLabel tone="var(--tone)" className="pr-8">Positive observations</TileLabel>
       <p data-testid="positives-count" data-handoff={POSITIVES_FIGURE} className={BIG}>
         <CountUp value={total} format={int} duration={1.2} delay={0.36} />
       </p>
