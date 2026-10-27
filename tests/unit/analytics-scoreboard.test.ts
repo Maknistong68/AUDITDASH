@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { getRepo } from '@/lib/data/repo';
 import {
-  bandDistribution, categoryDetail, categoryGaps, compareContractors, mainProblem, contractorCards, filterAudits, regionComparison,
+  auditItemStates, bandDistribution, categoryDetail, categoryGaps, compareContractors, findingsByAudit, isFinding, mainProblem, portfolioSummary, contractorCards, filterAudits, regionComparison,
 } from '@/lib/analytics';
 import { CATEGORIES } from '@/lib/categories';
 import type { Filter } from '@/lib/types';
@@ -109,13 +109,14 @@ describe('mainProblem', () => {
     expect(m.items.length).toBeLessThanOrEqual(3);
     expect(m.items).toEqual(categoryDetail(repo, { ...ALL, quarter: 'Q1-2026' }, m.category).items.slice(0, 3));
   });
-  test('driving items are ranked by impact = audits noted x mean subsection score lost', () => {
+  test('driving items are ranked by impact = audits with the finding x mean subsection score lost', () => {
     const m = mainProblem(repo, ALL)!;
     const q1 = repo.audits().filter((a) => a.quarter === 'Q1-2026');
     for (const it of m.items) {
       const item = repo.checklist().find((i) => i.code === it.itemCode)!;
       const sub = item.subsection ?? item.section;
-      const hit = q1.filter((a) => repo.observations().some((o) => o.auditId === a.id && o.itemCode === it.itemCode && o.kind === 'negative'));
+      // hits = audits in which the item is a finding (isFinding), not every audit with a note on it
+      const hit = q1.filter((a) => repo.observations().some((o) => o.itemCode === it.itemCode && isFinding(a, o)));
       expect(it.hits).toBe(hit.length);
       const ratios = hit.map((a) => a.sections.find((x) => x.code === sub)!).filter((x) => x.possible > 0).map((x) => x.scored / x.possible);
       const severity = 1 - ratios.reduce((s, r) => s + r, 0) / ratios.length;
@@ -131,4 +132,32 @@ describe('mainProblem', () => {
     expect(m.prevGapRate).toBeNull();
   });
   test('empty filter -> null', () => expect(mainProblem(repo, NONE)).toBeNull());
+});
+
+describe('one findings rule everywhere (isFinding)', () => {
+  test('main problem drivers count audits with the finding: Q1 2026 subcontractor B6.1–B6.3 in 9 of 11 audits', () => {
+    const m = mainProblem(repo, ALL)!;
+    expect(m.category).toBe('subcontractor');
+    expect(m.items.map((i) => [i.itemCode, i.hits])).toEqual([['B6.1', 9], ['B6.2', 9], ['B6.3', 9]]);
+    expect(filterAudits(repo, { ...ALL, quarter: 'Q1-2026' })).toHaveLength(11);
+  });
+  test('category findings, finding rates, item states and findingsByAudit agree', () => {
+    const byAudit = findingsByAudit(repo, ALL);
+    const codes = byAudit.reduce((n, r) => n + r.itemCodes.length, 0);
+    const audits = new Set(byAudit.map((r) => r.audit.id));
+    const site = repo.observations().filter((o) => o.kind === 'site' && audits.has(o.auditId)).length;
+    expect(categoryGaps(repo, ALL).reduce((n, g) => n + g.findings, 0)).toBe(codes + site);
+    expect(portfolioSummary(repo, ALL).negatives).toBe(codes + site);
+    for (const { audit, itemCodes } of byAudit) {
+      const noted = CATEGORIES.flatMap((c) => auditItemStates(repo, audit, c.id).filter((s) => s.state === 'noted').map((s) => s.item.code));
+      expect(noted.sort()).toEqual([...itemCodes].sort());
+    }
+  });
+  test('a note marked COMPLIANT is never counted', () => {
+    const o = repo.observations().find((x) => x.marker === 'compliant' && x.itemCode)!;
+    const audit = repo.audits().find((a) => a.id === o.auditId)!;
+    const state = auditItemStates(repo, audit, repo.checklist().find((i) => i.code === o.itemCode)!.category)
+      .find((s) => s.item.code === o.itemCode)!;
+    expect(state.state === 'noted').toBe(findingsByAudit(repo, ALL).find((r) => r.audit.id === audit.id)!.itemCodes.includes(o.itemCode!));
+  });
 });

@@ -49,6 +49,7 @@ test('dragging left swipes to the earlier audit', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto('/contractor/4800001131');
   await ready(page);
+  await expect(active(page).getByTestId('category-gaps')).toHaveCSS('opacity', '1'); // entrance settled before the drag
   const box = (await active(page).getByTestId('category-gaps').boundingBox())!;
   const y = box.y + 20;
   await page.mouse.move(box.x + box.width - 40, y);
@@ -151,15 +152,16 @@ test('reduced motion still navigates between audits', async ({ browser }) => {
   await ctx.close();
 });
 
-test('observations show as counts per category, each opening that audit in the category; no note text', async ({ page }) => {
+test('top repeated observations open their question for the contractor; no note text', async ({ page }) => {
   await page.goto('/contractor/4800001131');
   await ready(page);
-  const counts = active(page).getByTestId('obs-count');
-  expect(await counts.count()).toBeGreaterThan(1);
+  const rows = active(page).getByTestId('top-repeat');
+  await expect(rows).toHaveCount(3);
   await expect(active(page).getByTestId('finding')).toHaveCount(0);
-  await expect(counts.first()).toHaveAttribute('href', /^\/category\/[a-z]+\/4800001131\?q=all&r=SR1%2CSR2$/);
-  await counts.first().click();
-  await expect(page).toHaveURL(/\/category\/[a-z]+\/4800001131\?q=all/);
+  await expect(rows.first()).toHaveAttribute('href', /^\/category\/[a-z]+\/4800001131\/[A-C][\d.]+\?q=all&r=SR1%2CSR2$/);
+  await rows.first().click();
+  await expect(page).toHaveURL(/\/category\/[a-z]+\/4800001131\/[A-C][\d.]+\?q=all/);
+  await expect(page.getByTestId('item-title')).toBeVisible();
 });
 
 test('category rows on a contractor slide open that audit in the category', async ({ page }) => {
@@ -168,14 +170,16 @@ test('category rows on a contractor slide open that audit in the category', asyn
   expect(href).toMatch(/^\/category\/[a-z]+\/4800001131\?q=all&r=SR1%2CSR2&s=1$/);
 });
 
-test('item states are neutral notes with a score-based section gap, never pass/fail', async ({ page }) => {
+test('item states follow the findings rule (Noted / No finding / N/A) with a score-based section gap, never pass/fail', async ({ page }) => {
   await page.goto('/category/subcontractor/4800001131');
   await ready(page);
   const rows = active(page).getByTestId('item-row');
   expect(await rows.count()).toBeGreaterThan(0);
   for (const s of await rows.evaluateAll((els) => els.map((e) => e.getAttribute('data-state')))) expect(['noted', 'none', 'na']).toContain(s);
   await expect(rows.first().getByTestId('section-gap')).toBeVisible();
-  await expect(page.getByTestId('details')).not.toContainText(/fail|Finding/i);
+  await expect(page.getByTestId('details')).not.toContainText(/fail/i);
+  const pills = await rows.locator('[data-state]').evaluateAll((els) => [...new Set(els.map((e) => e.textContent))]);
+  for (const p of pills) expect(['Noted', 'No finding', 'N/A']).toContain(p);
   await page.goto('/category/subcontractor/4800001131/B6.1');
   await expect(page.getByTestId('item-summary')).toContainText('Noted in');
   await expect(page.getByTestId('details')).not.toContainText(/failed/i);
@@ -186,7 +190,7 @@ test('reduced motion zeroes CSS transitions and press transforms', async ({ brow
   const page = await ctx.newPage();
   await page.goto('/contractor/4800001131');
   await ready(page);
-  const dot = page.getByRole('button', { name: /Mar 2026/ }).locator('span');
+  const dot = page.getByRole('group', { name: 'Audits' }).getByRole('button', { name: /Mar 2026/ }).locator('span');
   expect(await dot.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s');
   const btn = page.getByRole('button', { name: 'Previous audit' });
   await btn.hover();

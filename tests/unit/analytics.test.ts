@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { getRepo, type Repo } from '@/lib/data/repo';
 import {
-  applicableSlots, auditCompliance, categoryDetail, categoryGaps, contractorInCategory, filterAudits, itemHistory, league, portfolioSummary,
+  applicableSlots, auditCompliance, categoryDetail, categoryGaps, contractorInCategory, filterAudits, isFinding, itemHistory, league, portfolioSummary,
 } from '@/lib/analytics';
 import { CATEGORIES } from '@/lib/categories';
 import type { Filter } from '@/lib/types';
@@ -19,6 +19,9 @@ const naRepo: Repo = {
   ],
 };
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
+const naAudit = () => repo.audits().find((a) => a.id === NA_AUDIT)!;
+/** One findings rule: site findings, plus item notes that are findings (isFinding; an N/A-subsection note never is). */
+const counted = (o: { kind: string }) => o.kind === 'site' || isFinding(naAudit(), o as Parameters<typeof isFinding>[1]);
 
 describe('portfolio', () => {
   test('portfolio all', () => {
@@ -98,12 +101,16 @@ describe('score-based gap', () => {
   });
   test('documents gap > health gap for all', () => expect(gap('documents').gapRate!).toBeGreaterThan(gap('health').gapRate!));
   test('findingRate present and bounded', () => categoryGaps(repo, ALL).forEach((x) => { expect(x.findingRate!).toBeGreaterThanOrEqual(0); expect(x.findingRate!).toBeLessThanOrEqual(1); }));
-  test('findings exclude N/A-subsection negatives', () => {
+  test('findings follow isFinding: N/A-subsection and marked notes excluded', () => {
     const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
     const raw = naRepo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.category === 'documents' && o.kind !== 'positive');
     const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
     expect(na).toBeGreaterThan(0);
-    expect(categoryGaps(naRepo, f).find((x) => x.category === 'documents')!.findings).toBe(raw.length - na);
+    expect(isFinding(naAudit(), naRepo.observations().find((o) => o.id === `${NA_AUDIT}-na`)!)).toBe(false);
+    // Notes marked COMPLIANT / N/A, or in a subsection that lost no points, are not findings either.
+    const expected = raw.filter(counted).length;
+    expect(expected).toBeLessThan(raw.length - na);
+    expect(categoryGaps(naRepo, f).find((x) => x.category === 'documents')!.findings).toBe(expected);
   });
 });
 
@@ -174,12 +181,14 @@ describe('N/A notes imported as negatives', () => {
 });
 
 describe('N/A notes excluded from summary and history', () => {
-  test('portfolio negatives exclude N/A notes', () => {
+  test('portfolio negatives count findings only (isFinding + site)', () => {
     const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
     const raw = naRepo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.kind !== 'positive');
     const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
     expect(na).toBeGreaterThan(0);
-    expect(portfolioSummary(naRepo, f).negatives).toBe(raw.length - na);
+    const expected = raw.filter(counted).length;
+    expect(expected).toBeLessThan(raw.length - na);
+    expect(portfolioSummary(naRepo, f).negatives).toBe(expected);
   });
   test('itemHistory returns null observation for N/A audit but keeps the row', () => {
     const h = itemHistory(repo, '4800000892', 'B5.1');

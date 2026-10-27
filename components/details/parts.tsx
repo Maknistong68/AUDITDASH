@@ -38,13 +38,12 @@ export function AuditDelta({ audit, previous }: { audit: Audit; previous: Audit 
 
 const STATE: Record<ItemState, { label: string; cls: string }> = {
   noted: { label: 'Noted', cls: 'bg-fill text-ink' },
-  none: { label: 'No note', cls: 'bg-fill-2 text-muted' },
+  none: { label: 'No finding', cls: 'bg-fill-2 text-muted' },
   na: { label: 'N/A', cls: 'bg-fill-2 text-faint' },
 };
 
 /**
- * Noted / No note / N/A. Deliberately neutral: auditors annotate compliant items too, so a note is not a
- * failure. Severity is shown separately, from the official subsection score (SectionGap).
+ * Noted (a finding) / No finding / N/A. Severity is shown separately, from the official subsection score (SectionGap).
  */
 export function StatePill({ state }: { state: ItemState }) {
   const s = STATE[state];

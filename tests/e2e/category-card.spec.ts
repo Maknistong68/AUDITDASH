@@ -257,11 +257,12 @@ test('the dashboard Main problem card renders exactly as before the refactor', a
   await page.goto('/');
   const mp = page.getByTestId('main-problem');
   await expect(mp.getByTestId('main-problem-gap')).toHaveText('73%');
-  // captured from the dashboard at b43b7ad, before the card was factored out; "gap" became "score lost" (one-page step)
+  // captured from the dashboard at b43b7ad, before the card was factored out; "gap" became "score lost" (one-page step).
+  // Driver counts follow the one findings rule (isFinding): 11 of 11 audits with a note → 9 of 11 with a finding.
   await expect.poll(() => mp.innerText()).toBe(
     'Main problem · Q1 2026\n\nSubcontractor Control\n\n73%\n\nscore lost\n−2 pts\nvs Q4\n\nDriven by\n\n' +
-      'Subcontractor screening & evaluation\n11 of 11 audits\nSubcontractor pre-start safety check\n11 of 11 audits\n' +
-      'Subcontractor past safety record\n11 of 11 audits',
+      'Subcontractor screening & evaluation\n9 of 11 audits\nSubcontractor pre-start safety check\n9 of 11 audits\n' +
+      'Subcontractor past safety record\n9 of 11 audits',
   );
   await expect(mp.getByRole('link')).toHaveAttribute('aria-label', 'Main problem Q1 2026: Subcontractor Control, 73% score lost. Open details');
   await expect(mp.getByRole('heading', { level: 2 })).toHaveText('Subcontractor Control');

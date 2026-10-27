@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { isTyping } from '@/components/shell/EscToParent';
 import { snapIndex, withSlide } from '@/lib/carousel';
+import { ScoreTrend, type ScoreTrendPoint } from '@/components/charts/ScoreTrend';
 
 const SNAP = { type: 'spring', stiffness: 320, damping: 36, mass: 0.9 } as const;
 const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
@@ -22,6 +23,7 @@ export function AuditCarousel({
   unit = 'audit',
   title,
   fit = false,
+  trend,
 }: {
   slides: React.ReactNode[];
   labels: string[];
@@ -30,6 +32,11 @@ export function AuditCarousel({
   title?: React.ReactNode;
   /** One-screen view (DetailFrame `fit`): the carousel fills what is left of the column and every slide is that tall. */
   fit?: boolean;
+  /**
+   * The audits' scores in DATE ORDER (one per slide, so slide i is point n − 1 − i): drawn as a score chart beside the
+   * title, in the 8 columns over the slides' second and third cards. Its active point follows the slide; a click opens it.
+   */
+  trend?: ScoreTrendPoint[];
 }) {
   const n = slides.length;
   const [index, setIndex] = useState(() => Math.max(0, Math.min(n - 1, initial)));
@@ -102,45 +109,58 @@ export function AuditCarousel({
   const older = unit === 'audit' ? 'Previous audit' : 'Previous quarter';
   const newer = unit === 'audit' ? 'Next audit' : 'Next quarter';
   const many = n > 1;
+  const nav = (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 text-[13px] text-muted">
+        <span>Latest</span>
+        <div role="group" aria-label={unit === 'audit' ? 'Audits' : 'Quarters'} className="flex items-center gap-1">
+          {labels.map((l, i) => (
+            <button
+              key={l + i}
+              type="button"
+              onClick={() => go(i)}
+              aria-label={l}
+              aria-current={i === index ? 'true' : undefined}
+              title={l}
+              className="grid h-6 place-items-center px-[3px]"
+            >
+              <span
+                className={`block h-[7px] rounded-full transition-[width,background-color] duration-300 ${i === index ? 'w-5 bg-ink' : 'w-[7px] bg-[var(--control)] hover:bg-faint'}`}
+              />
+            </button>
+          ))}
+        </div>
+        <span>Earlier</span>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <NavButton label={newer} hint={unit === 'audit' ? 'Newer audit (←)' : 'Newer quarter (←)'} disabled={index === 0} onClick={() => go(index - 1)}>
+          <ChevronLeft size={18} strokeWidth={2.4} aria-hidden />
+        </NavButton>
+        <NavButton label={older} hint={unit === 'audit' ? 'Earlier audit (→)' : 'Earlier quarter (→)'} disabled={index === n - 1} onClick={() => go(index + 1)}>
+          <ChevronRight size={18} strokeWidth={2.4} aria-hidden />
+        </NavButton>
+      </div>
+    </div>
+  );
 
   return (
     <section aria-roledescription="carousel" aria-label={unit === 'audit' ? 'Audit history' : 'Quarters'} data-testid="carousel" data-index={index} data-ready={measured ? '' : undefined} className={fit ? 'flex min-h-0 flex-1 flex-col' : undefined}>
-      <div className={`flex flex-wrap items-end justify-between gap-x-6 gap-y-3 px-[var(--gutter)] ${fit ? 'shrink-0 pb-[clamp(8px,1.2svh,16px)]' : 'pb-[clamp(10px,1.6svh,18px)]'}`}>
-        <div className="min-w-0">{title}</div>
-        {many && (
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 text-[13px] text-muted">
-              <span>Latest</span>
-              <div role="group" aria-label={unit === 'audit' ? 'Audits' : 'Quarters'} className="flex items-center gap-1">
-                {labels.map((l, i) => (
-                  <button
-                    key={l + i}
-                    type="button"
-                    onClick={() => go(i)}
-                    aria-label={l}
-                    aria-current={i === index ? 'true' : undefined}
-                    title={l}
-                    className="grid h-6 place-items-center px-[3px]"
-                  >
-                    <span
-                      className={`block h-[7px] rounded-full transition-[width,background-color] duration-300 ${i === index ? 'w-5 bg-ink' : 'w-[7px] bg-[var(--control)] hover:bg-faint'}`}
-                    />
-                  </button>
-                ))}
-              </div>
-              <span>Earlier</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <NavButton label={newer} hint={unit === 'audit' ? 'Newer audit (←)' : 'Newer quarter (←)'} disabled={index === 0} onClick={() => go(index - 1)}>
-                <ChevronLeft size={18} strokeWidth={2.4} aria-hidden />
-              </NavButton>
-              <NavButton label={older} hint={unit === 'audit' ? 'Earlier audit (→)' : 'Earlier quarter (→)'} disabled={index === n - 1} onClick={() => go(index + 1)}>
-                <ChevronRight size={18} strokeWidth={2.4} aria-hidden />
-              </NavButton>
-            </div>
+      {trend ? (
+        <div data-testid="carousel-head" className={`grid grid-cols-1 gap-x-[var(--gap-grid)] gap-y-3 px-[var(--gutter)] min-[900px]:grid-cols-12 ${fit ? 'shrink-0 pb-[var(--gap-grid)]' : 'pb-[clamp(10px,1.6svh,18px)]'}`}>
+          <div className="flex min-w-0 flex-col justify-between gap-3 min-[900px]:col-span-4">
+            <div className="min-w-0">{title}</div>
+            {many && nav}
           </div>
-        )}
-      </div>
+          <div className="h-[clamp(110px,18svh,250px)] [@media(max-height:700px)]:h-[96px] [@media(min-height:901px)]:h-[clamp(110px,22svh,280px)] min-w-0 min-[900px]:col-span-8">
+            <ScoreTrend points={trend} active={n - 1 - index} onSelect={(i) => go(n - 1 - i)} />
+          </div>
+        </div>
+      ) : (
+        <div className={`flex flex-wrap items-end justify-between gap-x-6 gap-y-3 px-[var(--gutter)] ${fit ? 'shrink-0 pb-[clamp(8px,1.2svh,16px)]' : 'pb-[clamp(10px,1.6svh,18px)]'}`}>
+          <div className="min-w-0">{title}</div>
+          {many && nav}
+        </div>
+      )}
       <p className="sr-only" aria-live="polite">
         {many ? `${index + 1} of ${n}: ${labels[index]}` : ''}
       </p>

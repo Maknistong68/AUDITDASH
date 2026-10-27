@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
-import { auditFindings, auditGaps, contractorAudits, sectionRatios } from '@/lib/analytics';
+import { auditFindings, auditGaps, contractorAudits, contractorRepeats, sectionRatios } from '@/lib/analytics';
 import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
 import { dateLabel, quarterLabel } from '@/lib/format';
@@ -21,7 +21,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 }
 
 /**
- * Contractor details, one screen: a swipeable history of its audits (latest first) within the filter's regions. The
+ * Contractor details, one screen: a score chart across its audits (date order) beside the title, over a swipeable
+ * history of its audits (latest first) within the filter's regions; the quarter filter only picks the opening slide. The
  * landing of a dashboard Contractors row hand-off: its name → the title, its score → the opened audit's score.
  */
 export default async function ContractorPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
@@ -35,8 +36,9 @@ export default async function ContractorPage({ params, searchParams }: { params:
   const crumbs = [{ label: 'Overview', href: overview }, { label: contractor.name }];
 
   const initial = initialSlide(s, rows.map((r) => r.audit.quarter), filter.quarter);
+  const repeats = contractorRepeats(repo, filter, id).slice(0, 3);
   const slides = rows.map(({ audit, previous }, index) => {
-    const { groups, positives } = auditFindings(repo, audit);
+    const { positives } = auditFindings(repo, audit);
     return (
       <ContractorSlide
         key={audit.id}
@@ -45,8 +47,7 @@ export default async function ContractorPage({ params, searchParams }: { params:
           landing: index === initial,
           sections: sectionRatios(audit),
           gaps: auditGaps(repo, audit),
-          findings: groups.reduce((n, g) => n + g.observations.length, 0),
-          observations: groups.map((g) => ({ category: g.category, count: g.observations.length })),
+          repeats,
         }}
       />
     );
@@ -71,6 +72,7 @@ export default async function ContractorPage({ params, searchParams }: { params:
           initial={initial}
           labels={rows.map((r) => `${dateLabel(r.audit.date)} · ${quarterLabel(r.audit.quarter)}`)}
           slides={slides}
+          trend={[...rows].reverse().map(({ audit }) => ({ auditId: audit.id, date: audit.date, label: dateLabel(audit.date), score: audit.totalScore }))}
           title={
             <PageTitle meta={`${contractor.subregion} · Contract ${contractor.contractNo} · ${rows.length} ${rows.length === 1 ? 'audit' : 'audits'}`}>
               {name}

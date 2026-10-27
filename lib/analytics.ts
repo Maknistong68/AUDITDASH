@@ -40,8 +40,6 @@ export function portfolioSummary(repo: Repo, filter: Filter): {
   const audits = select(repo, filter);
   const avgScore = avg(audits);
   const obs = obsByAudit(repo, audits);
-  const items = itemMap(repo);
-  const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
   let delta: number | null = null;
   if (filter.quarter === 'Q1-2026' || filter.quarter === 'all') {
     const q1 = avg(select(repo, filter, 'Q1-2026'));
@@ -53,7 +51,7 @@ export function portfolioSummary(repo: Repo, filter: Filter): {
     band: avgScore === null ? null : bandFor(avgScore),
     delta,
     audits: audits.length,
-    negatives: obs.filter((o) => (o.kind === 'negative' || o.kind === 'site') && !onNaItem(o, items, na)).length,
+    negatives: findingObs(repo, audits, obs).length,
     positives: obs.filter((o) => o.kind === 'positive').length,
   };
 }
@@ -108,16 +106,29 @@ export function applicableSlots(repo: Repo, filter: Filter, cat: CategoryId, aud
 }
 
 /**
- * Item-level negative observations (itemCode set) that sit on an applicable slot. The seed contains
- * "N/A - ..." notes imported as negatives on subsections scored possible === 0 (e.g. B5); they are not gaps.
+ * Item-level findings: auditor notes on a checklist item that are findings of their audit (isFinding: no COMPLIANT / N/A
+ * marker, text, the item's subsection lost points). Notes on N/A subsections never qualify (possible === 0).
  */
-function itemNegatives(audits: Audit[], obs: Observation[], items: Map<string, ChecklistItem>): Observation[] {
-  const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
+function itemFindings(audits: Audit[], obs: Observation[], items: Map<string, ChecklistItem>): Observation[] {
+  const byId = new Map(audits.map((a) => [a.id, a]));
   return obs.filter((o) => {
-    if (o.kind !== 'negative' || !o.itemCode) return false;
-    const item = items.get(o.itemCode);
-    return !!item && !isNa(item, na.get(o.auditId) ?? new Set());
+    const a = byId.get(o.auditId);
+    return !!a && items.has(o.itemCode ?? '') && isFinding(a, o);
   });
+}
+
+/**
+ * The one findings rule for every count: item findings (isFinding, one per question and audit) plus site findings
+ * (kind 'site', not question rows), site findings on an item whose subsection is N/A excluded.
+ */
+function findingObs(repo: Repo, audits: Audit[], obs: Observation[]): Observation[] {
+  const items = itemMap(repo);
+  // One finding per question and audit (as findingsByAudit and the repeats): a second note on the same item adds none.
+  const first = new Map<string, Observation>();
+  for (const o of itemFindings(audits, obs, items)) if (!first.has(`${o.auditId}|${o.itemCode}`)) first.set(`${o.auditId}|${o.itemCode}`, o);
+  const item = new Set(first.values());
+  const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
+  return obs.filter((o) => item.has(o) || (o.kind === 'site' && na.has(o.auditId) && !onNaItem(o, items, na)));
 }
 const itemMap = (repo: Repo) => new Map(repo.checklist().map((i) => [i.code, i]));
 
@@ -125,7 +136,7 @@ const itemMap = (repo: Repo) => new Map(repo.checklist().map((i) => [i.code, i])
 function itemHits(repo: Repo, audits: Audit[], cat: CategoryId, obs = obsByAudit(repo, audits)): number {
   const codes = new Set(itemsOf(repo, cat).map((i) => i.code));
   const seen = new Set<string>();
-  for (const o of itemNegatives(audits, obs, itemMap(repo))) if (codes.has(o.itemCode!)) seen.add(`${o.auditId}|${o.itemCode}`);
+  for (const o of itemFindings(audits, obs, itemMap(repo))) if (codes.has(o.itemCode!)) seen.add(`${o.auditId}|${o.itemCode}`);
   return seen.size;
 }
 
@@ -140,14 +151,9 @@ function onNaItem(o: Observation, items: Map<string, ChecklistItem>, na: Map<str
   return !!item && isNa(item, na.get(o.auditId) ?? new Set());
 }
 
-/** negative/site observations of the category, excluding those on items whose subsection is N/A in that audit. */
+/** The category's findings (findingObs: item findings by isFinding, plus site findings). */
 function findingsOf(repo: Repo, audits: Audit[], obs: Observation[], cat: CategoryId): Observation[] {
-  const items = itemMap(repo);
-  const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
-  return obs.filter((o) => {
-    if ((o.kind !== 'negative' && o.kind !== 'site') || o.category !== cat) return false;
-    return !onNaItem(o, items, na);
-  });
+  return findingObs(repo, audits, obs.filter((o) => o.category === cat));
 }
 
 export function categoryGaps(repo: Repo, filter: Filter): ReturnType<typeof gapsOver> {
@@ -190,8 +196,8 @@ export function league(repo: Repo, filter: Filter): { contractor: Contractor; la
 }
 
 /**
- * Contractors ranked by score-based gap, and the category's driving items. An item's `hits` = audits with an
- * applicable note on it (auditors annotate compliant items too, so a note is not a failure); `severity` =
+ * Contractors ranked by score-based gap, and the category's driving items. An item's `hits` = audits in which it is a
+ * finding (isFinding: a note not marked COMPLIANT / N/A, in a subsection that lost points); `severity` =
  * 1 − mean official subsection score over those audits; ranked by `impact` = hits × severity.
  */
 export function categoryDetail(repo: Repo, filter: Filter, cat: CategoryId): {
@@ -211,7 +217,7 @@ export function categoryDetail(repo: Repo, filter: Filter, cat: CategoryId): {
   }
   contractors.sort((a, b) => b.gapRate - a.gapRate || a.contractor.name.localeCompare(b.contractor.name));
   const hitsByCode = new Map<string, Set<string>>();
-  for (const o of itemNegatives(audits, obs, itemMap(repo))) {
+  for (const o of itemFindings(audits, obs, itemMap(repo))) {
     (hitsByCode.get(o.itemCode!) ?? hitsByCode.set(o.itemCode!, new Set()).get(o.itemCode!)!).add(o.auditId);
   }
   const items = itemsOf(repo, cat)
@@ -230,7 +236,7 @@ export function contractorInCategory(repo: Repo, filter: Filter, cat: CategoryId
   audits: Audit[]; items: { item: ChecklistItem; hitsByAudit: Record<string, Observation | null> }[];
 } {
   const audits = select(repo, { ...filter, contractorId });
-  const obs = itemNegatives(audits, obsByAudit(repo, audits), itemMap(repo));
+  const obs = itemFindings(audits, obsByAudit(repo, audits), itemMap(repo));
   const items = itemsOf(repo, cat).map((item) => {
     const hitsByAudit: Record<string, Observation | null> = {};
     for (const a of audits) {
@@ -470,6 +476,44 @@ export function repeatMatrix(repo: Repo, filter: Filter): RepeatMatrix {
   return { questions, contractors, cells };
 }
 
+export interface ContractorRepeat {
+  itemCode: string; label: string; category: CategoryId;
+  /** Times repeated (repeatMatrix cell): consecutive audit pairs in which the question is a finding in both. */
+  times: number;
+  /** The contractor's audits in which the question was a finding (isFinding), in date order. */
+  audits: { id: string; date: string; quarter: Quarter }[];
+  /** Date of the latest audit that repeated it. */
+  lastDate: string;
+}
+
+/**
+ * One contractor's repeated questions (repeatMatrix / isFinding), regions respected and quarter filter ignored, like the
+ * contractor page: most times repeated first, then the most recent repeat, then repeatMatrix's question order.
+ */
+export function contractorRepeats(repo: Repo, filter: Filter, contractorId: string): ContractorRepeat[] {
+  const f: Filter = { ...filter, quarter: 'all', contractorId: undefined };
+  const m = repeatMatrix(repo, f);
+  const row = m.cells[contractorId];
+  if (!row) return [];
+  const order = new Map(m.questions.map((q, i) => [q.itemCode, i]));
+  const date = new Map(repo.audits().map((a) => [a.id, a.date]));
+  const last = new Map<string, string>();
+  for (const r of repeatFindings(repo, f)) {
+    if (r.contractor.id !== contractorId) continue;
+    const d = date.get(r.auditId)!;
+    if (d > (last.get(r.itemCode) ?? '')) last.set(r.itemCode, d);
+  }
+  const found = findingsByAudit(repo, { ...f, contractorId });
+  return m.questions
+    .filter((q) => row[q.itemCode])
+    .map((q) => ({
+      itemCode: q.itemCode, label: q.label, category: q.category, times: row[q.itemCode],
+      audits: found.filter((x) => x.itemCodes.includes(q.itemCode)).map(({ audit: a }) => ({ id: a.id, date: a.date, quarter: a.quarter })),
+      lastDate: last.get(q.itemCode)!,
+    }))
+    .sort((a, b) => b.times - a.times || b.lastDate.localeCompare(a.lastDate) || order.get(a.itemCode)! - order.get(b.itemCode)!);
+}
+
 // ---------------------------------------------------------------- positive observations
 
 /** Positive observations over the filtered audits, and how widely they were recorded (audits / contractors with one). */
@@ -681,7 +725,7 @@ export function auditGaps(repo: Repo, audit: Audit): { category: CategoryId; gap
 }
 
 /**
- * An audit's findings (negative + site observations, N/A-subsection notes excluded) grouped by category,
+ * An audit's findings (findingObs: item findings by isFinding, plus site findings) grouped by category,
  * groups ordered by finding count (most first), observations in id order. Also the audit's positives count.
  */
 export function auditFindings(repo: Repo, audit: Audit): { groups: { category: CategoryId; observations: Observation[] }[]; positives: number } {
@@ -723,14 +767,15 @@ export function categoryQuarters(repo: Repo, filter: Filter, cat: CategoryId): C
 }
 
 /**
- * Neutral item state for one audit: "noted" = an applicable auditor note on the item (not a pass/fail verdict:
- * auditors annotate compliant items too), "none" = no note, "na" = subsection scored N/A (possible 0).
+ * Item state for one audit: "noted" = the item is a finding of the audit (isFinding), "none" = no finding (no note, or a
+ * note that is not a finding: marked COMPLIANT / N/A, or its subsection lost no points), "na" = subsection scored N/A.
  */
 export type ItemState = 'noted' | 'none' | 'na';
 
 export interface ItemInAudit {
   item: ChecklistItem;
   state: ItemState;
+  /** The finding's note; for "none", the auditor's note on the item when it is not a finding (else null). */
   observation: Observation | null;
   /** Official subsection (A items: section) score scored/possible for this audit; null when N/A. Severity = 1 − ratio. */
   ratio: number | null;
@@ -739,11 +784,14 @@ export interface ItemInAudit {
 /** The state of each given item in one audit (one place for the items slide and the item page). */
 function itemStatesIn(repo: Repo, audit: Audit, items: ChecklistItem[]): ItemInAudit[] {
   const na = naSubsections(audit);
-  const negs = itemNegatives([audit], obsByAudit(repo, [audit]), itemMap(repo));
+  const obs = obsByAudit(repo, [audit]);
+  const found = itemFindings([audit], obs, itemMap(repo));
   return items.map((item) => {
     if (isNa(item, na)) return { item, state: 'na', observation: null, ratio: null };
-    const o = negs.find((x) => x.itemCode === item.code) ?? null;
-    return { item, state: o ? 'noted' : 'none', observation: o, ratio: itemRatio(audit, item) };
+    const f = found.find((x) => x.itemCode === item.code);
+    // A note that is not a finding still shows (with its link); it just does not count.
+    const note = f ?? obs.find((x) => x.kind === 'negative' && x.itemCode === item.code) ?? null;
+    return { item, state: f ? 'noted' : 'none', observation: note, ratio: itemRatio(audit, item) };
   });
 }
 
