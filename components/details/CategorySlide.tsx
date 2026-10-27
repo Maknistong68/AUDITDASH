@@ -1,6 +1,7 @@
-import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
+import { HandoffLink } from '@/components/motion/HandoffLink';
+import { DRILL_CONTRACTOR } from '@/lib/handoff';
 import { Signed } from '@/components/bento/parts';
 import { itemLabel } from '@/lib/itemLabels';
 import { pct, quarterLabel } from '@/lib/format';
@@ -84,9 +85,11 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
         </div>
         <FitList testid="contractor-list" label="contractors" className="grid content-evenly">
           {q.contractors.map((r, i) => (
-            <Link
+            <HandoffLink
               key={r.contractor.id}
               data-testid="contractor-row"
+              data-handoff-card=""
+              data-handoff={DRILL_CONTRACTOR}
               href={d.contractorHref(r.contractor.id)}
               className="group grid grid-cols-[1.4em_minmax(0,1.6fr)_minmax(40px,1fr)_3em_14px] items-center gap-2.5 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(4px,0.85svh,10px)] transition-colors hover:bg-fill-2"
               title={`${r.contractor.name}: ${pct(r.gapRate)}% score lost`}
@@ -96,7 +99,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
               <GapBar value={r.gapRate} />
               <span className="num text-right text-[16px] font-semibold">{pct(r.gapRate)}<span className="text-[0.72em] text-muted">%</span></span>
               <ChevronRight size={14} strokeWidth={2.4} className="text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
-            </Link>
+            </HandoffLink>
           ))}
         </FitList>
       </BentoCard>

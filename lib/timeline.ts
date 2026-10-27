@@ -73,16 +73,21 @@ export function xOf(date: string, domain: { start: number; end: number }): numbe
   return Number.isFinite(x) ? Math.min(1, Math.max(0, x)) : 0;
 }
 
-/** Month ticks (first of each month) as axis fractions with short names. */
-export function monthTicks(domain: { start: number; end: number }): { x: number; label: string }[] {
-  const out: { x: number; label: string }[] = [];
+/**
+ * The months on the axis, as fractions: `x` the month's middle (where its label sits), `from`/`to` its first day and
+ * the first day of the next (where it breaks), `month` 0–11, and a short name.
+ */
+export function monthTicks(domain: { start: number; end: number }): { x: number; from: number; to: number; month: number; label: string }[] {
+  const out: { x: number; from: number; to: number; month: number; label: string }[] = [];
+  const at = (t: number) => (t - domain.start) / (domain.end - domain.start);
   const names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const d = new Date(domain.start * 864e5);
   for (let y = d.getUTCFullYear(), m = d.getUTCMonth(); ; m++) {
     const t = Date.UTC(y, m, 1) / 864e5;
     if (t >= domain.end) break;
     const next = Date.UTC(y, m + 1, 1) / 864e5;
-    out.push({ x: ((t + next) / 2 - domain.start) / (domain.end - domain.start), label: names[((m % 12) + 12) % 12] });
+    const month = ((m % 12) + 12) % 12;
+    out.push({ x: at((t + next) / 2), from: at(t), to: at(next), month, label: names[month] });
   }
   return out;
 }

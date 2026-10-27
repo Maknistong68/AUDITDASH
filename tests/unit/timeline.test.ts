@@ -77,6 +77,19 @@ describe('time axis', () => {
     expect(monthTicks(d).map((m) => m.label)).toEqual(['Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar']);
   });
 
+  test('month breaks tile the axis: each month ends where the next starts; the quarter split is a month break', () => {
+    const d = timeDomain(['Q4-2025', 'Q1-2026']);
+    const ms = monthTicks(d);
+    expect(ms[0].from).toBe(0);
+    expect(ms.at(-1)!.to).toBe(1);
+    for (let i = 1; i < ms.length; i++) expect(ms[i].from).toBeCloseTo(ms[i - 1].to, 12);
+    for (const m of ms) expect(m.x).toBeCloseTo((m.from + m.to) / 2, 12);
+    expect(ms.find((m) => m.label === 'Jan')!.from).toBeCloseTo(d.quarters[0].to, 12);
+    expect(ms.map((m) => m.month)).toEqual([9, 10, 11, 0, 1, 2]);
+    expect(xOf('2025-11-30', d)).toBeLessThan(ms[2].from);
+    expect(xOf('2025-12-01', d)).toBeGreaterThan(ms[2].from);
+  });
+
   test('one quarter spans the whole axis; bad dates never give NaN', () => {
     const d = timeDomain(['Q4-2025']);
     expect(d.quarters).toEqual([{ quarter: 'Q4-2025', from: 0, to: 1 }]);

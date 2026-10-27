@@ -1,13 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { filterAudits, repeatAudits, repeatContractors, systemicRepeats } from '../../lib/analytics';
+import { followUps, repeatContractors, repeatFindings, repeatQuestions } from '../../lib/analytics';
+import type { Filter } from '../../lib/types';
 
-const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
+const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const Q = 'q=all&r=SR1%2CSR2';
-const ROWS = systemicRepeats(getRepo(), ALL);
+const ROWS = repeatQuestions(getRepo(), ALL);
 const COLS = repeatContractors(getRepo(), ALL);
-// Denominators: the audits of the contractors audited in both quarters (the same audits the notes are counted over).
-const AUDITS = repeatAudits(getRepo(), ALL);
+const TOTAL = String(repeatFindings(getRepo(), ALL).length);
 const CODE = /\b[ABC]\d+(\.\d+)?\b/;
 
 /** Wrap startViewTransition: count hand-offs and, once each is running, record its pseudo-element animation durations. */
@@ -51,17 +51,17 @@ async function noPageScroll(page: Page) {
   expect(sw).toBeLessThanOrEqual(iw);
 }
 
-test('the dashboard Repeat findings card opens /repeats with a ~1 s shared hand-off; the header shows 28', async ({ page }) => {
-  expect(ROWS).toHaveLength(28);
+test('the dashboard Repeat findings card opens /repeats with a ~1 s shared hand-off; the header shows the same count', async ({ page }) => {
+  expect(TOTAL).toBe('345');
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
   const card = page.getByTestId('kpi-repeats');
-  await expect(card.getByTestId('repeats-count')).toHaveText('28');
+  await expect(card.getByTestId('repeats-count')).toHaveText(TOTAL);
   await watchTransitions(page);
   await card.getByRole('link').click();
   await expect(page).toHaveURL(new RegExp(`/repeats\\?${Q}$`));
-  await expect(page.getByTestId('repeats-figure')).toHaveText('28');
-  await expect(page.getByTestId('repeats-header')).toContainText('questions repeating');
+  await expect(page.getByTestId('repeats-figure')).toHaveText(TOTAL);
+  await expect(page.getByTestId('repeats-header')).toContainText("same question noted again at the contractor's next audit");
   await expect(page.getByTestId('breadcrumb')).toHaveText(/Overview\s*Repeat findings/);
   await expect.poll(async () => Object.keys((await transitions(page)).durations).length).toBeGreaterThan(0);
   const { handoffs, durations } = await transitions(page);
@@ -88,7 +88,7 @@ test('the Main problem hand-off also runs about 1 s', async ({ page }) => {
 });
 
 for (const [w, h] of [[1366, 768], [1920, 1080]] as const) {
-  test(`/repeats at ${w}×${h}: one screen, 28 issue rows × ${COLS.length} contractors, no codes`, async ({ page }) => {
+  test(`/repeats at ${w}×${h}: one screen, every repeated question × ${COLS.length} contractors, no codes`, async ({ page }) => {
     await page.setViewportSize({ width: w, height: h });
     await page.goto(`/repeats?${Q}`);
     await expect(page.getByTestId('repeats-matrix')).toBeVisible();
@@ -96,14 +96,14 @@ for (const [w, h] of [[1366, 768], [1920, 1080]] as const) {
     await expect(page.getByTestId('repeats-col')).toHaveCount(7);
     expect(COLS).toHaveLength(7);
     const rows = await allRows(page);
-    await expect(rows).toHaveCount(28);
+    await expect(rows).toHaveCount(ROWS.length);
     await noPageScroll(page);
-    // rows in order, plain labels, worst reach first; one filled dot per contractor hit
+    // rows in order, plain labels, widest reach first; one filled dot per contractor that repeated it
     const labels = await page.getByTestId('repeats-label').allInnerTexts();
     expect(labels).toEqual(ROWS.map((r) => r.label));
     const reach = await rows.evaluateAll((els) => els.map((e) => Number(e.getAttribute('data-reach'))));
     expect(reach).toEqual([...reach].sort((a, b) => b - a));
-    for (let i = 0; i < 28; i++) await expect(rows.nth(i).locator('[data-testid="repeats-cell"][data-filled]')).toHaveCount(ROWS[i].contractorCount);
+    for (let i = 0; i < ROWS.length; i++) await expect(rows.nth(i).locator('[data-testid="repeats-cell"][data-filled]')).toHaveCount(ROWS[i].contractorCount);
     await expect(rows.first().getByTestId('repeats-cell')).toHaveCount(7);
     // no checklist codes anywhere on the page, no question sentences
     const text = await page.locator('main').innerText();
@@ -113,19 +113,14 @@ for (const [w, h] of [[1366, 768], [1920, 1080]] as const) {
   });
 }
 
-test('/repeats: every row shows its Q4 → Q1 audits noting it by default; dot, label and column drill down', async ({ page }) => {
+test('/repeats: every row shows how many times it was repeated; dot, label and column drill down', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto(`/repeats?${Q}`);
   const row = page.getByTestId('repeats-row').first();
-  const trend = row.getByTestId('repeats-trend');
-  await expect(page.getByTestId('repeats-matrix')).toContainText('audits noting it: Q4 → Q1');
-  // shown for every row without hover (no empty strip)
+  await expect(page.getByTestId('repeats-matrix')).toContainText('times repeated');
   const rows = await allRows(page);
-  for (let i = 0; i < (await rows.count()); i++) {
-    await expect(rows.nth(i).getByTestId('repeats-trend')).toHaveCSS('opacity', '1');
-    await expect(rows.nth(i).getByTestId('repeats-trend')).toHaveText(`${ROWS[i].q4Audits} of ${AUDITS.q4}→${ROWS[i].q1Audits} of ${AUDITS.q1}`);
-  }
-  await expect(trend).toHaveAttribute('aria-label', `Noted at ${ROWS[0].q4Audits} of ${AUDITS.q4} audits in Q4, ${ROWS[0].q1Audits} of ${AUDITS.q1} audits in Q1`);
+  for (let i = 0; i < (await rows.count()); i++) await expect(rows.nth(i).getByTestId('repeats-times')).toHaveText(`${ROWS[i].times}×`);
+  await expect(row.getByTestId('repeats-times')).toHaveAttribute('aria-label', `Repeated ${ROWS[0].times} times at ${ROWS[0].contractorCount} contractors`);
   await page.goto(`/repeats?${Q}`);
 
   const r = ROWS[0];
@@ -153,16 +148,16 @@ test('reduced motion: the repeats card still navigates, with no transition', asy
   await watchTransitions(page);
   await page.getByTestId('kpi-repeats').getByRole('link').click();
   await expect(page).toHaveURL(new RegExp(`/repeats\\?${Q}$`));
-  await expect(page.getByTestId('repeats-figure')).toHaveText('28');
+  await expect(page.getByTestId('repeats-figure')).toHaveText(TOTAL);
   expect((await transitions(page)).handoffs).toBe(0);
   await ctx.close();
 });
 
-test('/repeats under a single-quarter or empty filter: calm empty state, same header, no NaN', async ({ page }) => {
+test('/repeats without a follow-up audit: calm empty state, same header, no NaN', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
   for (const [url, figure, title] of [
-    ['/repeats?q=Q4-2025&r=SR1%2CSR2', '—', 'Needs an earlier quarter'],
-    ['/repeats?q=all&r=SR1%2CSR2&t=security', '0', 'No questions repeating'],
+    ['/repeats?q=all&r=SR1%2CSR2&t=security', '—', 'Needs a follow-up audit'],
+    ['/repeats?q=all&r=', '—', 'Needs a follow-up audit'],
   ] as const) {
     await page.goto(url);
     await expect(page.getByTestId('repeats-figure')).toHaveText(figure);
@@ -182,40 +177,40 @@ test('/repeats on a short screen: top rows + "+M more" that expands in place; th
   const more = page.getByTestId('repeats-more');
   await expect(more).toBeVisible();
   const shown = await page.getByTestId('repeats-row').count();
-  expect(shown).toBeLessThan(28);
-  await expect(more).toHaveText(`+${28 - shown} more`);
+  expect(shown).toBeLessThan(ROWS.length);
+  await expect(more).toHaveText(`+${ROWS.length - shown} more`);
   await noPageScroll(page);
   await more.click();
-  await expect(page.getByTestId('repeats-row')).toHaveCount(28);
+  await expect(page.getByTestId('repeats-row')).toHaveCount(ROWS.length);
   await expect(page.getByTestId('repeats-label').nth(shown)).toBeFocused();
   await page.getByTestId('repeats-row').last().scrollIntoViewIfNeeded();
   await expect(page.getByTestId('repeats-row').last()).toBeInViewport();
   await noPageScroll(page);
 });
 
-test('/repeats header: Q4 → Q1 as notes per audit over the eligible contractors\' audits; the threshold is labelled', async ({ page }) => {
+test('/repeats header: the rule, and what the count is made of', async ({ page }) => {
   await page.goto(`/repeats?${Q}`);
-  const notes = page.getByTestId('repeats-notes');
-  await expect(notes).toContainText('notes per audit');
-  await expect(notes).not.toContainText('contractor notes');
-  await expect(page.getByTestId('repeats-header').getByTestId('repeats-threshold')).toHaveText('at ≥5 of 7 contractors');
-  const sum = (k: 'q4Audits' | 'q1Audits') => ROWS.reduce((s, r) => s + r[k], 0);
-  expect(AUDITS.q4).toBeGreaterThan(0);
-  expect(AUDITS.q1).toBeGreaterThan(0);
-  // the denominators leave out contractors audited in one quarter only
-  expect(AUDITS.q1).toBeLessThan(filterAudits(getRepo(), { ...ALL, quarter: 'Q1-2026' }).length);
-  await expect(page.getByTestId('repeats-notes-count')).toHaveText([
-    (sum('q4Audits') / AUDITS.q4).toFixed(1),
-    (sum('q1Audits') / AUDITS.q1).toFixed(1),
-  ]);
+  const header = page.getByTestId('repeats-header');
+  await expect(header.getByTestId('repeats-rule')).toHaveText("same question noted again at the contractor's next audit");
+  await expect(header.getByTestId('repeats-questions')).toHaveText(`${ROWS.length} questions`);
+  await expect(header.getByTestId('repeats-contractors')).toHaveText(`${COLS.length} contractors`);
+  await expect(header.getByTestId('repeats-followups')).toHaveText(`${followUps(getRepo(), ALL).length} follow-up audits`);
+  await expect(header.getByTestId('repeats-spread')).toBeVisible();
 });
 
-test('/repeats single region: the scaled threshold finds repeats and says so', async ({ page }) => {
-  for (const [r, label] of [['SR1', 'at ≥3 of 4 contractors'], ['SR2', 'at ≥3 of 3 contractors']] as const) {
+test('/repeats Q4 only: the same-quarter follow-up (SIBS) shows its repeats', async ({ page }) => {
+  const f: Filter = { ...ALL, quarter: 'Q4-2025' };
+  await page.goto('/repeats?q=Q4-2025&r=SR1%2CSR2');
+  await expect(page.getByTestId('repeats-figure')).toHaveText(String(repeatFindings(getRepo(), f).length));
+  await expect(page.getByTestId('repeats-col')).toHaveCount(1);
+  await expect(page.getByTestId('repeats-matrix')).toBeVisible();
+});
+
+test('/repeats single region: repeats within that region only', async ({ page }) => {
+  for (const r of ['SR1', 'SR2'] as const) {
     await page.goto(`/repeats?q=all&r=${r}`);
-    await expect(page.getByTestId('repeats-header').getByTestId('repeats-threshold')).toHaveText(label);
-    await expect(page.getByTestId('repeats-figure')).not.toHaveText('0');
-    await expect(page.getByTestId('repeats-matrix')).toBeVisible();
+    await expect(page.getByTestId('repeats-figure')).toHaveText(String(repeatFindings(getRepo(), { quarter: 'all', regions: [r] }).length));
+    await expect(page.getByTestId('repeats-col')).toHaveCount(repeatContractors(getRepo(), { quarter: 'all', regions: [r] }).length);
   }
 });
 
@@ -240,7 +235,8 @@ test('/repeats matrix: two encodings (tint and size by step), per-cell labels, p
   const steps = [...width.keys()].sort();
   for (let i = 1; i < steps.length; i++) expect(width.get(steps[i])!).toBeGreaterThan(width.get(steps[i - 1])!);
   await expect(matrix.locator('[data-testid="repeats-cell"]:not([data-filled])').first()).toHaveAttribute('aria-label', /^.+: not repeated$/);
-  // aria-rowcount is backed by aria-rowindex on every row
+  // aria-rowcount is backed by aria-rowindex on every row (all rows shown)
+  await allRows(page);
   await expect(matrix).toHaveAttribute('aria-rowcount', String(ROWS.length + 1));
   const idx = await matrix.locator('[role="row"]').evaluateAll((els) => els.map((e) => e.getAttribute('aria-rowindex')));
   expect(idx.slice(0, ROWS.length + 1)).toEqual(Array.from({ length: ROWS.length + 1 }, (_, i) => String(i + 1)));

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
-import { repeatAudits, repeatContractors, repeatNotesPerAudit, repeatSpread, repeatThreshold, systemicRepeats } from '@/lib/analytics';
+import { followUps, repeatContractors, repeatFindings, repeatQuestions, repeatSpread } from '@/lib/analytics';
 import { detailContext, href, type SP } from '@/lib/details';
 import { splitName } from '@/lib/timeline';
 import { DetailFrame } from '@/components/details/DetailFrame';
@@ -8,7 +8,7 @@ import { RepeatsView, type RepeatCol, type RepeatRow } from '@/components/detail
 
 export const metadata: Metadata = { title: 'Repeat findings' };
 
-/** Latest section score → score lost, in four steps (0 = little lost … 3 = most); null when the section was not scored. */
+/** Latest repeating audit's section score → score lost, in four steps (0 = little lost … 3 = most); null when the section was not scored. */
 const step = (ratio: number | null) => {
   if (ratio === null) return null;
   const lost = 1 - Math.min(1, Math.max(0, ratio));
@@ -16,16 +16,18 @@ const step = (ratio: number | null) => {
 };
 
 /**
- * Repeat findings, one screen: a header strip (questions repeating, how widespread, Q4 → Q1 notes) over an
- * issues × contractors dot matrix. Needs both quarters; otherwise a calm empty state under the same header.
+ * Repeat findings, one screen: a header strip (repeat findings, how widespread, what they are made of) over a
+ * questions × contractors dot matrix. A repeat is the same question noted again at the contractor's next audit of the
+ * same type; without a follow-up audit in the filter, a calm empty state under the same header.
  */
 export default async function RepeatsPage({ searchParams }: { searchParams: Promise<SP> }) {
   const repo = getRepo();
   const { filter, query } = detailContext(await searchParams);
   const overview = `/?${query}`;
-  const twoQuarters = filter.quarter !== 'Q4-2025';
-  const repeats = twoQuarters ? systemicRepeats(repo, filter) : [];
-  const contractors = twoQuarters ? repeatContractors(repo, filter) : [];
+  const pairs = followUps(repo, filter);
+  const findings = pairs.length ? repeatFindings(repo, filter) : [];
+  const repeats = pairs.length ? repeatQuestions(repo, filter) : [];
+  const contractors = repeatContractors(repo, filter);
   const hits = (id: string) => repeats.filter((r) => r.contractors.some((c) => c.id === id)).length;
   const cols: RepeatCol[] = contractors
     .map((c) => ({ id: c.id, name: c.name, ...splitName(c.name), hits: hits(c.id), href: href(`/contractor/${c.id}`, query) }))
@@ -34,34 +36,26 @@ export default async function RepeatsPage({ searchParams }: { searchParams: Prom
     key: r.itemCode,
     label: r.label,
     reach: r.contractorCount,
-    q4: r.q4Audits,
-    q1: r.q1Audits,
+    times: r.times,
     href: href(`/category/${r.category}`, query, { hash: `item-${r.itemCode}` }),
     cells: cols.map((c) => {
-      if (!r.contractors.some((x) => x.id === c.id)) return null;
       const sc = r.sectionScores.find((x) => x.contractorId === c.id);
-      const ratio = sc ? (sc.q1 ?? sc.q4) : null;
+      if (!sc) return null;
       return {
-        step: step(ratio),
-        lost: ratio === null ? null : Math.round((1 - Math.min(1, Math.max(0, ratio))) * 100),
+        step: step(sc.ratio),
+        lost: sc.ratio === null ? null : Math.round((1 - Math.min(1, Math.max(0, sc.ratio))) * 100),
         href: href(`/category/${r.category}/${c.id}/${encodeURIComponent(r.itemCode)}`, query),
       };
     }),
   }));
-  // Audits per quarter of the eligible contractors (audited in both quarters): the denominators, over the same audits as
-  // the notes, so neither a quarter with more audits nor a contractor audited once reads as a rise.
-  const audits = repeatAudits(repo, filter);
-  const eligible = contractors.length;
-  const empty = twoQuarters ? (repeats.length ? null : 'No questions repeating') : 'Needs an earlier quarter';
+  const empty = pairs.length ? (repeats.length ? null : 'No questions repeated') : 'Needs a follow-up audit';
 
   return (
     <DetailFrame filter={filter} crumbs={[{ label: 'Overview', href: overview }, { label: 'Repeat findings' }]} parent={overview} fit>
       <RepeatsView
-        count={twoQuarters ? repeats.length : null}
-        spread={repeatSpread(repeats)}
-        rates={repeatNotesPerAudit(repeats, audits)}
-        threshold={{ min: repeatThreshold(eligible), of: eligible }}
-        audits={audits}
+        count={pairs.length ? findings.length : null}
+        stats={{ questions: repeats.length, contractors: new Set(findings.map((f) => f.contractor.id)).size, followUps: pairs.length }}
+        spread={repeatSpread(repeats, contractors.length)}
         rows={rows}
         cols={cols}
         empty={empty}

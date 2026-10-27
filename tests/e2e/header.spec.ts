@@ -85,12 +85,27 @@ test('a type with no audits shows its empty state, no H&S data', async ({ page }
   await expect(page.getByTestId('type-empty')).toContainText('Environmental');
 });
 
-test('the name is Audits Only', async ({ page }) => {
+test('the name is Audits, with no logo mark', async ({ page }) => {
   await page.goto('/');
-  await expect(page).toHaveTitle('Audits Only');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Audits Only');
+  await expect(page).toHaveTitle('Audits');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Audits');
+  await expect(page.getByRole('heading', { level: 1 }).locator('xpath=..').locator('svg')).toHaveCount(0);
   await page.goto('/contractor/4800001131');
-  await expect(page).toHaveTitle('JV-ECH (Port T1) · Audits Only');
+  await expect(page).toHaveTitle('JV-ECH (Port T1) · Audits');
+});
+
+test('dark is the default theme; a stored light choice wins', async ({ browser }) => {
+  const fresh = await browser.newContext({ colorScheme: 'light' });
+  const p = await fresh.newPage();
+  await p.goto('/');
+  await expect(p.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await fresh.close();
+  const light = await browser.newContext();
+  await light.addInitScript(() => { try { localStorage.setItem('theme', 'light'); } catch { /* private mode */ } });
+  const q = await light.newPage();
+  await q.goto('/');
+  await expect(q.locator('html')).toHaveAttribute('data-theme', 'light');
+  await light.close();
 });
 
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {

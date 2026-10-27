@@ -1,5 +1,7 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
+import { useState } from 'react';
+import { handoffPending } from '@/lib/handoff';
 
 export const SPRING = { type: 'spring', stiffness: 240, damping: 28, mass: 0.9 } as const;
 
@@ -13,24 +15,29 @@ export function BentoCard({
   className = '',
   label,
   handoff,
+  landing,
   children,
 }: {
   i: number;
   /** The card's name in the shared "card opens" hand-off (lib/handoff), when it opens a detail view. */
   handoff?: string;
+  /** The hand-off name this card lands (a drill-down's first card): the clicked row grows into it, so it skips its rise. */
+  landing?: string;
   testid?: string;
   className?: string;
   label?: string;
   children: React.ReactNode;
 }) {
   const reduce = useReducedMotion();
+  const [landed] = useState(() => !!landing && handoffPending());
   return (
     <motion.section
       data-testid={testid}
       data-handoff={handoff}
       data-handoff-card={handoff ? '' : undefined}
       aria-label={label}
-      initial={reduce ? false : { opacity: 0, y: 22, scale: 0.985 }}
+      style={landing ? { viewTransitionName: landing } : undefined}
+      initial={reduce || landed ? false : { opacity: 0, y: 22, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ ...SPRING, delay: 0.05 + i * 0.07 }}
       className={`card relative flex min-h-0 min-w-0 flex-col ${className}`}
@@ -54,7 +61,7 @@ export function TileLabel({ children, tone, className = '' }: { children: React.
 
 /**
  * Bento layout. ≥1200px: XL contractors tile on the left at full hero height; the right half is a 6-column
- * grid: L main problem (6) / M score (3) + M repeats (3) / S high-risk, bands, region (2 each).
+ * grid: L main problem (6) / M score (3) + M repeats (3) / S positives, bands, region (2 each).
  * Narrower: everything stacks and the page scrolls.
  */
 export function BentoGrid({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {

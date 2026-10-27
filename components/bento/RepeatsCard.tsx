@@ -13,24 +13,21 @@ const SHADES = ['100%', '68%', '42%', '26%'];
 const shade = (k: number) => `color-mix(in srgb, var(--tone-dot) ${SHADES[Math.min(k, SHADES.length - 1)]}, transparent)`;
 
 /**
- * M: questions repeating at ≥5 of the 7 contractors audited in both quarters, scaled for a region filter (lib/analytics
- * systemicRepeats, repeatThreshold; the threshold is the tiny label under the meaning). Under the number, one stacked bar of how
- * widespread they are: a segment per reach (contractors hit, widest first), width ∝ questions at that reach, with a tiny
- * "6 at all 7" label (questions at reach) under each segment.
+ * M: repeat findings, i.e. the same question noted again in a contractor's next audit of the same type (lib/analytics
+ * repeatFindings). Under the number, how wide: questions repeated, contractors and follow-up audits behind it.
  * The whole tile opens /repeats with the shared hand-off: the tile grows into the view's header strip and the figure
  * flies into its header figure (lib/handoff).
  */
-export function RepeatsCard({ repeats, spread, threshold, href }: {
-  repeats: number | null; spread: Spread;
-  /** The reach a question needed ("at ≥5 of 7 contractors"); null without an earlier quarter. */
-  threshold: { min: number; of: number } | null;
+export function RepeatsCard({ repeats, questions, contractors, followUps, href }: {
+  /** Repeat findings; null when the filter has no follow-up audit (nothing to repeat yet). */
+  repeats: number | null; questions: number; contractors: number; followUps: number;
   href: string;
 }) {
   return (
     <BentoCard i={3} testid="kpi-repeats" handoff={REPEATS_CARD} className={`tone-minimal ${PAD} lift group justify-between gap-2 min-[640px]:col-span-3`}>
       <HandoffLink
         href={href}
-        aria-label={`Repeat findings: ${repeats === null ? 'needs an earlier quarter' : `${repeats} questions repeating`}. Open details`}
+        aria-label={`Repeat findings: ${repeats === null ? 'needs a follow-up audit' : `${repeats} findings repeated at the next audit`}. Open details`}
         className="absolute inset-0 z-[1] rounded-[var(--radius-card)]"
       />
       <CardChevron />
@@ -42,24 +39,35 @@ export function RepeatsCard({ repeats, spread, threshold, href }: {
         <p data-testid="repeats-count" data-handoff={REPEATS_FIGURE} className={BIG}>
           {repeats === null ? <span className="text-faint">—</span> : <CountUp value={repeats} format={int} duration={1.2} delay={0.3} />}
         </p>
-        <p className="flex flex-col gap-1 pb-[0.5em] text-[13px] leading-tight text-muted">
-          <span>{repeats === null ? 'Needs an earlier quarter' : 'questions repeating'}</span>
-          {repeats !== null && threshold && threshold.of > 0 && (
-            <ThresholdLabel min={threshold.min} of={threshold.of} />
-          )}
+        <p className="pb-[0.5em] text-[13px] leading-tight text-muted">
+          {repeats === null ? 'Needs a follow-up audit' : <RepeatRule />}
         </p>
       </div>
-      {repeats !== null && spread.length > 0 && <ReachBar spread={spread} />}
+      {repeats !== null && <RepeatStats questions={questions} contractors={contractors} followUps={followUps} />}
     </BentoCard>
   );
 }
 
-/** "at ≥5 of 7 contractors": the reach a question needed to count (lib/analytics repeatThreshold). Card and /repeats header. */
-export function ThresholdLabel({ min, of }: { min: number; of: number }) {
-  return (
-    <span data-testid="repeats-threshold" className="whitespace-nowrap text-[11px] leading-none text-muted">
-      at ≥{min} of {of} contractors
+/** The rule in a few words, beside the figure. Card and /repeats header. */
+export function RepeatRule() {
+  return <span data-testid="repeats-rule">same question noted again at the contractor&apos;s next audit</span>;
+}
+
+/** "79 questions · 7 contractors · 8 follow-up audits": what the repeat count is made of. */
+export function RepeatStats({ questions, contractors, followUps }: { questions: number; contractors: number; followUps: number }) {
+  const stat = (n: number, one: string, many: string, id: string) => (
+    <span data-testid={id} className="whitespace-nowrap">
+      <span className="num font-semibold text-ink">{n}</span> {n === 1 ? one : many}
     </span>
+  );
+  return (
+    <p data-testid="repeats-stats" className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-[13px] leading-tight text-muted">
+      {stat(questions, 'question', 'questions', 'repeats-questions')}
+      <span aria-hidden>·</span>
+      {stat(contractors, 'contractor', 'contractors', 'repeats-contractors')}
+      <span aria-hidden>·</span>
+      {stat(followUps, 'follow-up audit', 'follow-up audits', 'repeats-followups')}
+    </p>
   );
 }
 

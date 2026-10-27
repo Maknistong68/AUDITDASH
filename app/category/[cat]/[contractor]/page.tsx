@@ -34,6 +34,7 @@ export default async function ContractorInCategoryPage({ params, searchParams }:
     const comp = auditCompliance(audit, items);
     return { id: audit.id, date: audit.date, gap: comp === null ? null : 1 - comp };
   });
+  const start = initialSlide(s, rows.map((r) => r.audit.quarter), filter.quarter);
   const title = (
     <PageTitle meta={<span className="inline-flex flex-wrap items-center gap-2"><CategoryChip id={cat} /> <span>{contractor.subregion} · {rows.length} {rows.length === 1 ? 'audit' : 'audits'}</span></span>}>
       {contractor.name}
@@ -50,14 +51,14 @@ export default async function ContractorInCategoryPage({ params, searchParams }:
       ) : (
         <AuditCarousel
           unit="audit"
-          initial={initialSlide(s, rows.map((r) => r.audit.quarter), filter.quarter)}
+          initial={start}
           labels={rows.map((r) => `${dateLabel(r.audit.date)} · ${quarterLabel(r.audit.quarter)}`)}
           title={title}
-          slides={rows.map(({ audit, previous }) => (
+          slides={rows.map(({ audit, previous }, k) => (
             <ItemsSlide
               key={audit.id}
               d={{
-                audit, previous, categoryName: c.name, history,
+                audit, previous, categoryName: c.name, history, landing: k === start,
                 rows: auditItemStates(repo, audit, cat),
                 itemHref: (code) => href(`/category/${cat}/${contractor.id}/${encodeURIComponent(code)}`, query),
               }}

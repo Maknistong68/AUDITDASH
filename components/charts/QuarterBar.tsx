@@ -1,4 +1,4 @@
-/** Track heights: `sm` region rows, `md` the /repeats header, `lg` the /audits and /high-risk headers. */
+/** Track heights: `sm` region rows, `md` the /repeats header, `lg` the /audits header. */
 const TRACK = {
   sm: 'h-[clamp(7px,1svh,10px)]',
   md: 'h-[clamp(8px,1.1svh,12px)]',
@@ -9,7 +9,7 @@ const TRACK = {
  * One quarter as a horizontal bar row: label · bar on its track · value. Renders three cells of the caller's grid
  * (`grid-cols-[auto_minmax(0,1fr)_auto]`, or more columns when the caller adds cells after it). The bar grows in from the
  * left (`rp-grow`, staggered by `delay` ms). `fraction` is the bar's share of the track (0–1); null draws the empty track.
- * Shared by the /repeats, /high-risk and /audits headers and the /audits region rows.
+ * Shared by the /repeats and /audits headers and the /audits region rows.
  */
 export function QuarterBar({ label, fraction, hue, delay, value, size = 'lg', barTestid, valueTestid, valueClass }: {
   label: React.ReactNode;

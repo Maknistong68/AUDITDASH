@@ -38,8 +38,6 @@
   --rp-0: #d4700f; --rp-1: #b35a0c; --rp-2: #8a430a; --rp-3: #552a04;
   /* Outline of the washed segments of the repeats reach bar: the full orange, >= 3:1 on white. None in dark. */
   --seg-edge: var(--minimal-dot);
-  /* /high-risk hazard hues (HighRiskView), categorical; no green or red, which mean good/bad here */
-  --hz-lifting: #0f9fb5; --hz-height: #eb6834; --hz-electrical: #2a78d6; --hz-excavation: #eda100; --hz-confined: #e87ba4; --hz-hotwork: #6250d6; --hz-permits: #5e6b7d; --hz-other: #aeaeb2;
   --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
   --up: #1f7a36;
   --down: #c0141c;
@@ -101,8 +99,6 @@
   --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
   /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
   --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18; --seg-edge: transparent;
-  /* /high-risk hazard hues, stepped for the dark card */
-  --hz-lifting: #22a8bd; --hz-height: #d95926; --hz-electrical: #3987e5; --hz-excavation: #c98500; --hz-confined: #d55181; --hz-hotwork: #9085e9; --hz-permits: #8e9aab; --hz-other: #636366;
   --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
   --up: #4fdc78;
   --down: #ff7b72;
@@ -144,8 +140,6 @@
     --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
     /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
     --rp-0: #ffd6ad; --rp-1: #ffa952; --rp-2: #e2782a; --rp-3: #b85a18; --seg-edge: transparent;
-    /* /high-risk hazard hues, stepped for the dark card */
-    --hz-lifting: #22a8bd; --hz-height: #d95926; --hz-electrical: #3987e5; --hz-excavation: #c98500; --hz-confined: #d55181; --hz-hotwork: #9085e9; --hz-permits: #8e9aab; --hz-other: #636366;
     --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
     --up: #4fdc78;
     --down: #ff7b72;
@@ -327,8 +321,10 @@ html.js [data-countup]:not([data-ready]) {
  * Main problem → category: the card travels left and shrinks into the active compact card. Both snapshots fill the
  * moving box from its top-left corner (cropped, never squashed): the compact content fades in over the big card, so it
  * reads as one dark card changing size, never two cards.
- * Repeat findings → /repeats, High-risk work → /high-risk and Portfolio score → /audits: the card grows into the header
- * strip and its figure flies into the header figure. Contractors by band and Region → /audits: the card grows into its panel.
+ * Repeat findings → /repeats, Positive observations → /positives and Portfolio score → /audits: the card grows into the header
+ * strip and its figure flies into the header figure. Drill-downs below a category (contractor row → contractor in the
+ * category, question row → question, history entry → note; dl-contractor, dl-item, dl-note) grow the clicked row into the next page's first card the same way.
+ * Contractors by band and Region → /audits: the card grows into its panel.
  * A Contractors row → /contractor/[id]: the row's name flies into the page title and its score into the opened audit's
  * score (ct-name, ct-score; the default cross-fade of the two snapshots).
  */
@@ -343,7 +339,10 @@ html.js [data-countup]:not([data-ready]) {
 }
 ::view-transition-image-pair(mp-card),
 ::view-transition-image-pair(rp-card),
-::view-transition-image-pair(hr-card),
+::view-transition-image-pair(po-card),
+::view-transition-image-pair(dl-contractor),
+::view-transition-image-pair(dl-item),
+::view-transition-image-pair(dl-note),
 ::view-transition-image-pair(ps-card),
 ::view-transition-image-pair(ps-bands),
 ::view-transition-image-pair(ps-regions) {
@@ -365,14 +364,21 @@ html.js [data-countup]:not([data-ready]) {
 ::view-transition-new(mp-card) {
   animation-name: handoff-in;
 }
+/* Leaving the category page by a drill (no compact card on the next page): its card fades with the page, never lingers. */
+::view-transition-old(mp-card):only-child {
+  animation-name: handoff-out;
+}
 @keyframes handoff-in {
   0%, 8% { opacity: 0; }
   42%, 100% { opacity: 1; }
 }
-/* The repeats and high-risk cards: one opaque card surface grows; its content (kept at its own size) fades out early and the
-   strip's content fades in. */
+/* The repeats and positives cards, and every drill-down row (dl-*): one opaque card surface grows; its content (kept
+   at its own size) fades out early and the strip's content fades in. */
 ::view-transition-image-pair(rp-card),
-::view-transition-image-pair(hr-card),
+::view-transition-image-pair(po-card),
+::view-transition-image-pair(dl-contractor),
+::view-transition-image-pair(dl-item),
+::view-transition-image-pair(dl-note),
 ::view-transition-image-pair(ps-card),
 ::view-transition-image-pair(ps-bands),
 ::view-transition-image-pair(ps-regions) {
@@ -381,8 +387,14 @@ html.js [data-countup]:not([data-ready]) {
 }
 ::view-transition-old(rp-card),
 ::view-transition-new(rp-card),
-::view-transition-old(hr-card),
-::view-transition-new(hr-card),
+::view-transition-old(po-card),
+::view-transition-new(po-card),
+::view-transition-old(dl-contractor),
+::view-transition-old(dl-item),
+::view-transition-old(dl-note),
+::view-transition-new(dl-contractor),
+::view-transition-new(dl-item),
+::view-transition-new(dl-note),
 ::view-transition-old(ps-card),
 ::view-transition-new(ps-card),
 ::view-transition-old(ps-bands),
@@ -395,14 +407,20 @@ html.js [data-countup]:not([data-ready]) {
   mix-blend-mode: normal;
 }
 ::view-transition-old(rp-card),
-::view-transition-old(hr-card),
+::view-transition-old(po-card),
+::view-transition-old(dl-contractor),
+::view-transition-old(dl-item),
+::view-transition-old(dl-note),
 ::view-transition-old(ps-card),
 ::view-transition-old(ps-bands),
 ::view-transition-old(ps-regions) {
   animation-name: handoff-out;
 }
 ::view-transition-new(rp-card),
-::view-transition-new(hr-card),
+::view-transition-new(po-card),
+::view-transition-new(dl-contractor),
+::view-transition-new(dl-item),
+::view-transition-new(dl-note),
 ::view-transition-new(ps-card),
 ::view-transition-new(ps-bands),
 ::view-transition-new(ps-regions) {
@@ -412,16 +430,12 @@ html.js [data-countup]:not([data-ready]) {
   0% { opacity: 1; }
   40%, 100% { opacity: 0; }
 }
-/* /repeats: the matrix dots pop in and the Q4 → Q1 bars grow, staggered by --d, as the hand-off lands (and the
-   /high-risk contractor bars, .hr-grow). */
+/* /repeats: the matrix dots pop in, staggered by --d, as the hand-off lands; .rp-grow bars (the /positives contractor
+   bars) grow from the left. */
 .rp-dot {
   animation: rp-pop 520ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms) both;
 }
 .rp-grow {
-  transform-origin: left;
-  animation: rp-grow 900ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms) both;
-}
-.hr-grow {
   transform-origin: left;
   animation: rp-grow 900ms cubic-bezier(0.22, 1, 0.36, 1) var(--d, 0ms) both;
 }
@@ -522,8 +536,6 @@ html.js [data-countup]:not([data-ready]) {
     --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #d96c00;
     /* /repeats dot tint by score lost (darker = more lost), RepeatsView */
     --rp-0: #d4700f; --rp-1: #b35a0c; --rp-2: #8a430a; --rp-3: #552a04;
-    /* /high-risk hazard hues (HighRiskView), categorical; no green or red, which mean good/bad here */
-    --hz-lifting: #0f9fb5; --hz-height: #eb6834; --hz-electrical: #2a78d6; --hz-excavation: #eda100; --hz-confined: #e87ba4; --hz-hotwork: #6250d6; --hz-permits: #5e6b7d; --hz-other: #aeaeb2;
     --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
     --up: #1f7a36;
     --down: #c0141c;

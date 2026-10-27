@@ -266,3 +266,50 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1280, height: 600 }, { 
     }
   });
 }
+
+test('every drill below a category grows the clicked row into the next page\'s first card (~1 s, like Main problem)', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/category/subcontractor?q=all&r=SR1%2CSR2');
+  await ready(page);
+  // count hand-offs and record each one's pseudo-element durations (the page is a SPA from here on)
+  await page.evaluate(() => {
+    const w = window as unknown as { handoffs: number; durations: Record<string, number> };
+    w.handoffs = 0;
+    w.durations = {};
+    const start = document.startViewTransition.bind(document);
+    document.startViewTransition = ((cb: ViewTransitionUpdateCallback) => {
+      w.handoffs++;
+      const t = start(cb);
+      t.ready.then(() => {
+        for (const a of document.getAnimations()) {
+          const pe = (a.effect as KeyframeEffect | null)?.pseudoElement;
+          if (pe) w.durations[pe] = Number(a.effect!.getComputedTiming().duration);
+        }
+      });
+      return t;
+    }) as typeof document.startViewTransition;
+  });
+  const seen = () => page.evaluate(() => {
+    const w = window as unknown as { handoffs: number; durations: Record<string, number> };
+    return { handoffs: w.handoffs, durations: w.durations };
+  });
+  const settled = () => expect.poll(() => page.evaluate(() => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement).length)).toBe(0);
+  /** The view-transition names on the page: each landing name exactly once (a duplicate would abort the next drill). */
+  const names = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>('*')].map((e) => getComputedStyle(e).viewTransitionName).filter((n) => n.startsWith('dl-')));
+
+  const steps = [
+    { click: () => active(page).getByTestId('contractor-row').first().click(), url: /\/category\/subcontractor\/\d{10}\?/, name: 'dl-contractor' },
+    { click: () => active(page).getByTestId('item-row').first().click(), url: /\/category\/subcontractor\/\d{10}\/B6\.1\?/, name: 'dl-item' },
+    { click: () => page.getByTestId('observation-link').first().click(), url: /\/category\/subcontractor\/\d{10}\/B6\.1\/[^?]+\?/, name: 'dl-note' },
+  ];
+  for (const [k, s] of steps.entries()) {
+    await s.click();
+    await expect(page).toHaveURL(s.url);
+    await expect.poll(async () => (await seen()).durations[`::view-transition-group(${s.name})`] ?? 0).toBeGreaterThanOrEqual(900);
+    expect((await seen()).handoffs).toBe(k + 1);
+    await settled();
+    expect(await names()).toEqual([s.name]);
+    if (k === 0) await ready(page);
+  }
+  await expect(page.getByTestId('observation-text')).toBeVisible();
+});

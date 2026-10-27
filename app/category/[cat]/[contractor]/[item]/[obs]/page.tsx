@@ -8,6 +8,8 @@ import { detailContext, href, type SP } from '@/lib/details';
 import { dateLabel, quarterLabel } from '@/lib/format';
 import { findCategory, findContractor, findItem, safeDecode } from '@/lib/routeParams';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
+import { HandoffLanding } from '@/components/motion/HandoffLink';
+import { DRILL_NOTE } from '@/lib/handoff';
 import { DetailFrame } from '@/components/details/DetailFrame';
 import { itemLabel } from '@/lib/itemLabels';
 import { CategoryChip } from '@/components/details/parts';
@@ -43,7 +45,8 @@ export default async function ObservationPage({ params, searchParams }: { params
   return (
     <DetailFrame filter={filter} crumbs={crumbs} parent={itemHref}>
       <div className="grid grid-cols-1 gap-[var(--gap-grid)] px-[var(--gutter)] min-[1100px]:grid-cols-12">
-        <BentoCard i={0} testid="observation" className="min-w-0 gap-[clamp(14px,2.2svh,24px)] p-[clamp(18px,2.6svh,36px)] min-[1100px]:col-span-8">
+        <HandoffLanding />
+        <BentoCard i={0} testid="observation" landing={DRILL_NOTE} className="min-w-0 gap-[clamp(14px,2.2svh,24px)] p-[clamp(18px,2.6svh,36px)] min-[1100px]:col-span-8">
           <div className="flex flex-col gap-1.5">
             <h1 className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[22px] min-[900px]:text-[clamp(22px,3.2svh,30px)] font-semibold leading-[1.1] tracking-[-0.03em]">
               <span>{itemLabel(item.code, item.question)}</span>

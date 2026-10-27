@@ -46,7 +46,7 @@ export function AuditsView(props: {
   auditCount: number;
   byQuarter: QuarterValue[];
   rows: AuditsRow[];
-  axis: { quarters: { quarter: Quarter; from: number; to: number }[]; months: { x: number; label: string }[] };
+  axis: { quarters: { quarter: Quarter; from: number; to: number }[]; months: { x: number; from: number; to: number; month: number; label: string }[] };
   bands: Record<Band, number>;
   regions: RegionRow[];
   initialBand: Band | null;
@@ -180,7 +180,7 @@ function Percent({ value }: { value: number | null }) {
 type Tip = { dot: AuditDot; left: number; top: number };
 
 function Timeline({ rows, axis, band, clear }: {
-  rows: AuditsRow[]; axis: { quarters: { quarter: Quarter; from: number; to: number }[]; months: { x: number; label: string }[] }; band: Band | null; clear: () => void;
+  rows: AuditsRow[]; axis: { quarters: { quarter: Quarter; from: number; to: number }[]; months: { x: number; from: number; to: number; month: number; label: string }[] }; band: Band | null; clear: () => void;
 }) {
   const card = useRef<HTMLElement>(null);
   const [tip, setTip] = useState<Tip | null>(null);
@@ -232,7 +232,8 @@ function Timeline({ rows, axis, band, clear }: {
           className="relative grid min-h-0 flex-1 grid-cols-[clamp(140px,22%,280px)_minmax(0,1fr)] gap-x-[calc(clamp(12px,1.2vw,22px)+10px)] pr-[clamp(12px,1.2vw,22px)]"
           style={{ gridTemplateRows: `auto repeat(${rows.length}, minmax(0, 1fr))` }}
         >
-          {/* quarter columns behind the rows, a step of tone each (no rules) */}
+          {/* quarter columns behind the rows, a step of tone each (no rules); inside each quarter its middle month is one
+              more faint step with hairline edges, so every month break reads (light · tinted · light) */}
           <div aria-hidden className="pointer-events-none relative col-start-2" style={{ gridRow: '1 / -1' }}>
             {axis.quarters.map((q, k) => (
               <div
@@ -242,6 +243,14 @@ function Timeline({ rows, axis, band, clear }: {
                   left: k === 0 ? `calc(-1 * ${BLEED})` : `calc(${at(q.from)}% + 3px)`,
                   right: k === axis.quarters.length - 1 ? `calc(-1 * ${BLEED})` : `calc(${100 - at(q.to)}% + 3px)`,
                 }}
+              />
+            ))}
+            {axis.months.filter((m) => m.month % 3 === 1).map((m) => (
+              <div
+                key={`${m.label}-${m.from}`}
+                data-testid="audits-month-band"
+                className="absolute inset-y-0 bg-fill-2 shadow-[inset_1px_0_0_var(--hairline),inset_-1px_0_0_var(--hairline)]"
+                style={{ left: `${at(m.from)}%`, right: `${100 - at(m.to)}%` }}
               />
             ))}
           </div>
@@ -259,7 +268,8 @@ function Timeline({ rows, axis, band, clear }: {
             {axis.months.map((m) => (
               <span
                 key={`${m.label}-${m.x}`}
-                className="absolute bottom-[2px] -translate-x-1/2 text-[11px] leading-none text-muted"
+                data-testid="audits-axis-month"
+                className="absolute bottom-[2px] -translate-x-1/2 text-[11px] font-medium leading-none text-muted"
                 style={{ left: `${at(m.x)}%` }}
               >
                 {m.label}

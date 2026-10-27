@@ -170,7 +170,7 @@ export function CompareTray({
                         <GapBar key={g.category} value={g.gapRate} max={maxGap} best={!!gapRows[r]?.best.includes(ci)} worst={!!gapRows[r]?.worst.includes(ci)} />
                       ))}
                       <p className="self-end pb-1 pt-[clamp(8px,1.6svh,16px)] text-[13px] text-muted">
-                        {e.card.previous === null ? (
+                        {e.card.previous === null && e.repeatCount === 0 ? (
                           'No earlier audit to repeat'
                         ) : (
                           <>

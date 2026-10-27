@@ -1,28 +1,15 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo, type Repo } from '@/lib/data/repo';
+import { getRepo } from '@/lib/data/repo';
 import {
-  bandDistribution, categoryDetail, categoryGaps, compareContractors, mainProblem, contractorCards, filterAudits, highRiskCount, regionComparison, repeatFindings,
+  bandDistribution, categoryDetail, categoryGaps, compareContractors, mainProblem, contractorCards, filterAudits, regionComparison,
 } from '@/lib/analytics';
 import { CATEGORIES } from '@/lib/categories';
-import { isHighRisk } from '@/lib/highRisk';
-import type { Filter, Observation } from '@/lib/types';
+import type { Filter } from '@/lib/types';
 
 const repo = getRepo();
 
-// The importer drops "Not Applicable" notes, so the seed no longer has notes on N/A subsections.
-// The analytics guard still matters (data from other sources), so inject one on TDP's N/A B5 subsection.
-const NA_AUDIT = '4800000892-Q1-2026-20260315';
-const naRepo: Repo = {
-  ...repo,
-  observations: () => [
-    ...repo.observations(),
-    { id: `${NA_AUDIT}-na`, auditId: NA_AUDIT, itemCode: 'B5.1', kind: 'negative', text: 'Utility clearance permit for excavation not seen', category: 'documents', hasPhoto: false },
-  ],
-};
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const NONE: Filter = { quarter: 'all', regions: [] };
-const obs = (text: string, kind: Observation['kind'], category: Observation['category'] = null, itemCode: string | null = null): Observation =>
-  ({ id: 'x', auditId: 'a', itemCode, kind, text, category, hasPhoto: false });
 
 describe('contractorCards', () => {
   test('JV-ECH card', () => {
@@ -55,51 +42,6 @@ describe('bandDistribution', () => {
     expect(Object.values(d).reduce((a, b) => a + b, 0)).toBe(contractorCards(repo, ALL).length);
   });
   test('empty -> zeros', () => Object.values(bandDistribution(repo, NONE)).forEach((v) => expect(v).toBe(0)));
-});
-
-describe('repeatFindings', () => {
-  test('empty for Q4-2025', () => expect(repeatFindings(repo, { ...ALL, quarter: 'Q4-2025' })).toEqual([]));
-  test('every contractor has audits in both quarters; no null/N-A codes', () => {
-    const r = repeatFindings(repo, ALL);
-    expect(r.length).toBeGreaterThan(0);
-    r.forEach((x) => {
-      const qs = new Set(repo.audits().filter((a) => a.contractorId === x.contractor.id).map((a) => a.quarter));
-      expect(qs.size).toBe(2);
-      expect(x.quarters).toEqual(['Q4-2025', 'Q1-2026']);
-      expect(x.itemCode).toBeTruthy();
-    });
-    expect(new Set(r.map((x) => `${x.contractor.id}|${x.itemCode}`)).size).toBe(r.length);
-  });
-  test('worst contractor first', () => {
-    const totals = new Map(contractorCards(repo, ALL).map((c) => [c.contractor.id, c.total]));
-    const t = repeatFindings(repo, ALL).map((x) => totals.get(x.contractor.id)!);
-    expect(t).toEqual([...t].sort((a, b) => a - b));
-  });
-  test('Q1 filter works; empty filter -> []', () => {
-    expect(repeatFindings(repo, { ...ALL, quarter: 'Q1-2026' }).length).toBeGreaterThan(0);
-    expect(repeatFindings(repo, NONE)).toEqual([]);
-  });
-});
-
-describe('high risk', () => {
-  test('keywords', () => {
-    expect(isHighRisk(obs('Tower light found operational without earthing', 'site'))).toBe(true);
-    expect(isHighRisk(obs('Mosquito presence', 'site'))).toBe(false);
-    expect(isHighRisk(obs('Mobile CRANES operating', 'site'))).toBe(true);
-    expect(isHighRisk(obs('anything', 'negative', 'documents', 'B4.1'))).toBe(true);
-  });
-  test('count', () => {
-    expect(highRiskCount(repo, ALL)).toBeGreaterThan(0);
-    expect(highRiskCount(repo, NONE)).toBe(0);
-    expect(highRiskCount(repo, { ...ALL, quarter: 'Q4-2025' })).toBeLessThan(highRiskCount(repo, ALL));
-  });
-  test('N/A permits notes excluded', () => {
-    const f: Filter = { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: '4800000892' };
-    const raw = naRepo.observations().filter((o) => o.auditId === '4800000892-Q1-2026-20260315' && o.kind !== 'positive' && isHighRisk(o));
-    const na = raw.filter((o) => o.itemCode?.startsWith('B5.')).length;
-    expect(na).toBeGreaterThan(0);
-    expect(highRiskCount(naRepo, f)).toBe(raw.length - na);
-  });
 });
 
 describe('regionComparison', () => {

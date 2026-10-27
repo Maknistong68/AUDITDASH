@@ -1,6 +1,6 @@
-# Audits Only — v2 requirements (from the owner, 2026-10-26)
+# Audits (formerly "Audits Only") — v2 requirements (from the owner, 2026-10-26)
 
-App name: **Audits Only**.
+App name: **Audits** (renamed from "Audits Only", §21).
 
 ## 1. Header tabs
 - Main audit-category tabs at the top of the dashboard: **H&S** (Health & Safety) · **Security** · **Environmental** · **Welfare** · **CRC**.
@@ -86,3 +86,12 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
 - Clicking the dashboard Main-problem card **animates**: the card moves left and shrinks smoothly into the category page's first card (shared-element transition).
 - On the category page the card is **~50% smaller (or less)**; strip it to the essentials (remove the extra content inside).
 - **No "1 / 8" counter, no dots.** Replace with a **gradient moving carousel**: a horizontal row of **same-size** compact cards (one per category, worst first), edges fading with a gradient, draggable/swipeable; the active card is the current category; the page content follows.
+
+## 21. Owner feedback 2026-10-27
+1. **Name:** the header reads **Audits** (not "Audits Only").
+2. **Dark theme is the default**; a viewer's own light choice is remembered.
+3. **High-risk work card removed** (high risk is not recorded in the audits; it was only guessed from keywords). Its place on the H&S dashboard goes to **Positive observations**: the count, and how widely good practice was noted (audits and contractors). It opens `/positives`: contractors ranked by positives per audit and the good-practice notes themselves, newest first. Supersedes the "High-risk work" card of §17.
+4. **Portfolio timeline:** month breaks are visible (the middle month of each quarter is a faint band with hairline edges; month names under the quarter).
+5. **No logo mark** in the header; nothing in its place.
+6. **Repeat findings, one rule:** the same question noted in a contractor's audit and again in that contractor's **next** audit of the same type. The later audit sets the quarter; the earlier may be in any quarter (two audits in one quarter count). No "≥5 of 7 contractors" threshold. Supersedes the repeat logic of §17.
+7. **Drill-down animation:** every drill below a category (contractor → question → note) uses the same card-opens morph as the first drill (Main problem → category).

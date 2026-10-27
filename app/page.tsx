@@ -2,8 +2,8 @@ import { getRepo } from '@/lib/data/repo';
 import { href, toSearchParams, type SP } from '@/lib/details';
 import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
 import {
-  bandDistribution, compareContractors, contractorCards, filterAudits, highRiskCount, mainProblem, portfolioSummary,
-  regionComparison, repeatContractors, repeatSpread, repeatThreshold, systemicRepeats,
+  bandDistribution, compareContractors, contractorCards, filterAudits, followUps, mainProblem, portfolioSummary,
+  positiveSummary, regionComparison, repeatFindings,
 } from '@/lib/analytics';
 import { MAX_COMPARE } from '@/lib/compare';
 import { TopBar } from '@/components/shell/TopBar';
@@ -14,7 +14,7 @@ import { ContractorsCard } from '@/components/bento/ContractorsCard';
 import { MainProblemCard } from '@/components/bento/MainProblemCard';
 import { ScoreCard } from '@/components/bento/ScoreCard';
 import { RepeatsCard } from '@/components/bento/RepeatsCard';
-import { HighRiskCard } from '@/components/bento/HighRiskCard';
+import { PositivesCard } from '@/components/bento/PositivesCard';
 import { BandsCard } from '@/components/bento/BandsCard';
 import { RegionCard } from '@/components/bento/RegionCard';
 import { TypeEmpty } from '@/components/shell/TypeEmpty';
@@ -43,18 +43,10 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   }
 
   const problem = empty ? null : mainProblem(repo, filter);
-  // Questions repeating at ≥5 of 7 contractors (scaled to the filter's regions); needs an earlier quarter (null → "—").
-  const repeats = filter.quarter === 'Q4-2025' || empty ? null : systemicRepeats(repo, filter);
-  const eligible = repeats ? repeatContractors(repo, filter).length : 0;
-  const threshold = repeats ? { min: repeatThreshold(eligible), of: eligible } : null;
-  // How widespread the repeats are: number of questions per reach (contractors hit), widest first.
-  const spread = repeatSpread(repeats ?? []);
+  // Repeat findings: the same question noted again at the contractor's next audit; null without a follow-up audit ("—").
+  const pairs = empty ? [] : followUps(repo, filter);
+  const repeats = pairs.length ? repeatFindings(repo, filter) : null;
   const query = filterToQuery(filter);
-  // High-risk findings per audit, per quarter shown (one bar under a single-quarter filter).
-  const highRiskByQuarter = empty ? [] : (filter.quarter === 'all' ? QUARTERS : [filter.quarter]).map((q) => {
-    const audits = filterAudits(repo, { ...filter, quarter: q }).length;
-    return { quarter: q, count: highRiskCount(repo, { ...filter, quarter: q }), audits };
-  }).filter((q) => q.audits > 0);
   const byQuarter = QUARTERS.map((q) => ({ label: q.replace('-', ' '), value: portfolioSummary(repo, { ...filter, quarter: q }).avgScore }));
 
   return (
@@ -83,8 +75,14 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                     />
                   )}
                   <ScoreCard avgScore={summary.avgScore} band={summary.band} delta={summary.delta} audits={summary.audits} quarter={filter.quarter} byQuarter={byQuarter} href={href('/audits', query)} />
-                  <RepeatsCard repeats={repeats ? repeats.length : null} spread={spread} threshold={threshold} href={href('/repeats', query)} />
-                  <HighRiskCard count={highRiskCount(repo, filter)} byQuarter={highRiskByQuarter} href={href('/high-risk', query)} />
+                  <RepeatsCard
+                    repeats={repeats ? repeats.length : null}
+                    questions={new Set(repeats?.map((r) => r.itemCode)).size}
+                    contractors={new Set(repeats?.map((r) => r.contractor.id)).size}
+                    followUps={pairs.length}
+                    href={href('/repeats', query)}
+                  />
+                  <PositivesCard summary={positiveSummary(repo, filter)} href={href('/positives', query)} />
                   <BandsCard bands={bandDistribution(repo, filter)} href={`${href('/audits', query)}&focus=bands`} />
                   <RegionCard rows={regionComparison(repo, filter)} quarter={filter.quarter} href={`${href('/audits', query)}&focus=regions`} />
                 </>

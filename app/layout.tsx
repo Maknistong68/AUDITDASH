@@ -15,7 +15,7 @@ const inter = localFont({
 });
 
 export const metadata: Metadata = {
-  title: { default: 'Audits Only', template: '%s · Audits Only' },
+  title: { default: 'Audits', template: '%s · Audits' },
   description: 'Audit scores across contractors: H&S, Security, Environmental, Welfare and CRC',
   // The mock data is real audit data: keep every page out of search engines.
   robots: { index: false, follow: false },
@@ -23,13 +23,13 @@ export const metadata: Metadata = {
 
 /**
  * Runs before first paint: marks JS as available (count-ups hide their server value until they start)
- * and applies the stored theme, else the OS preference. Never throws.
+ * and applies the stored theme, else dark (the default). Never throws.
  */
-const THEME_SCRIPT = `(function(){var d=document.documentElement,t;d.classList.add('js');try{t=localStorage.getItem('theme')}catch(e){}if(t!=='light'&&t!=='dark'){try{t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch(e){t='light'}}d.setAttribute('data-theme',t)})()`;
+const THEME_SCRIPT = `(function(){var d=document.documentElement,t;d.classList.add('js');try{t=localStorage.getItem('theme')}catch(e){}if(t!=='light'){t='dark'}d.setAttribute('data-theme',t)})()`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={inter.variable} data-theme="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>

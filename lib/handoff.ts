@@ -13,9 +13,9 @@ export const HANDOFF = 'mp-card';
 /** Repeat findings card → the /repeats header strip, and its figure → the header figure. */
 export const REPEATS_CARD = 'rp-card';
 export const REPEATS_FIGURE = 'rp-figure';
-/** High-risk work card → the /high-risk header strip, and its figure → the header figure. */
-export const HIGHRISK_CARD = 'hr-card';
-export const HIGHRISK_FIGURE = 'hr-figure';
+/** Positive observations card → the /positives header strip, and its figure → the header figure. */
+export const POSITIVES_CARD = 'po-card';
+export const POSITIVES_FIGURE = 'po-figure';
 /** Portfolio score card → the /audits header strip, and its figure → the header figure; the Bands and Region cards → their panels. */
 export const PORTFOLIO_CARD = 'ps-card';
 export const PORTFOLIO_FIGURE = 'ps-figure';
@@ -24,6 +24,13 @@ export const REGIONS_CARD = 'ps-regions';
 /** A Contractors card row → the contractor page: its name → the page title, its score → the opened audit's score. */
 export const CONTRACTOR_NAME = 'ct-name';
 export const CONTRACTOR_SCORE = 'ct-score';
+/**
+ * Drill-downs below a category, the same card-opens morph as the dashboard cards: the clicked row grows into the next
+ * page's first card. One name per level, so a page that is itself a landing (named card) can start the next drill.
+ */
+export const DRILL_CONTRACTOR = 'dl-contractor'; // category page contractor row → contractor in the category
+export const DRILL_ITEM = 'dl-item'; // that page's question row → the question page
+export const DRILL_NOTE = 'dl-note'; // the question page's history entry → the note page
 
 /**
  * Length of the morph, in ms (mirrors `::view-transition-group(*)` in globals.css, with its ease-out
@@ -36,6 +43,11 @@ let arrived: (() => void) | null = null;
 /** Called by a detail view once its landing element is in the DOM: the browser may capture the new state. */
 export function cardArrived() {
   arrived?.();
+}
+
+/** True while a hand-off waits for its landing: a landing card then skips its own rise (the morph is its entrance). */
+export function handoffPending(): boolean {
+  return arrived !== null;
 }
 
 export function canHandOff(): boolean {

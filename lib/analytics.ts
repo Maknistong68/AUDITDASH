@@ -2,7 +2,6 @@ import { BANDS, bandFor } from './scoring';
 import type { Repo } from './data/repo';
 import type { Audit, Band, CategoryId, ChecklistItem, Contractor, Filter, Observation, Quarter, Subregion } from './types';
 import { CATEGORIES } from './categories';
-import { HAZARDS, hazardOf, isHighRisk, type HazardId, type HighRiskContractor } from './highRisk';
 import { itemLabel } from './itemLabels';
 
 const QUARTER_ORDER: Quarter[] = ['Q4-2025', 'Q1-2026'];
@@ -255,7 +254,7 @@ export function itemHistory(repo: Repo, contractorId: string, itemCode: string):
   });
 }
 
-// ---------------------------------------------------------------- scoreboard, repeats, high-risk, regions, compare
+// ---------------------------------------------------------------- scoreboard, repeats, positives, regions, compare
 
 export interface ContractorCard {
   contractor: Contractor; auditId: string; total: number; band: Band;
@@ -291,189 +290,165 @@ export function bandDistribution(repo: Repo, filter: Filter): Record<Band, numbe
   return out;
 }
 
+/** One contractor's audit and the audit before it (same contractor, same audit type), the later one in the filter. */
+export interface FollowUp { contractor: Contractor; prev: Audit; next: Audit }
+
 /**
- * Items negative in a contractor's latest filtered audit AND in one of its audits in an earlier quarter
- * (regions respected, quarter filter ignored). N/A-subsection and null-itemCode observations excluded.
- * Worst contractor (lowest latest total) first, then itemCode.
+ * Every follow-up pair in the filter: for each contractor, its audits of one type in date order (regions respected,
+ * quarter ignored), paired with the audit before; a pair counts when the later audit is in the filter's quarter. The
+ * earlier audit may sit in any quarter, the same one included.
  */
-export function repeatFindings(repo: Repo, filter: Filter): {
-  contractor: Contractor; itemCode: string; question: string; category: CategoryId; quarters: Quarter[];
-}[] {
-  if (filter.quarter === 'Q4-2025') return [];
-  const audits = select(repo, filter);
+export function followUps(repo: Repo, filter: Filter): FollowUp[] {
+  const inFilter = new Set(select(repo, filter).map((a) => a.id));
   const pool = select(repo, filter, 'all');
-  const items = itemMap(repo);
-  const na = new Map(pool.map((a) => [a.id, naSubsections(a)]));
-  const negs = repo.observations().filter((o) => o.kind === 'negative' && o.itemCode && na.has(o.auditId) && !onNaItem(o, items, na));
-  const rows: { total: number; row: ReturnType<typeof repeatFindings>[number] }[] = [];
+  const out: FollowUp[] = [];
   for (const contractor of repo.contractors()) {
-    const latest = audits.filter((a) => a.contractorId === contractor.id).at(-1);
-    if (!latest) continue;
-    const lq = QUARTER_ORDER.indexOf(latest.quarter);
-    const mine = pool.filter((a) => a.contractorId === contractor.id);
-    const quartersOf = new Map<string, Set<Quarter>>();
-    const hitIn = (a: Audit) => negs.filter((o) => o.auditId === a.id).map((o) => o.itemCode!);
-    for (const a of mine) {
-      if (QUARTER_ORDER.indexOf(a.quarter) > lq) continue;
-      for (const code of hitIn(a)) (quartersOf.get(code) ?? quartersOf.set(code, new Set()).get(code)!).add(a.quarter);
+    const byType = new Map<string, Audit[]>();
+    for (const a of pool) if (a.contractorId === contractor.id) (byType.get(a.type ?? 'hs') ?? byType.set(a.type ?? 'hs', []).get(a.type ?? 'hs')!).push(a);
+    for (const list of byType.values()) {
+      for (let i = 1; i < list.length; i++) if (inFilter.has(list[i].id)) out.push({ contractor, prev: list[i - 1], next: list[i] });
     }
-    for (const code of new Set(hitIn(latest))) {
-      const qs = quartersOf.get(code)!;
+  }
+  return out;
+}
+
+export interface RepeatFinding {
+  contractor: Contractor; itemCode: string; question: string; category: CategoryId; prevAuditId: string; auditId: string;
+}
+
+/**
+ * Repeat findings: the same question noted in a contractor's audit AND in that contractor's previous audit of the same
+ * type (followUps). Applicable item notes only (N/A subsections and site notes excluded). One row per follow-up pair and
+ * question; worst contractor (lowest latest total in the filter) first, then date, then itemCode.
+ */
+export function repeatFindings(repo: Repo, filter: Filter): RepeatFinding[] {
+  const pairs = followUps(repo, filter);
+  if (!pairs.length) return [];
+  const audits = [...new Map(pairs.flatMap((p) => [p.prev, p.next]).map((a) => [a.id, a])).values()];
+  const items = itemMap(repo);
+  const noted = new Map<string, Set<string>>();
+  for (const o of itemNegatives(audits, obsByAudit(repo, audits), items)) (noted.get(o.auditId) ?? noted.set(o.auditId, new Set()).get(o.auditId)!).add(o.itemCode!);
+  const latest = new Map<string, number>();
+  for (const p of pairs) latest.set(p.contractor.id, p.next.totalScore);
+  const rows: { total: number; date: string; row: RepeatFinding }[] = [];
+  for (const p of pairs) {
+    const before = noted.get(p.prev.id);
+    if (!before) continue;
+    for (const code of noted.get(p.next.id) ?? []) {
       const item = items.get(code);
-      if (!item || qs.size < 2) continue;
+      if (!item || !before.has(code)) continue;
       rows.push({
-        total: latest.totalScore,
-        row: { contractor, itemCode: code, question: item.question, category: item.category, quarters: QUARTER_ORDER.filter((q) => qs.has(q)) },
+        total: latest.get(p.contractor.id)!,
+        date: p.next.date,
+        row: { contractor: p.contractor, itemCode: code, question: item.question, category: item.category, prevAuditId: p.prev.id, auditId: p.next.id },
       });
     }
   }
-  rows.sort((a, b) => a.total - b.total || a.row.itemCode.localeCompare(b.row.itemCode, undefined, { numeric: true }));
+  rows.sort((a, b) => a.total - b.total || a.row.contractor.id.localeCompare(b.row.contractor.id) || a.date.localeCompare(b.date)
+    || a.row.itemCode.localeCompare(b.row.itemCode, undefined, { numeric: true }));
   return rows.map((r) => r.row);
 }
 
-export interface SystemicRepeat {
+export interface RepeatQuestion {
   itemCode: string; label: string; category: CategoryId; contractors: Contractor[]; contractorCount: number;
-  eligibleContractors: number;
-  /** The reach a question needed to count (repeatThreshold of eligibleContractors, unless given). */
-  minContractors: number;
-  /**
-   * Audits of the eligible contractors (audited in both quarters, within the filter's regions) with an applicable note on
-   * this question, per quarter: over the same audits as repeatAudits, so a per-audit rate is not skewed by contractors
-   * audited in one quarter only.
-   */
-  q4Audits: number; q1Audits: number;
-  sectionScores: { contractorId: string; q4: number | null; q1: number | null }[];
+  /** Repeat findings on this question (a contractor with two follow-ups can repeat it twice). */
+  times: number;
+  /** Per contractor: the subsection score in its latest audit repeating this question (null = not scored). */
+  sectionScores: { contractorId: string; ratio: number | null; auditId: string }[];
 }
 
 /**
- * The reach a question needs to count as a systemic repeat: 5 of the 7 contractors audited in both quarters (the owner's
- * rule), scaled to the contractors the filter leaves, never below 2: 7 → 5, 4 → 3, 3 → 3. Integer arithmetic.
+ * repeatFindings grouped by question: contractors that repeated it, most contractors first, then times repeated,
+ * then score lost, then code. No reach threshold: every repeated question is listed.
  */
-export function repeatThreshold(eligibleContractors: number): number {
-  return Math.max(2, Math.ceil((5 * eligibleContractors) / 7));
-}
-
-/**
- * Questions repeated (repeatFindings) at >= minContractors contractors (default repeatThreshold of the eligible
- * contractors), i.e. noted in the contractor's latest audit and an earlier quarter. Sorted by contractorCount desc, then
- * impact (audits noted x (1 - mean subsection score)), then code.
- */
-export function systemicRepeats(repo: Repo, filter: Filter, minContractors?: number): SystemicRepeat[] {
-  return rankedSystemicRepeats(repo, filter, minContractors).map((r) => {
-    const { impact, ...out } = r;
-    void impact;
-    return out;
-  });
-}
-
-/** systemicRepeats with each row's ranking impact (audits noted × mean score lost); exported for tests. */
-export function rankedSystemicRepeats(repo: Repo, filter: Filter, minContractors?: number): (SystemicRepeat & { impact: number })[] {
+export function repeatQuestions(repo: Repo, filter: Filter): RepeatQuestion[] {
   const repeats = repeatFindings(repo, filter);
   if (!repeats.length) return [];
-  const pool = select(repo, filter, 'all');
   const items = itemMap(repo);
-  const quarterOf = new Map(pool.map((a) => [a.id, a.quarter]));
-  const contractorOf = new Map(pool.map((a) => [a.id, a.contractorId]));
-  const eligible = new Set(repeatContractors(repo, filter).map((c) => c.id));
-  const eligibleContractors = eligible.size;
-  const min = minContractors ?? repeatThreshold(eligibleContractors);
-  const auditOf = (c: string, q: Quarter) => pool.filter((a) => a.contractorId === c && a.quarter === q).at(-1);
-  const negs = itemNegatives(pool, obsByAudit(repo, pool), items);
-  const byItem = new Map<string, Contractor[]>();
-  for (const r of repeats) (byItem.get(r.itemCode) ?? byItem.set(r.itemCode, []).get(r.itemCode)!).push(r.contractor);
-  const rows: (SystemicRepeat & { impact: number })[] = [];
+  const audit = new Map(repo.audits().map((a) => [a.id, a]));
+  const byItem = new Map<string, RepeatFinding[]>();
+  for (const r of repeats) (byItem.get(r.itemCode) ?? byItem.set(r.itemCode, []).get(r.itemCode)!).push(r);
+  const rows: (RepeatQuestion & { lost: number })[] = [];
   for (const [code, list] of byItem) {
-    const contractors = [...new Map(list.map((c) => [c.id, c])).values()];
-    const item = items.get(code);
-    if (!item || contractors.length < min) continue;
-    contractors.sort((a, b) => a.name.localeCompare(b.name));
-    const mine = negs.filter((o) => o.itemCode === code);
-    const hitIds = new Set(mine.map((o) => o.auditId));
-    const auditsIn = (q: Quarter) => [...hitIds].filter((id) => quarterOf.get(id) === q && eligible.has(contractorOf.get(id)!)).length;
-    const ratios = pool.filter((a) => hitIds.has(a.id)).map((a) => itemRatio(a, item)).filter((x): x is number => x !== null);
-    const ratioIn = (c: string, q: Quarter) => { const a = auditOf(c, q); return a ? itemRatio(a, item) : null; };
+    const item = items.get(code)!;
+    const last = new Map<string, RepeatFinding>();
+    for (const r of [...list].sort((a, b) => audit.get(a.auditId)!.date.localeCompare(audit.get(b.auditId)!.date))) last.set(r.contractor.id, r);
+    const contractors = [...last.values()].map((r) => r.contractor).sort((a, b) => a.name.localeCompare(b.name));
+    const sectionScores = contractors.map((c) => {
+      const auditId = last.get(c.id)!.auditId;
+      return { contractorId: c.id, ratio: itemRatio(audit.get(auditId)!, item), auditId };
+    });
+    const ratios = sectionScores.map((x) => x.ratio).filter((x): x is number => x !== null);
     rows.push({
       itemCode: code, label: itemLabel(code, item.question), category: item.category, contractors, contractorCount: contractors.length,
-      eligibleContractors, minContractors: min,
-      q4Audits: auditsIn('Q4-2025'), q1Audits: auditsIn('Q1-2026'),
-      sectionScores: contractors.map((c) => ({ contractorId: c.id, q4: ratioIn(c.id, 'Q4-2025'), q1: ratioIn(c.id, 'Q1-2026') })),
-      impact: hitIds.size * (1 - (mean(ratios) ?? 1)),
+      times: list.length, sectionScores, lost: 1 - (mean(ratios) ?? 1),
     });
   }
-  rows.sort((a, b) => b.contractorCount - a.contractorCount || b.impact - a.impact || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
-  return rows;
+  rows.sort((a, b) => b.contractorCount - a.contractorCount || b.times - a.times || b.lost - a.lost
+    || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
+  return rows.map(({ lost, ...r }) => { void lost; return r; });
 }
 
-/** The contractors a systemic repeat can reach: audited in both Q4 2025 and Q1 2026 within the filter's regions. */
+/** The contractors a repeat can reach: those with a follow-up audit in the filter (followUps), by name. */
 export function repeatContractors(repo: Repo, filter: Filter): Contractor[] {
-  const pool = select(repo, filter, 'all');
-  const has = (c: string, q: Quarter) => pool.some((a) => a.contractorId === c && a.quarter === q);
-  return repo.contractors().filter((c) => has(c.id, 'Q4-2025') && has(c.id, 'Q1-2026'));
+  const ids = new Set(followUps(repo, filter).map((p) => p.contractor.id));
+  return repo.contractors().filter((c) => ids.has(c.id)).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-/**
- * Audits per quarter of the contractors a systemic repeat can reach (repeatContractors): the denominator of the /repeats
- * "notes per audit" rate, over the same audits as SystemicRepeat.q4Audits / q1Audits.
- */
-export function repeatAudits(repo: Repo, filter: Filter): { q4: number; q1: number } {
-  const eligible = new Set(repeatContractors(repo, filter).map((c) => c.id));
-  const pool = select(repo, filter, 'all').filter((a) => eligible.has(a.contractorId));
-  return { q4: pool.filter((a) => a.quarter === 'Q4-2025').length, q1: pool.filter((a) => a.quarter === 'Q1-2026').length };
+/** How widespread repeats are: questions per reach (contractors that repeated them), widest first. */
+export function repeatSpread(rows: RepeatQuestion[], of: number): { reach: number; of: number; questions: number }[] {
+  return [...new Set(rows.map((r) => r.contractorCount))]
+    .sort((a, b) => b - a)
+    .map((reach) => ({ reach, of, questions: rows.filter((r) => r.contractorCount === reach).length }));
 }
 
-/** Notes on the repeating questions per audit, per quarter (numerator and denominator over the eligible contractors' audits). */
-export function repeatNotesPerAudit(rows: SystemicRepeat[], audits: { q4: number; q1: number }): { q4: number | null; q1: number | null } {
-  const rate = (n: number, d: number) => (d > 0 ? n / d : null);
+// ---------------------------------------------------------------- positive observations
+
+/** Positive observations over the filtered audits, and how widely they were recorded (audits / contractors with one). */
+export function positiveSummary(repo: Repo, filter: Filter): {
+  total: number; audits: number; auditsWith: number; contractors: number; contractorsWith: number;
+} {
+  const audits = select(repo, filter);
+  const pos = obsByAudit(repo, audits).filter((o) => o.kind === 'positive');
+  const withIds = new Set(pos.map((o) => o.auditId));
+  const contractorOf = new Map(audits.map((a) => [a.id, a.contractorId]));
   return {
-    q4: rate(rows.reduce((s, r) => s + r.q4Audits, 0), audits.q4),
-    q1: rate(rows.reduce((s, r) => s + r.q1Audits, 0), audits.q1),
+    total: pos.length,
+    audits: audits.length,
+    auditsWith: withIds.size,
+    contractors: new Set(audits.map((a) => a.contractorId)).size,
+    contractorsWith: new Set([...withIds].map((id) => contractorOf.get(id)!)).size,
   };
 }
 
-/** How widespread systemic repeats are: questions per reach (contractors hit), widest first. */
-export function repeatSpread(rows: SystemicRepeat[]): { reach: number; of: number; questions: number }[] {
-  return [...new Set(rows.map((r) => r.contractorCount))]
-    .sort((a, b) => b - a)
-    .map((reach) => ({ reach, of: rows[0].eligibleContractors, questions: rows.filter((r) => r.contractorCount === reach).length }));
-}
-
-/** High-risk (B4/B5 items, keyword site findings) non-positive observations over filtered audits, N/A subsections excluded. */
-export function highRiskCount(repo: Repo, filter: Filter): number {
-  return highRiskObservations(repo, select(repo, filter)).length;
-}
-
-function highRiskObservations(repo: Repo, audits: Audit[]): Observation[] {
-  const items = itemMap(repo);
-  const na = new Map(audits.map((a) => [a.id, naSubsections(a)]));
-  return obsByAudit(repo, audits).filter((o) => o.kind !== 'positive' && !onNaItem(o, items, na) && isHighRisk(o));
-}
-
-/**
- * The highRiskCount findings split by hazard type (lib/highRisk hazardOf): every finding in exactly one bucket, so the
- * counts sum to highRiskCount. All HAZARDS in display order, empty ones included; share is of the total (0 when none).
- */
-export function highRiskByHazard(repo: Repo, filter: Filter): { hazard: HazardId; label: string; count: number; share: number }[] {
-  const obs = highRiskObservations(repo, select(repo, filter));
-  return HAZARDS.map((h) => {
-    const count = obs.filter((o) => hazardOf(o) === h.id).length;
-    return { hazard: h.id, label: h.label, count, share: obs.length ? count / obs.length : 0 };
-  });
-}
-
-/** High-risk findings and audits per contractor and quarter (filter's quarter and regions), with the hazard split. */
-export function highRiskByContractor(repo: Repo, filter: Filter): HighRiskContractor[] {
+/** Positive observations per contractor audited in the filter: count, audits and per audit; most per audit first. */
+export function positivesByContractor(repo: Repo, filter: Filter): { contractor: Contractor; count: number; audits: number; perAudit: number }[] {
   const audits = select(repo, filter);
-  const obs = highRiskObservations(repo, audits);
-  return repo.contractors().flatMap((c) => {
-    const quarters = QUARTER_ORDER.map((quarter) => {
-      const mine = new Set(audits.filter((a) => a.contractorId === c.id && a.quarter === quarter).map((a) => a.id));
-      const hits = obs.filter((o) => mine.has(o.auditId));
-      const byHazard: Partial<Record<HazardId, number>> = {};
-      for (const o of hits) byHazard[hazardOf(o)] = (byHazard[hazardOf(o)] ?? 0) + 1;
-      return { quarter, audits: mine.size, findings: hits.length, byHazard };
-    }).filter((q) => q.audits > 0);
-    return quarters.length ? [{ id: c.id, name: c.name, quarters }] : [];
-  });
+  const pos = obsByAudit(repo, audits).filter((o) => o.kind === 'positive');
+  return repo.contractors()
+    .map((contractor) => {
+      const mine = new Set(audits.filter((a) => a.contractorId === contractor.id).map((a) => a.id));
+      const count = pos.filter((o) => mine.has(o.auditId)).length;
+      return { contractor, count, audits: mine.size, perAudit: mine.size ? count / mine.size : 0 };
+    })
+    .filter((r) => r.audits > 0)
+    .sort((a, b) => b.perAudit - a.perAudit || b.count - a.count || a.contractor.name.localeCompare(b.contractor.name));
+}
+
+/** The positive observations themselves, newest audit first (then id), with their contractor and audit date. */
+export function positiveNotes(repo: Repo, filter: Filter): {
+  id: string; text: string; hasPhoto: boolean; auditId: string; date: string; contractor: Contractor;
+}[] {
+  const audits = select(repo, filter);
+  const audit = new Map(audits.map((a) => [a.id, a]));
+  const contractor = new Map(repo.contractors().map((c) => [c.id, c]));
+  return obsByAudit(repo, audits)
+    .filter((o) => o.kind === 'positive')
+    .map((o) => {
+      const a = audit.get(o.auditId)!;
+      return { id: o.id, text: o.text, hasPhoto: o.hasPhoto, auditId: a.id, date: a.date, contractor: contractor.get(a.contractorId)! };
+    })
+    .sort((x, y) => y.date.localeCompare(x.date) || x.id.localeCompare(y.id, undefined, { numeric: true }));
 }
 
 /** Average totalScore per region and quarter; ignores filter.quarter, respects regions and contractorId. */
@@ -498,14 +473,15 @@ export function compareContractors(repo: Repo, filter: Filter, ids: string[]): {
     .slice(0, 3)
     .map((id) => {
       const card = cards.get(id)!;
-      // Same scope as the card's rings and total: the latest audit in the filter; prev = the audit behind `previous`.
+      // Same scope as the card's rings and total: the latest audit in the filter; prev = the audit behind `previous`; the
+      // repeats are those of that latest audit against the one before it.
       const latest = repo.audits().find((a) => a.id === card.auditId)!;
       const lq = QUARTER_ORDER.indexOf(latest.quarter);
       const earlier = select(repo, { ...filter, contractorId: id }, 'all').filter((a) => QUARTER_ORDER.indexOf(a.quarter) < lq);
       return {
         card,
         gaps: gapsOver(repo, { ...filter, contractorId: id }, [latest], earlier.length ? [earlier[earlier.length - 1]] : null),
-        repeats: repeats.filter((r) => r.contractor.id === id),
+        repeats: repeats.filter((r) => r.contractor.id === id && r.auditId === card.auditId),
       };
     });
 }

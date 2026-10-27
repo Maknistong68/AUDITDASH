@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { filterAudits, highRiskCount, regionComparison, systemicRepeats } from '../../lib/analytics';
+import { followUps, positiveSummary, regionComparison, repeatFindings, repeatQuestions } from '../../lib/analytics';
+import type { Filter } from '../../lib/types';
 
-const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
+const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 import { pct } from '../../lib/format';
 
 const hydrated = async (page: import('@playwright/test').Page) =>
@@ -11,7 +12,7 @@ const hydrated = async (page: import('@playwright/test').Page) =>
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) test(`hero fits ${vp.width}`, async ({ page }) => {
   await page.setViewportSize(vp); await page.goto('/');
   await expect(page.getByTestId('score-ring')).toBeVisible();
-  for (const id of ['main-problem', 'kpi-score', 'kpi-repeats', 'kpi-highrisk', 'kpi-bands', 'region-compare']) {
+  for (const id of ['main-problem', 'kpi-score', 'kpi-repeats', 'kpi-positives', 'kpi-bands', 'region-compare']) {
     await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
   }
   await expect(page.getByTestId('contractor-row')).toHaveCount(12);
@@ -86,66 +87,46 @@ test('main problem tile lifts on hover', async ({ page }) => {
   await expect.poll(async () => y0 - (await mp.boundingBox())!.y).toBeGreaterThan(2);
 });
 
-test('the high-risk tile opens /high-risk with the filter', async ({ page }) => {
+test('the positives tile opens /positives with the filter', async ({ page }) => {
   await page.goto('/?q=Q1-2026&r=SR1');
   await hydrated(page);
-  const link = page.getByTestId('kpi-highrisk').getByRole('link');
-  await expect(link).toHaveAttribute('href', '/high-risk?q=Q1-2026&r=SR1');
+  const link = page.getByTestId('kpi-positives').getByRole('link');
+  await expect(link).toHaveAttribute('href', '/positives?q=Q1-2026&r=SR1');
   await link.click();
-  await expect(page).toHaveURL(/\/high-risk\?q=Q1-2026&r=SR1$/);
-  await expect(page.getByTestId('highrisk-header')).toBeVisible();
+  await expect(page).toHaveURL(/\/positives\?q=Q1-2026&r=SR1$/);
+  await expect(page.getByTestId('positives-header')).toBeVisible();
 });
 
-test('repeats card: questions repeating at ≥5 contractors, with a stacked bar of how widespread', async ({ page }) => {
-  const rows = systemicRepeats(getRepo(), ALL);
-  expect(rows).toHaveLength(28);
-  const reaches = [...new Set(rows.map((r) => r.contractorCount))].sort((a, b) => b - a);
+test('repeats card: findings noted again at the next audit, and what they are made of', async ({ page }) => {
+  const repo = getRepo();
+  const count = (f: Filter) => repeatFindings(repo, f).length;
+  expect(count(ALL)).toBe(345);
   await page.goto('/');
   const card = page.getByTestId('kpi-repeats');
-  await expect(card.getByTestId('repeats-count')).toHaveText('28');
-  await expect(card).toContainText('questions repeating');
-  await expect(card.getByTestId('repeat-row')).toHaveCount(0);
-  const segs = card.getByTestId('repeats-segment');
-  await expect(segs).toHaveCount(reaches.length);
-  const labels = card.getByTestId('repeats-segment-label');
-  let total = 0;
-  for (const [k, reach] of reaches.entries()) {
-    const n = rows.filter((r) => r.contractorCount === reach).length;
-    total += n;
-    await expect(segs.nth(k)).toHaveAttribute('data-reach', String(reach));
-    await expect(segs.nth(k)).toHaveAttribute('data-questions', String(n));
-    await expect(labels.nth(k)).toHaveText(`${n} at ${reach === 7 ? 'all 7' : `${reach} of 7`}`);
-  }
-  expect(total).toBe(28);
-  await expect(card.getByTestId('repeats-threshold')).toHaveText('at ≥5 of 7 contractors');
-  // a single region scales the threshold (5 of 7 → 3 of 4 in SR1, 3 of 3 in SR2) and finds repeats
-  for (const [r, label] of [['SR1', 'at ≥3 of 4 contractors'], ['SR2', 'at ≥3 of 3 contractors']] as const) {
-    await page.goto(`/?q=all&r=${r}`);
-    await expect(card.getByTestId('repeats-threshold')).toHaveText(label);
-    await expect(card.getByTestId('repeats-count')).not.toHaveText('0');
-    expect(systemicRepeats(getRepo(), { quarter: 'all', regions: [r] }).length).toBeGreaterThan(0);
-  }
-  // no earlier quarter: "—" and no infographic
+  await expect(card.getByTestId('repeats-count')).toHaveText('345');
+  await expect(card.getByTestId('repeats-rule')).toHaveText("same question noted again at the contractor's next audit");
+  await expect(card.getByTestId('repeats-questions')).toHaveText(`${repeatQuestions(repo, ALL).length} questions`);
+  await expect(card.getByTestId('repeats-contractors')).toHaveText('7 contractors');
+  await expect(card.getByTestId('repeats-followups')).toHaveText(`${followUps(repo, ALL).length} follow-up audits`);
+  // Q4 has a follow-up too (SIBS, audited twice in November): never "—" while a pair exists
   await page.goto('/?q=Q4-2025&r=SR1,SR2');
-  await expect(card.getByTestId('repeats-count')).toHaveText('—');
-  await expect(card.getByTestId('repeats-spread')).toHaveCount(0);
+  await expect(card.getByTestId('repeats-count')).toHaveText(String(count({ ...ALL, quarter: 'Q4-2025' })));
+  await expect(card.getByTestId('repeats-contractors')).toHaveText('1 contractor');
+  for (const r of ['SR1', 'SR2'] as const) {
+    await page.goto(`/?q=all&r=${r}`);
+    await expect(card.getByTestId('repeats-count')).toHaveText(String(count({ quarter: 'all', regions: [r] })));
+  }
 });
 
-test('high-risk card: total, label and per-audit bars (one bar for a single quarter)', async ({ page }) => {
-  const repo = getRepo();
-  const rate = (quarter: 'Q4-2025' | 'Q1-2026') => (highRiskCount(repo, { ...ALL, quarter }) / filterAudits(repo, { ...ALL, quarter }).length).toFixed(1);
+test('positives card: total, coverage of audits and contractors', async ({ page }) => {
+  const s = positiveSummary(getRepo(), ALL);
+  expect(s.total).toBe(138);
   await page.goto('/');
-  const card = page.getByTestId('kpi-highrisk');
-  await expect(card).toContainText(String(highRiskCount(repo, ALL)));
-  await expect(card).toContainText('high-risk findings');
-  await expect(card).not.toContainText(/Permits, lifting/);
-  await expect(card.getByTestId('highrisk-bar')).toHaveCount(2);
-  await expect(card.getByTestId('highrisk-rate')).toHaveText([rate('Q4-2025'), rate('Q1-2026')]);
-  await expect(card).toContainText('per audit');
-  await expect(card.getByTestId('highrisk-bars')).toHaveAttribute('aria-label', `Findings per audit: Q4 2025 ${rate('Q4-2025')}, Q1 2026 ${rate('Q1-2026')}`);
-  await page.goto('/?q=Q1-2026&r=SR1,SR2');
-  await expect(card.getByTestId('highrisk-bar')).toHaveCount(1);
-  await expect(card.getByTestId('highrisk-rate')).toHaveText([rate('Q1-2026')]);
+  const card = page.getByTestId('kpi-positives');
+  await expect(card.getByTestId('positives-count')).toHaveText('138');
+  await expect(card.getByTestId('positives-coverage')).toHaveText(`${s.auditsWith} of ${s.audits} audits · ${s.contractorsWith} of ${s.contractors} contractors`);
+  await page.goto('/?q=Q4-2025&r=SR1,SR2');
+  await expect(card.getByTestId('positives-count')).toHaveText(String(positiveSummary(getRepo(), { ...ALL, quarter: 'Q4-2025' }).total));
 });
 
 test('main problem reads "score lost" beside the %', async ({ page }) => {

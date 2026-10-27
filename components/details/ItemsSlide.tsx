@@ -1,6 +1,7 @@
-import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
+import { HandoffLanding, HandoffLink } from '@/components/motion/HandoffLink';
+import { DRILL_CONTRACTOR, DRILL_ITEM } from '@/lib/handoff';
 import { auditCompliance, type ItemInAudit, type ItemState } from '@/lib/analytics';
 import { bandShort, bandTone, dateLabel, pct } from '@/lib/format';
 import { bandFor } from '@/lib/scoring';
@@ -17,6 +18,8 @@ export interface ItemsSlideData {
   categoryName: string;
   /** This category's gap in each of the contractor's audits (latest first), to read this slide against. */
   history: { id: string; date: string; gap: number | null }[];
+  /** The slide the page opens on: its first card lands the category page's contractor-row hand-off (one per page). */
+  landing?: boolean;
 }
 
 /** One audit of a contractor in one category: the category gap, the audit's score, each item's state (plain labels, no codes). */
@@ -28,7 +31,8 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
   const count = (s: ItemState) => rows.filter((r) => r.state === s).length;
   return (
     <div className="grid grid-cols-1 gap-[var(--gap-grid)] min-[900px]:grid-cols-12">
-      <BentoCard i={0} testid="slide-header" className={`tone-${bandTone(band)} justify-between gap-[clamp(12px,2svh,22px)] p-[clamp(16px,2.2svh,28px)] min-[900px]:col-span-4`}>
+      {d.landing && <HandoffLanding />}
+      <BentoCard i={0} testid="slide-header" landing={d.landing ? DRILL_CONTRACTOR : undefined} className={`tone-${bandTone(band)} justify-between gap-[clamp(12px,2svh,22px)] p-[clamp(16px,2.2svh,28px)] min-[900px]:col-span-4`}>
         <div className="flex flex-col gap-[clamp(12px,2svh,22px)]">
         <AuditLine audit={audit} />
         <div className="flex flex-wrap items-end gap-x-4 gap-y-2">
@@ -79,9 +83,11 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
         <ul className="grid">
           {rows.map((r) => (
             <li key={r.item.code}>
-              <Link
+              <HandoffLink
                 data-testid="item-row"
                 data-state={r.state}
+                data-handoff-card=""
+                data-handoff={DRILL_ITEM}
                 href={d.itemHref(r.item.code)}
                 className="group grid grid-cols-[minmax(0,1fr)_minmax(64px,7.5em)_5.2em_14px] items-center gap-3 rounded-[12px] px-[clamp(6px,0.6vw,10px)] py-[clamp(7px,1.2svh,11px)] transition-colors hover:bg-fill-2"
               >
@@ -94,7 +100,7 @@ export function ItemsSlide({ d }: { d: ItemsSlideData }) {
                 <SectionGap ratio={r.ratio} />
                 <span><StatePill state={r.state} /></span>
                 <ChevronRight size={14} strokeWidth={2.4} className="text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
-              </Link>
+              </HandoffLink>
             </li>
           ))}
         </ul>

@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
 import { CATEGORIES } from '../../lib/categories';
-import { systemicRepeats } from '../../lib/analytics';
+import { repeatQuestions } from '../../lib/analytics';
 import { expectNothingClipped } from './clip';
 
 /**
@@ -11,10 +11,10 @@ import { expectNothingClipped } from './clip';
  */
 const repo = getRepo();
 const contractors = repo.contractors().map((c) => c.id);
-// The deepest one-screen drills: the top systemic repeat at its first contractor.
-const top = systemicRepeats(repo, { quarter: 'all', regions: ['SR1', 'SR2'] })[0];
+// The deepest one-screen drills: the top repeated question at its first contractor.
+const top = repeatQuestions(repo, { quarter: 'all', regions: ['SR1', 'SR2'] })[0];
 const ROUTES = [
-  '/', '/repeats', '/high-risk', '/audits',
+  '/', '/repeats', '/positives', '/audits',
   ...CATEGORIES.map((c) => `/category/${c.id}`),
   ...contractors.map((id) => `/contractor/${id}`),
   `/category/${top.category}/${top.contractors[0].id}`,

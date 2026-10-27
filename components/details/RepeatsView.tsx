@@ -2,18 +2,18 @@
 import Link from 'next/link';
 import { Repeat2 } from 'lucide-react';
 import { useLayoutEffect, useRef, useState } from 'react';
-import { ReachBar, ThresholdLabel } from '@/components/bento/RepeatsCard';
-import { QuarterBar } from '@/components/charts/QuarterBar';
+import { ReachBar, RepeatRule, RepeatStats } from '@/components/bento/RepeatsCard';
 import { HandoffLanding } from '@/components/motion/HandoffLink';
 import { REPEATS_CARD, REPEATS_FIGURE } from '@/lib/handoff';
 
 export interface RepeatCol { id: string; name: string; base: string; qual: string; hits: number; href: string }
 /** `step`: score lost in four steps (0 little … 3 most), null when the section was not scored (a neutral outlined dot). */
 export interface RepeatCell { step: number | null; lost: number | null; href: string }
-export interface RepeatRow { key: string; label: string; reach: number; q4: number; q1: number; href: string; cells: (RepeatCell | null)[] }
+/** `times`: repeat findings on the question (a contractor with two follow-up audits can repeat it twice). */
+export interface RepeatRow { key: string; label: string; reach: number; times: number; href: string; cells: (RepeatCell | null)[] }
 
 /**
- * Dot by score lost in the contractor's latest audit, two encodings: one warm hue, darker = more lost (tokens in
+ * Dot by score lost in the contractor's latest audit repeating the question, two encodings: one warm hue, darker = more lost (tokens in
  * globals.css, every step >= 3:1 on the card in both themes), and larger = more lost.
  */
 const TINT = ['var(--rp-0)', 'var(--rp-1)', 'var(--rp-2)', 'var(--rp-3)'];
@@ -24,22 +24,18 @@ const GROUP_GAP = 6;
 
 /**
  * The /repeats screen under the breadcrumb. Header strip (the landing of the dashboard card's hand-off): the figure,
- * the reach bar, Q4 → Q1 notes per audit. Then the issues × contractors matrix: worst reach first, a filled dot where the question
- * repeats at that contractor (darker and larger = more score lost there; outlined = not scored), a faint dot otherwise.
- * The last column shows each row's Q4 → Q1 "X of Y" audits noting it (the eligible contractors' audits);
- * a dot opens the item's history, a label the item in its category, a column head the contractor.
- * Rows share the height left; if they cannot all fit at ROW_MIN, the top N show with a "+M more" row that expands in
- * place inside the matrix's own scroll area. The page itself never scrolls.
+ * the reach bar (questions per number of contractors repeating them) and what the count is made of. Then the questions ×
+ * contractors matrix: widest reach first, a filled dot where the contractor noted the question again at its next audit
+ * (darker and larger = more score lost there; outlined = not scored), a faint dot otherwise. The last column shows how
+ * many times each question was repeated; a dot opens the item's history, a label the item in its category, a column head
+ * the contractor. Rows share the height left; if they cannot all fit at ROW_MIN, the top N show with a "+M more" row that
+ * expands in place inside the matrix's own scroll area. The page itself never scrolls.
  */
-export function RepeatsView({ count, spread, rates, threshold, audits, rows, cols, empty }: {
+export function RepeatsView({ count, stats, spread, rows, cols, empty }: {
+  /** Repeat findings; null when the filter has no follow-up audit. */
   count: number | null;
+  stats: { questions: number; contractors: number; followUps: number };
   spread: { reach: number; of: number; questions: number }[];
-  /** Notes on these questions per audit, per quarter, over the eligible contractors' audits (lib/analytics repeatNotesPerAudit). */
-  rates: { q4: number | null; q1: number | null };
-  /** The reach a question needed: "at ≥ min of `of` contractors". */
-  threshold: { min: number; of: number };
-  /** Audits of the eligible contractors per quarter: the denominators. */
-  audits: { q4: number; q1: number };
   rows: RepeatRow[];
   cols: RepeatCol[];
   empty: string | null;
@@ -47,27 +43,26 @@ export function RepeatsView({ count, spread, rates, threshold, audits, rows, col
   return (
     <div className="tone-minimal flex min-h-0 flex-1 flex-col gap-[var(--gap-grid)] px-[var(--gutter)]">
       <HandoffLanding />
-      <Header count={count} spread={spread} rates={rates} threshold={threshold} />
+      <Header count={count} stats={stats} spread={spread} />
       {empty ? (
         <section data-testid="empty-state" className="card flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
           <p className="figure text-[clamp(56px,10svh,112px)] text-faint" aria-hidden>{count === null ? '—' : '0'}</p>
           <h2 className="text-[21px] font-semibold tracking-[-0.02em]">{empty}</h2>
         </section>
       ) : (
-        <Matrix rows={rows} cols={cols} audits={audits} />
+        <Matrix rows={rows} cols={cols} />
       )}
     </div>
   );
 }
 
-function Header({ count, spread, rates, threshold }: {
-  count: number | null; spread: { reach: number; of: number; questions: number }[]; rates: { q4: number | null; q1: number | null }; threshold: { min: number; of: number };
+function Header({ count, stats, spread }: {
+  count: number | null; stats: { questions: number; contractors: number; followUps: number }; spread: { reach: number; of: number; questions: number }[];
 }) {
-  const max = Math.max(1e-9, rates.q4 ?? 0, rates.q1 ?? 0);
   return (
     <section
       data-testid="repeats-header"
-      className="card grid shrink-0 grid-cols-1 items-center gap-x-[clamp(20px,3vw,64px)] gap-y-3 px-[clamp(16px,1.5vw,28px)] py-[clamp(10px,1.5svh,20px)] min-[700px]:grid-cols-[auto_minmax(0,1fr)_minmax(200px,22%)]"
+      className="card grid shrink-0 grid-cols-1 items-center gap-x-[clamp(20px,3vw,64px)] gap-y-3 px-[clamp(16px,1.5vw,28px)] py-[clamp(10px,1.5svh,20px)] min-[700px]:grid-cols-[auto_minmax(0,1fr)_auto]"
       style={{ viewTransitionName: REPEATS_CARD }}
     >
       <div className="flex flex-col gap-1">
@@ -79,44 +74,19 @@ function Header({ count, spread, rates, threshold }: {
           <p data-testid="repeats-figure" className="figure text-[clamp(40px,6.2svh,76px)]" style={{ viewTransitionName: REPEATS_FIGURE }}>
             {count === null ? <span className="text-faint">—</span> : count}
           </p>
-          <p className="flex flex-col gap-1 pb-[0.5em] text-[13px] leading-tight text-muted">
-            <span>{count === null ? 'Needs an earlier quarter' : 'questions repeating'}</span>
-            {count !== null && threshold.of > 0 && <ThresholdLabel min={threshold.min} of={threshold.of} />}
+          <p className="max-w-[24ch] pb-[0.5em] text-[13px] leading-tight text-muted">
+            {count === null ? 'Needs a follow-up audit' : <RepeatRule />}
           </p>
         </div>
       </div>
-      <div className="min-w-0">{count !== null && spread.length > 0 && <ReachBar spread={spread} />}</div>
-      {count !== null && count > 0 ? (
-        <div
-          data-testid="repeats-notes"
-          role="img"
-          aria-label={`Notes on these questions per audit: Q4 ${rates.q4?.toFixed(1) ?? 'none'}, Q1 ${rates.q1?.toFixed(1) ?? 'none'}`}
-          className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2.5 gap-y-1.5"
-        >
-          {([['Q4', rates.q4, 'color-mix(in srgb, var(--muted) 40%, transparent)'], ['Q1', rates.q1, 'var(--tone-dot)']] as const).map(([q, r, bg], k) => (
-            <QuarterBar
-              key={q}
-              label={q}
-              fraction={(r ?? 0) / max}
-              hue={bg}
-              delay={300 + k * 90}
-              size="md"
-              value={r === null ? '—' : r.toFixed(1)}
-              valueClass="text-[13px]"
-              barTestid="repeats-notes-bar"
-              valueTestid="repeats-notes-count"
-            />
-          ))}
-          <span className="col-start-2 col-end-4 text-[11px] leading-none text-muted">notes per audit</span>
-        </div>
-      ) : (
-        <div />
-      )}
+      {/* phones: the reach bar (one labelled segment per reach) is wider than the screen; the stats say enough there */}
+      <div className="min-w-0 max-[699px]:hidden">{count !== null && spread.length > 0 && <ReachBar spread={spread} />}</div>
+      {count !== null ? <RepeatStats {...stats} /> : <div />}
     </section>
   );
 }
 
-function Matrix({ rows, cols, audits }: { rows: RepeatRow[]; cols: RepeatCol[]; audits: { q4: number; q1: number } }) {
+function Matrix({ rows, cols }: { rows: RepeatRow[]; cols: RepeatCol[] }) {
   const body = useRef<HTMLDivElement>(null);
   // How many rows fit at ROW_MIN (null until measured: the server renders them all).
   const [fit, setFit] = useState<number | null>(null);
@@ -155,7 +125,7 @@ function Matrix({ rows, cols, audits }: { rows: RepeatRow[]; cols: RepeatCol[]; 
 
   const clipped = !open && fit !== null && fit < rows.length;
   const shown = clipped ? rows.slice(0, fit) : rows;
-  const cssCols = `clamp(220px, 19vw, 360px) repeat(${cols.length}, minmax(0, 1fr)) clamp(150px, 12vw, 210px)`;
+  const cssCols = `clamp(220px, 19vw, 360px) repeat(${cols.length}, minmax(0, 1fr)) clamp(90px, 7vw, 130px)`;
 
   return (
     <section
@@ -195,7 +165,7 @@ function Matrix({ rows, cols, audits }: { rows: RepeatRow[]; cols: RepeatCol[]; 
             </Link>
           </div>
         ))}
-        <div role="columnheader" className="px-2 text-right text-[11px] leading-none text-muted">audits noting it: Q4 → Q1</div>
+        <div role="columnheader" className="px-2 text-right text-[11px] leading-none text-muted">times repeated</div>
       </div>
 
       <div
@@ -215,7 +185,6 @@ function Matrix({ rows, cols, audits }: { rows: RepeatRow[]; cols: RepeatCol[]; 
             cssCols={cssCols}
             gap={i > 0 && r.reach !== shown[i - 1].reach}
             open={open}
-            audits={audits}
             labelRef={open && fit !== null && i === fit ? (el) => { firstHidden.current = el; } : undefined}
           />
         ))}
@@ -241,8 +210,8 @@ function Matrix({ rows, cols, audits }: { rows: RepeatRow[]; cols: RepeatCol[]; 
   );
 }
 
-function Row({ row, index, rowIndex, cols, cssCols, gap, open, audits, labelRef }: {
-  row: RepeatRow; index: number; rowIndex: number; cols: RepeatCol[]; cssCols: string; gap: boolean; open: boolean; audits: { q4: number; q1: number };
+function Row({ row, index, rowIndex, cols, cssCols, gap, open, labelRef }: {
+  row: RepeatRow; index: number; rowIndex: number; cols: RepeatCol[]; cssCols: string; gap: boolean; open: boolean;
   labelRef?: (el: HTMLAnchorElement | null) => void;
 }) {
   return (
@@ -307,13 +276,11 @@ function Row({ row, index, rowIndex, cols, cssCols, gap, open, audits, labelRef 
       )}
       <div
         role="cell"
-        data-testid="repeats-trend"
-        aria-label={`Noted at ${row.q4} of ${audits.q4} audits in Q4, ${row.q1} of ${audits.q1} audits in Q1`}
+        data-testid="repeats-times"
+        aria-label={`Repeated ${row.times} ${row.times === 1 ? 'time' : 'times'} at ${row.reach} ${row.reach === 1 ? 'contractor' : 'contractors'}`}
         className="num flex items-center justify-end gap-1 whitespace-nowrap px-2 text-[12px]"
       >
-        <span className="text-muted">{row.q4} of {audits.q4}</span>
-        <span className="text-muted">→</span>
-        <span className="font-semibold text-ink">{row.q1} of {audits.q1}</span>
+        <span className="font-semibold text-ink">{row.times}×</span>
       </div>
     </div>
   );

@@ -8,6 +8,8 @@ import { detailContext, href, type SP } from '@/lib/details';
 import { dateLabel, quarterLabel } from '@/lib/format';
 import { findCategory, findContractor, findItem } from '@/lib/routeParams';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
+import { HandoffLanding, HandoffLink } from '@/components/motion/HandoffLink';
+import { DRILL_ITEM, DRILL_NOTE } from '@/lib/handoff';
 import { DetailFrame } from '@/components/details/DetailFrame';
 import { CategoryChip, SectionGap, StatePill } from '@/components/details/parts';
 import { FitList } from '@/components/details/FitList';
@@ -51,6 +53,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
   return (
     <DetailFrame filter={filter} crumbs={crumbs} parent={parent} fit>
       <div className="flex flex-col gap-[var(--gap-grid)] px-[var(--gutter)] min-[1200px]:min-h-0 min-[1200px]:flex-1">
+        <HandoffLanding />
         <header className="flex min-w-0 shrink-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <h1 data-testid="item-title" className="text-[24px] min-[900px]:text-[clamp(24px,3.6svh,32px)] font-semibold leading-[1.05] tracking-[-0.035em]">{label}</h1>
@@ -62,14 +65,14 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
 
         {/* Cards as tall as the tallest one's content, capped at the screen (flex-initial shrinks, never grows). */}
         <div className="grid grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:min-h-0 min-[1200px]:flex-initial min-[1200px]:grid-cols-12 min-[1200px]:grid-rows-[minmax(0,1fr)]">
-          <BentoCard i={0} testid="item-timeline" className="gap-[clamp(8px,1.4svh,12px)] px-[clamp(14px,1.4vw,24px)] py-[clamp(12px,1.8svh,24px)] min-[1200px]:col-span-4">
+          <BentoCard i={0} testid="item-timeline" landing={DRILL_ITEM} className="gap-[clamp(8px,1.4svh,12px)] px-[clamp(14px,1.4vw,24px)] py-[clamp(12px,1.8svh,24px)] min-[1200px]:col-span-4">
             <TileLabel>History · newest first</TileLabel>
             {entries.length === 0 ? (
               <p className="text-[15px] text-muted">No audits match this filter.</p>
             ) : (
               <ol className="relative grid min-h-0 content-start gap-[clamp(10px,2svh,24px)] overflow-y-auto overscroll-contain">
                 {entries.map(({ audit, observation, state, ratio }, i) => (
-                  <li key={audit.id} data-testid="timeline-entry" data-state={state} className="relative grid grid-cols-[18px_minmax(0,1fr)] gap-x-3">
+                  <li key={audit.id} data-testid="timeline-entry" data-state={state} data-handoff-card="" data-handoff={DRILL_NOTE} className="relative grid grid-cols-[18px_minmax(0,1fr)] gap-x-3 rounded-[12px]">
                     <span aria-hidden className="relative flex justify-center">
                       <span className="mt-[5px] size-3 rounded-full" style={{ background: DOT[state] }} />
                       {i < entries.length - 1 && <span className="absolute bottom-[calc(-1*clamp(10px,2svh,24px))] top-[22px] w-[2px] rounded-full bg-fill" />}
@@ -84,13 +87,13 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
                       {observation ? (
                         <>
                           <p className="line-clamp-3 whitespace-pre-line break-words text-[14px] leading-snug [@media(min-height:900px)]:line-clamp-5" title={observation.text}>{observation.text}</p>
-                          <Link
+                          <HandoffLink
                             data-testid="observation-link"
                             href={href(`/category/${cat}/${contractor.id}/${encodeURIComponent(item.code)}/${observation.id}`, query)}
                             className="inline-flex w-fit items-center gap-1 rounded-full py-0.5 text-[14px] font-semibold text-[var(--accent)] hover:underline"
                           >
                             Read observation <ArrowRight size={14} strokeWidth={2.4} aria-hidden />
-                          </Link>
+                          </HandoffLink>
                         </>
                       ) : (
                         <p className="text-[14px] text-muted">{state === 'na' ? 'Not applicable in this audit.' : 'No auditor note on this item.'}</p>
