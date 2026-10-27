@@ -112,3 +112,8 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
 - **Dashboard contractor list:** replace "+1 / −2" text with a small up/down line chart per contractor.
 - **Contractor page:** fill the open space at the top with a bigger up/down score chart across audits; move the A/B/C bars
   lower; replace the third card (observations by category) with the **top 3 repeated observations** for that contractor.
+- Owner kept from the parallel session (2026-10-27): name "Audits", dark default theme, Positive observations card/page.
+- Interim repeat rule until Part 1 arrives: a question is a *finding* in an audit when it has an auditor note, is not
+  marked COMPLIANT / N/A in the evidence column, and its section lost points in that audit (Q4 2025 notes proved exact
+  against ABYATONA-1112's Part 1: 50 notes = 50 Partial/No). Repeat = finding in a contractor's audit and again in its
+  next audit; "times repeated" counts consecutive repeats. Labelled "based on auditor notes".
