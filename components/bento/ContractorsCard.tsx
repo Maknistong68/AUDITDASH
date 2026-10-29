@@ -1,59 +1,27 @@
 'use client';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { ArrowDown, ArrowUp, Check, Plus } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useRef } from 'react';
 import { CountUp } from '@/components/motion/CountUp';
 import { HandoffLink } from '@/components/motion/HandoffLink';
-import { CompareTray, type CompareEntry } from '@/components/sections/CompareTray';
-import { MAX_COMPARE, parseCompare, toggleCompare, withCompare } from '@/lib/compare';
 import { Sparkline, trendLabel } from '@/components/charts/Trend';
 import { CONTRACTOR_NAME, CONTRACTOR_SCORE } from '@/lib/handoff';
-import { bandShort, bandTone, deltaPoints, pct, prevQuarterShort } from '@/lib/format';
+import { bandShort, bandTone, pct } from '@/lib/format';
 import type { ContractorCard as Card } from '@/lib/analytics';
-import { SPRING, TileLabel } from './BentoGrid';
+import { PRESS, SPRING, TileLabel } from './BentoGrid';
 
 const whole = (n: number) => String(Math.round(n));
 const BAND_TICKS = [0.6, 0.7, 0.8, 0.9];
 
-/** Δ in whole points vs the previous audit (computed from the displayed totals); nothing without a previous. Used by the compare tray. */
-export function Delta({ total, previous, auditId, size = 13 }: { total: number; previous: number | null; auditId: string; size?: number }) {
-  const d = deltaPoints(total, previous);
-  if (d === null) return null;
-  const vs = prevQuarterShort(auditId);
-  const color = d > 0 ? 'var(--up)' : d < 0 ? 'var(--down)' : 'var(--muted)';
-  return (
-    <span
-      className="num inline-flex items-center gap-0.5 font-semibold"
-      style={{ color, fontSize: size }}
-      title={`${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)} points vs ${vs ?? 'previous audit'} (${pct(previous)}%)`}
-    >
-      {d > 0 && <ArrowUp size={size} strokeWidth={2.6} aria-hidden />}
-      {d < 0 && <ArrowDown size={size} strokeWidth={2.6} aria-hidden />}
-      <span>
-        {d > 0 ? '+' : d < 0 ? '−' : '±'}
-        {Math.abs(d)}
-      </span>
-      {vs && <span className="ml-0.5 font-normal text-muted">vs {vs}</span>}
-    </span>
-  );
-}
-
 function Row({
   card,
   i,
-  selected,
-  disabled,
-  onToggle,
   animateIn,
   query,
 }: {
   query: string;
   card: Card;
   i: number;
-  selected: boolean;
-  disabled: boolean;
-  onToggle: () => void;
   animateIn: boolean;
 }) {
   const reduce = useReducedMotion();
@@ -68,12 +36,11 @@ function Row({
       animate={{ opacity: 1, x: 0 }}
       exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, transition: { duration: 0.15 } }}
       transition={{ ...SPRING, delay }}
+      whileTap={reduce ? undefined : { scale: 0.985, transition: PRESS }}
       data-testid="contractor-row"
       data-handoff-card=""
       data-score={total}
-      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.6em_minmax(0,1.6fr)_minmax(0,1fr)_3.3em_6.4em_60px_24px] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
-        selected ? 'bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]' : ''
-      }`}
+      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.6em_minmax(0,1fr)_3.3em_6.4em] min-[640px]:grid-cols-[1.6em_minmax(0,1.6fr)_minmax(0,1fr)_3.3em_6.4em_60px] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2`}
     >
       <span className="num text-[clamp(13px,1.5svh,15px)] font-semibold text-faint">{rank}</span>
       <span className="flex min-w-0 flex-col justify-center">
@@ -82,7 +49,7 @@ function Row({
         </span>
         <span className="text-[12px] leading-tight text-muted">{contractor.subregion}</span>
       </span>
-      <span className="relative h-[clamp(6px,0.9svh,9px)] rounded-full bg-fill-2" aria-hidden>
+      <span className="relative hidden h-[clamp(6px,0.9svh,9px)] rounded-full bg-fill-2 min-[640px]:block" aria-hidden>
         {BAND_TICKS.map((t) => (
           <span key={t} className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-surface" style={{ left: `${t * 100}%` }} />
         ))}
@@ -105,7 +72,7 @@ function Row({
           {bandShort(band)}
         </span>
       </span>
-      <span className="flex justify-start" title={`Audit scores, oldest first: ${trendLabel(scores)}`}>
+      <span className="hidden justify-start min-[640px]:flex" title={`Audit scores, oldest first: ${trendLabel(scores)}`}>
         <Sparkline values={scores} delay={delay + 0.2} />
       </span>
       <HandoffLink
@@ -113,52 +80,27 @@ function Row({
         aria-label={`${contractor.name}, rank ${rank}, ${pct(total)}%, ${band}`}
         className="absolute inset-0 z-[1] rounded-[14px]"
       />
-      <button
-        type="button"
-        aria-pressed={selected}
-        aria-label={`Compare ${contractor.name}`}
-        disabled={disabled}
-        onClick={onToggle}
-        title={disabled ? 'Up to 3 contractors' : selected ? 'Remove from compare' : 'Add to compare'}
-        className={`relative z-[2] grid size-[24px] place-items-center rounded-full transition-[background-color,transform,opacity] duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 ${
-          selected
-            ? 'bg-[var(--accent)] text-[var(--on-accent)]'
-            : 'bg-fill-2 text-muted shadow-[inset_0_0_0_1.5px_var(--control)] hover:text-ink enabled:hover:bg-fill'
-        }`}
-      >
-        {selected ? <Check size={14} strokeWidth={3} aria-hidden /> : <Plus size={14} strokeWidth={2.6} aria-hidden />}
-      </button>
     </motion.li>
   );
 }
 
 /**
- * XL tile: contractors ranked by latest official score, highest first. Row → contractor details with the shared hand-off
- * (its name and score morph into the contractor page's title and score, lib/handoff);
- * the + toggle adds to compare (max 3; selection in ?c=, see lib/compare). Hosts the compare tray.
+ * XL tile: contractors ranked by latest official score, highest first. The whole row is the tap target: it opens the
+ * contractor details with the shared hand-off (its name and score morph into the contractor page's title and score, lib/handoff).
  */
-export function ContractorsCard({ cards, compare }: { cards: Card[]; compare: Record<string, CompareEntry> }) {
+export function ContractorsCard({ cards }: { cards: Card[] }) {
   const reduce = useReducedMotion();
   const sp = useSearchParams();
-  const pathname = usePathname();
-  const ids = cards.map((c) => c.contractor.id);
-  const selected = parseCompare(sp.get('c'), ids);
   const firstPaint = useRef(true);
   const root = useRef<HTMLElement>(null);
   useEffect(() => {
     firstPaint.current = false;
-    root.current?.setAttribute('data-hydrated', ''); // toggles are live (used by e2e)
+    root.current?.setAttribute('data-hydrated', ''); // rows are live (used by e2e)
   }, []);
-  const setSelected = useCallback(
-    (next: string[]) => window.history.replaceState(null, '', `${pathname}${withCompare(window.location.search, next)}`),
-    [pathname],
-  );
-  const full = selected.length >= MAX_COMPARE;
   // Carry an explicit filter into the details (the default overview URL stays clean).
   const query = sp.has('q') || sp.has('r') ? `?${new URLSearchParams([...sp].filter(([k]) => k === 'q' || k === 'r')).toString()}` : '';
 
   return (
-    <>
     <motion.section
       ref={root}
       data-testid="contractors"
@@ -176,40 +118,16 @@ export function ContractorsCard({ cards, compare }: { cards: Card[]; compare: Re
           <span className="num text-[clamp(15px,2svh,20px)] font-semibold text-faint">{cards.length}</span>
         </div>
         <TileLabel className="!font-normal">
-          <span aria-live="polite">
-            {selected.length === 0 ? 'Latest audit · score trend · + to compare' : `${selected.length} of ${MAX_COMPARE} selected to compare`}
-          </span>
+          Latest Total Final Score · trend
         </TileLabel>
       </div>
       <ul className="grid min-h-0 flex-1 auto-rows-[minmax(44px,1fr)] min-[1200px]:auto-rows-[minmax(0,1fr)]">
         <AnimatePresence mode="popLayout" initial={!reduce}>
-          {cards.map((card, i) => {
-            const id = card.contractor.id;
-            const on = selected.includes(id);
-            return (
-              <Row
-                key={id}
-                card={card}
-                i={i}
-                selected={on}
-                disabled={!on && full}
-                onToggle={() => setSelected(toggleCompare(selected, id))}
-                animateIn={firstPaint.current}
-                query={query}
-              />
-            );
-          })}
+          {cards.map((card, i) => (
+            <Row key={card.contractor.id} card={card} i={i} animateIn={firstPaint.current} query={query} />
+          ))}
         </AnimatePresence>
       </ul>
     </motion.section>
-    {/* Outside the tile: a transformed ancestor would trap the fixed sheet. Fixed boxes take no grid cell. */}
-    <CompareTray
-        entries={selected.map((id) => compare[id]).filter(Boolean)}
-        candidates={cards.filter((c) => !selected.includes(c.contractor.id)).map((c) => ({ id: c.contractor.id, name: c.contractor.name }))}
-        onAdd={(id) => setSelected(toggleCompare(selected, id))}
-        onRemove={(id) => setSelected(selected.filter((x) => x !== id))}
-        onClose={() => setSelected([])}
-      />
-    </>
   );
 }

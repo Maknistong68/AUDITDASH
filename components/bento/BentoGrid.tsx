@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { handoffPending } from '@/lib/handoff';
 
 export const SPRING = { type: 'spring', stiffness: 240, damping: 28, mass: 0.9 } as const;
+/** Hover / press response: stiff and quick, so a tap feels answered at once. */
+export const PRESS = { type: 'spring', stiffness: 520, damping: 32 } as const;
 
 /**
  * One bento tile: a single rounded surface with one job. Rises in on a stagger (index).
@@ -16,9 +18,12 @@ export function BentoCard({
   label,
   handoff,
   landing,
+  press = false,
   children,
 }: {
   i: number;
+  /** A whole-card tap target: lifts on hover and gives under the finger on press. */
+  press?: boolean;
   /** The card's name in the shared "card opens" hand-off (lib/handoff), when it opens a detail view. */
   handoff?: string;
   /** The hand-off name this card lands (a drill-down's first card): the clicked row grows into it, so it skips its rise. */
@@ -40,6 +45,8 @@ export function BentoCard({
       initial={reduce || landed ? false : { opacity: 0, y: 22, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ ...SPRING, delay: 0.05 + i * 0.07 }}
+      whileHover={press && !reduce ? { y: -3, transition: PRESS } : undefined}
+      whileTap={press && !reduce ? { scale: 0.985, transition: PRESS } : undefined}
       className={`card relative flex min-h-0 min-w-0 flex-col ${className}`}
     >
       {children}
@@ -61,14 +68,13 @@ export function TileLabel({ children, tone, className = '' }: { children: React.
 
 /**
  * Bento layout. ≥1200px: XL contractors tile on the left at full hero height; the right half is a 6-column
- * grid: L main problem (6) / M portfolio score (3) + M repeats (3) / wide positives (6). Bands and regions live on /audits.
- * Narrower: everything stacks and the page scrolls.
+ * grid: L main problem (6) / SR1 vs SR2 (6) / biggest movers (3) + audits done (3). Narrower: everything stacks and the page scrolls.
  */
 export function BentoGrid({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   return (
     <div className="grid min-h-0 flex-1 grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:grid-cols-[minmax(0,1.18fr)_minmax(0,1fr)]">
       {left}
-      <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[640px]:grid-cols-6 min-[1200px]:grid-rows-[minmax(0,1.5fr)_minmax(0,1fr)_auto]">
+      <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[640px]:grid-cols-6 min-[1200px]:grid-rows-[minmax(0,1.25fr)_minmax(0,0.9fr)_minmax(0,1fr)]">
         {right}
       </div>
     </div>

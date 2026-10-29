@@ -1,51 +1,38 @@
 import { getRepo } from '@/lib/data/repo';
 import { href, toSearchParams, type SP } from '@/lib/details';
-import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
-import {
-  compareContractors, contractorCards, filterAudits, followUps, mainProblem, portfolioSummary, positiveSummary,
-  repeatMatrix,
-} from '@/lib/analytics';
-import { MAX_COMPARE } from '@/lib/compare';
+import { filterToQuery, parseFilter } from '@/lib/filters';
+import { contractorCards, coverage, filterAudits, mainProblem, movers, portfolioSummary, regionDuel, weakestSection } from '@/lib/analytics';
 import { TopBar } from '@/components/shell/TopBar';
 import { EmptyState } from '@/components/shell/EmptyState';
-import type { CompareEntry } from '@/components/sections/CompareTray';
 import { BentoGrid } from '@/components/bento/BentoGrid';
 import { ContractorsCard } from '@/components/bento/ContractorsCard';
 import { MainProblemCard } from '@/components/bento/MainProblemCard';
-import { ScoreCard } from '@/components/bento/ScoreCard';
-import { RepeatsCard } from '@/components/bento/RepeatsCard';
-import { PositivesCard } from '@/components/bento/PositivesCard';
-import { TypeEmpty } from '@/components/shell/TypeEmpty';
+import { RegionDuelCard } from '@/components/bento/RegionDuelCard';
+import { MoversCard } from '@/components/bento/MoversCard';
+import { CoverageCard } from '@/components/bento/CoverageCard';
+import { TypeDashboard } from '@/components/shell/TypeDashboard';
 
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<SP> }) {
   const filter = parseFilter(toSearchParams(await searchParams));
   const repo = getRepo();
-  const summary = portfolioSummary(repo, filter);
-  const empty = summary.audits === 0;
-  // A non-H&S tab has no imported audits; its dashboard fills from audits entered in the app (Task 14).
-  const typeEmpty = empty && filter.type !== undefined && filter.type !== 'hs' ? filter.type : null;
-  const cards = empty ? [] : contractorCards(repo, filter);
-
-  // Compare data for every contractor, so selecting is instant (selection lives in ?c= on the client).
-  const compare: Record<string, CompareEntry> = {};
-  const ids = cards.map((c) => c.contractor.id);
-  for (let i = 0; i < ids.length; i += MAX_COMPARE) {
-    for (const x of compareContractors(repo, filter, ids.slice(i, i + MAX_COMPARE))) {
-      compare[x.card.contractor.id] = {
-        card: x.card,
-        gaps: x.gaps.map((g) => ({ category: g.category, gapRate: g.gapRate })),
-        repeatCount: x.repeats.length,
-        topRepeats: x.repeats.slice(0, 3).map((r) => ({ itemCode: r.itemCode, question: r.question })),
-      };
-    }
-  }
-
-  const problem = empty ? null : mainProblem(repo, filter);
-  // Repeat findings: a question that is a finding again at the contractor's next audit; null without a follow-up audit ("—").
-  const pairs = empty ? [] : followUps(repo, filter);
-  const matrix = pairs.length ? repeatMatrix(repo, filter) : null;
+  const typed = filter.type !== undefined && filter.type !== 'hs' ? filter.type : null;
+  const empty = portfolioSummary(repo, filter).audits === 0;
   const query = filterToQuery(filter);
-  const byQuarter = QUARTERS.map((q) => ({ label: q.replace('-', ' '), value: portfolioSummary(repo, { ...filter, quarter: q }).avgScore }));
+  const cards = empty ? [] : contractorCards(repo, filter);
+  const problem = empty || typed ? null : mainProblem(repo, filter);
+  const duel = empty ? null : regionDuel(repo, filter);
+  const moves = movers(repo, filter);
+  const cover = coverage(repo, filter);
+  // Carry an explicit filter into contractor pages (the default overview URL stays clean).
+  const rowQuery = query ? `?${query}` : '';
+
+  const tiles = (
+    <>
+      {duel && <RegionDuelCard {...duel} href={href('/audits', query)} />}
+      {moves.quarter && <MoversCard quarter={moves.quarter} up={moves.up} down={moves.down} compared={moves.compared} query={rowQuery} />}
+      {cover.quarter && <CoverageCard quarter={cover.quarter} regions={cover.regions} href={href('/audits', query)} />}
+    </>
+  );
 
   return (
     <>
@@ -56,13 +43,13 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
           data-testid="hero"
           className="flex flex-col px-[var(--gutter)] pb-[clamp(14px,2.4svh,32px)] pt-[clamp(6px,1.2svh,16px)] min-[1200px]:h-[calc(100svh-var(--topbar))]"
         >
-          {typeEmpty ? (
-            <TypeEmpty type={typeEmpty} />
+          {typed ? (
+            <TypeDashboard type={typed} cards={cards} contractors={repo.contractors().filter((c) => filter.regions.includes(c.subregion))} weakest={empty ? null : weakestSection(repo, filter)} tiles={empty ? null : tiles} />
           ) : empty ? (
             <EmptyState />
           ) : (
             <BentoGrid
-              left={<ContractorsCard cards={cards} compare={compare} />}
+              left={<ContractorsCard cards={cards} />}
               right={
                 <>
                   {problem && (
@@ -72,13 +59,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                       query={query}
                     />
                   )}
-                  <ScoreCard avgScore={summary.avgScore} band={summary.band} audits={summary.audits} byQuarter={byQuarter} href={href('/audits', query)} />
-                  <RepeatsCard
-                    repeats={matrix ? matrix.questions.reduce((s, q) => s + q.total, 0) : null}
-                    top={(matrix?.questions ?? []).slice(0, 3).map((q) => ({ key: q.itemCode, label: q.label, times: q.total }))}
-                    href={href('/repeats', query)}
-                  />
-                  <PositivesCard summary={positiveSummary(repo, filter)} href={href('/positives', query)} />
+                  {tiles}
                 </>
               }
             />

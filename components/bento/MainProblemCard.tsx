@@ -1,6 +1,6 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowDown, ArrowUp, ChevronRight } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 import { CountUp } from '@/components/motion/CountUp';
 import { categoryById } from '@/lib/categories';
 import { QUARTERS } from '@/lib/filters';
@@ -55,7 +55,7 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ ...SPRING, delay: 0.12 }}
       whileHover={reduce ? undefined : { y: -4, transition: { type: 'spring', stiffness: 400, damping: 28 } }}
-      whileTap={reduce ? undefined : { scale: 0.99, y: -1 }}
+      whileTap={reduce ? undefined : { scale: 0.985, y: -1, transition: { type: 'spring', stiffness: 520, damping: 32 } }}
       className="hero-tile lift group relative col-span-full flex min-h-0 min-w-0 rounded-[var(--radius-card)]"
     >
       <HandoffLink
@@ -64,13 +64,6 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
         className="absolute inset-0 z-[2] rounded-[var(--radius-card)]"
       />
       <ProblemCardContent problem={problem} audits={audits} label="Main problem" />
-      <span
-        aria-hidden
-        className="absolute right-[clamp(12px,1.6svh,22px)] top-[clamp(12px,1.6svh,22px)] grid size-9 place-items-center rounded-full transition-transform duration-300 group-hover:translate-x-0.5"
-        style={{ background: 'var(--hero-chip)' }}
-      >
-        <ChevronRight size={18} strokeWidth={2.4} />
-      </span>
     </motion.section>
   );
 }
@@ -117,7 +110,7 @@ export function ProblemCardContent({
             </p>
           </div>
           <div className="flex shrink-0 flex-col gap-1 whitespace-nowrap pb-[0.6em] text-[clamp(13px,1.5svh,15px)]">
-            <span style={{ color: 'var(--hero-muted)' }}>score lost</span>
+            <span style={{ color: 'var(--hero-muted)' }}>of points lost</span>
             {d !== null && (
               <span
                 className="num inline-flex items-center gap-0.5 font-semibold"
@@ -126,13 +119,10 @@ export function ProblemCardContent({
               >
                 {d > 0 && <ArrowUp size={14} strokeWidth={2.6} aria-hidden />}
                 {d < 0 && <ArrowDown size={14} strokeWidth={2.6} aria-hidden />}
-                {d > 0 ? '+' : d < 0 ? '−' : '±'}
-                {Math.abs(d)} {Math.abs(d) === 1 ? 'pt' : 'pts'}
-                <span className="ml-1 font-normal" style={{ color: 'var(--hero-muted)' }}>
-                  vs {vs}
-                </span>
+                {d === 0 ? 'Same' : `${Math.abs(d)} ${Math.abs(d) === 1 ? 'pt' : 'pts'} ${d > 0 ? 'worse' : 'better'}`}
               </span>
             )}
+            {d !== null && <span style={{ color: 'var(--hero-muted)' }}>{d === 0 ? `as ${vs}` : `than ${vs}`}</span>}
           </div>
         </div>
       </div>

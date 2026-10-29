@@ -1,6 +1,6 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
-import { ArrowDown, ArrowUp, ChevronRight } from 'lucide-react';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 export const whole = (n: number) => String(Math.round(n));
 export const PAD = 'px-[clamp(16px,1.5vw,28px)] py-[clamp(12px,1.8svh,24px)]';
@@ -36,30 +36,6 @@ export function ScoreBar({ value, delay }: { value: number; delay: number }) {
         animate={{ scaleX: 1 }}
         transition={{ type: 'spring', stiffness: 100, damping: 20, delay }}
       />
-    </span>
-  );
-}
-
-/**
- * The subtle "opens" chevron in a clickable tile's top-right corner. `small`: a bare chevron inside the corner padding, for
- * the small tiles whose label runs nearly to the edge (it never overlaps or reflows the label).
- */
-export function CardChevron({ small = false }: { small?: boolean }) {
-  return small ? (
-    <span
-      aria-hidden
-      data-testid="card-chevron"
-      className="absolute right-[clamp(3px,0.4vw,8px)] top-[calc(clamp(12px,1.8svh,24px)+0.5*clamp(13px,1.5svh,16px)*1.5)] grid -translate-y-1/2 place-items-center text-faint transition-transform duration-300 group-hover:translate-x-0.5"
-    >
-      <ChevronRight size={14} strokeWidth={2.6} />
-    </span>
-  ) : (
-    <span
-      aria-hidden
-      data-testid="card-chevron"
-      className="absolute right-[clamp(12px,1.4svh,20px)] top-[clamp(10px,1.4svh,18px)] grid size-7 place-items-center rounded-full bg-fill-2 text-muted transition-transform duration-300 group-hover:translate-x-0.5"
-    >
-      <ChevronRight size={16} strokeWidth={2.4} />
     </span>
   );
 }

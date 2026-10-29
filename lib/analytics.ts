@@ -10,11 +10,12 @@ const byDate = (a: Audit, b: Audit) => a.date.localeCompare(b.date) || a.id.loca
 
 /** Audits matching quarter (unless overridden), regions (via contractor subregion) and optional contractorId. */
 function select(repo: Repo, filter: Filter, quarter: Filter['quarter'] = filter.quarter): Audit[] {
-  if (filter.type && filter.type !== 'hs') return []; // seed audits are all H&S; other types have none yet
+  const type = filter.type ?? 'hs'; // an audit without a type is H&S (the imported workbook)
   const region = new Map(repo.contractors().map((c) => [c.id, c.subregion]));
   return repo
     .audits()
     .filter((a) => {
+      if ((a.type ?? 'hs') !== type) return false;
       if (quarter !== 'all' && a.quarter !== quarter) return false;
       const r = region.get(a.contractorId);
       if (!r || !filter.regions.includes(r)) return false;
@@ -870,4 +871,130 @@ export function auditReport(repo: Repo, audit: Audit): AuditReport {
     negatives: obs.filter((o) => (o.kind === 'negative' || o.kind === 'site') && !onNaItem(o, items, na)),
     positives: obs.filter((o) => o.kind === 'positive'),
   };
+}
+
+// ---------------------------------------------------------------- director tiles: SR1 vs SR2, movers, coverage
+
+/** The quarter the director tiles speak for: the filter's quarter, or the latest quarter present when "All". */
+function focusQuarter(repo: Repo, filter: Filter): Quarter | null {
+  if (filter.quarter !== 'all') return filter.quarter;
+  const audits = select(repo, filter);
+  return QUARTER_ORDER.filter((q) => audits.some((a) => a.quarter === q)).at(-1) ?? null;
+}
+
+const prevQuarter = (q: Quarter): Quarter | null => QUARTER_ORDER[QUARTER_ORDER.indexOf(q) - 1] ?? null;
+
+export interface RegionSide {
+  region: Subregion;
+  /** Average totalScore of the region's audits in the quarter (same figure as the /audits regions panel); null = no audit. */
+  score: number | null;
+  previous: number | null;
+  audits: number;
+  contractors: number;
+}
+
+/**
+ * SR1 vs SR2 for one quarter: each side's average official score, the same average the quarter before, and how many
+ * audits / contractors it rests on (SR1 has many more contractors than SR2, so the base is always shown).
+ * `portfolio` = the average over both sides' audits. Regions follow the filter.
+ */
+export function regionDuel(repo: Repo, filter: Filter): {
+  quarter: Quarter; previousQuarter: Quarter | null; sides: RegionSide[]; portfolio: number | null; audits: number;
+} | null {
+  const quarter = focusQuarter(repo, filter);
+  if (!quarter) return null;
+  const prev = prevQuarter(quarter);
+  const sides = (['SR1', 'SR2'] as Subregion[])
+    .filter((r) => filter.regions.includes(r))
+    .map((region): RegionSide => {
+      const f: Filter = { ...filter, regions: [region] };
+      const now = select(repo, f, quarter);
+      return {
+        region,
+        score: avg(now),
+        previous: prev ? avg(select(repo, f, prev)) : null,
+        audits: now.length,
+        contractors: new Set(now.map((a) => a.contractorId)).size,
+      };
+    });
+  const all = select(repo, filter, quarter);
+  return { quarter, previousQuarter: prev, sides, portfolio: avg(all), audits: all.length };
+}
+
+export interface Mover { contractor: Contractor; total: number; previous: number; change: number }
+
+/**
+ * Biggest movers: contractors whose latest audit in the quarter can be set against their audit the quarter before;
+ * `up` = largest rises first, `down` = largest falls first (whole-point change of the official totals).
+ */
+export function movers(repo: Repo, filter: Filter): { quarter: Quarter | null; up: Mover[]; down: Mover[]; compared: number } {
+  const quarter = focusQuarter(repo, filter);
+  if (!quarter) return { quarter, up: [], down: [], compared: 0 };
+  const rows: Mover[] = [];
+  for (const row of league(repo, { ...filter, quarter })) {
+    if (row.previous === null) continue;
+    rows.push({ contractor: row.contractor, total: row.latest, previous: row.previous, change: Math.round(row.latest * 100) - Math.round(row.previous * 100) });
+  }
+  const byName = (a: Mover, b: Mover) => a.contractor.name.localeCompare(b.contractor.name);
+  return {
+    quarter,
+    up: rows.filter((r) => r.change > 0).sort((a, b) => b.change - a.change || byName(a, b)),
+    down: rows.filter((r) => r.change < 0).sort((a, b) => a.change - b.change || byName(a, b)),
+    compared: rows.length,
+  };
+}
+
+/**
+ * Audits done in the quarter, per region: audits, contractors audited out of the region's contractors (those with any
+ * audit of this type on record), and the contractors still waiting for this quarter's audit.
+ */
+export function coverage(repo: Repo, filter: Filter): {
+  quarter: Quarter | null;
+  regions: { region: Subregion; audits: number; audited: number; contractors: number; missing: Contractor[] }[];
+} {
+  const quarter = focusQuarter(repo, filter);
+  const known = new Set(select(repo, filter, 'all').map((a) => a.contractorId));
+  const done = quarter ? select(repo, filter, quarter) : [];
+  const audited = new Set(done.map((a) => a.contractorId));
+  return {
+    quarter,
+    regions: (['SR1', 'SR2'] as Subregion[])
+      .filter((r) => filter.regions.includes(r))
+      .map((region) => {
+        const mine = repo.contractors().filter((c) => c.subregion === region && known.has(c.id));
+        return {
+          region,
+          audits: done.filter((a) => mine.some((c) => c.id === a.contractorId)).length,
+          audited: mine.filter((c) => audited.has(c.id)).length,
+          contractors: mine.length,
+          missing: mine.filter((c) => !audited.has(c.id)).sort((a, b) => a.name.localeCompare(b.name)),
+        };
+      }),
+  };
+}
+
+/**
+ * Weakest section for audit types without the H&S category model (Security, Environmental, Welfare, CRC): the section
+ * with the lowest mean scored/possible over the quarter's audits, with the previous quarter's ratio. Null without data.
+ */
+export function weakestSection(repo: Repo, filter: Filter): {
+  quarter: Quarter; code: string; label: string; score: number; previous: number | null; audits: number;
+} | null {
+  const quarter = focusQuarter(repo, filter);
+  if (!quarter) return null;
+  const ratios = (audits: Audit[]) => {
+    const by = new Map<string, { label: string; xs: number[] }>();
+    for (const a of audits) for (const s of a.sections) {
+      if (s.possible === 0) continue;
+      (by.get(s.code) ?? by.set(s.code, { label: s.label, xs: [] }).get(s.code)!).xs.push(s.scored / s.possible);
+    }
+    return new Map([...by].map(([code, v]) => [code, { label: v.label, score: mean(v.xs)! }]));
+  };
+  const now = select(repo, filter, quarter);
+  let worst: { code: string; label: string; score: number } | null = null;
+  for (const [code, v] of ratios(now)) if (!worst || v.score < worst.score) worst = { code, ...v };
+  if (!worst) return null;
+  const prev = prevQuarter(quarter);
+  const before = prev ? ratios(select(repo, filter, prev)).get(worst.code) : undefined;
+  return { quarter, ...worst, previous: before?.score ?? null, audits: now.length };
 }

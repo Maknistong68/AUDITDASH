@@ -32,15 +32,14 @@ test('no high-risk card on the dashboard, and old /high-risk links redirect (308
   }
   await page.goto('/high-risk?q=Q1-2026&r=SR1');
   await expect(page).toHaveURL(/\/\?q=Q1-2026&r=SR1$/);
-  await expect(page.getByTestId('kpi-score')).toBeVisible();
+  await expect(page.getByTestId('kpi-regions')).toBeVisible();
 });
 
-test('the dashboard has one Portfolio card and no band or region card', async ({ page }) => {
+test('the dashboard has the director tiles and no band card; repeats and positives live on their own pages', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByTestId('kpi-score')).toHaveCount(1);
-  for (const id of ['kpi-bands', 'region-compare', 'region-row']) await expect(page.getByTestId(id)).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: /Contractors by band|Region/ })).toHaveCount(0);
-  await expect(page.getByTestId('hero').locator('section.card')).toHaveCount(4); // contractors, score, repeats, positives (the main problem is the dark hero tile)
+  for (const id of ['kpi-regions', 'kpi-movers', 'kpi-coverage']) await expect(page.getByTestId(id)).toHaveCount(1);
+  for (const id of ['kpi-bands', 'kpi-score', 'kpi-repeats', 'kpi-positives']) await expect(page.getByTestId(id)).toHaveCount(0);
+  await expect(page.getByTestId('hero').locator('section.card')).toHaveCount(4); // contractors, SR1 vs SR2, movers, audits done (the main problem is the dark hero tile)
 });
 
 test('/audits is the home of the timeline, the bands and the regions', async ({ page }) => {
@@ -49,29 +48,6 @@ test('/audits is the home of the timeline, the bands and the regions', async ({ 
   await expect(page.getByTestId('audits-bands')).toBeVisible();
   await expect(page.getByTestId('audits-regions')).toBeVisible();
   await expect(page.getByTestId('region-quarter-bar')).toHaveCount(4);
-});
-
-test('the Portfolio card draws Q4 2025 → Q1 2026 as a green up chart (66 → 67), with the big figure and band', async ({ page }) => {
-  await page.goto('/');
-  const card = page.getByTestId('kpi-score');
-  await expect(card.getByTestId('kpi-score-delta')).toHaveCount(0);
-  await expect(card).not.toContainText(/Q1 vs Q4/);
-  await expect(card.getByText('Minimal', { exact: true })).toBeVisible();
-  await expect(card.locator('[data-handoff="ps-figure"]')).toHaveAttribute('aria-label', '67 percent');
-  const chart = card.getByTestId('trend-chart');
-  await expect(chart).toHaveAttribute('data-points', '2');
-  await expect(chart).toHaveAttribute('data-trend', 'up');
-  await expect(chart).toHaveAttribute('aria-label', 'Q4 2025 66% → Q1 2026 67%');
-  await expect(chart.getByTestId('trend-point')).toHaveCount(2);
-  expect(await chart.getByTestId('trend-point').evaluateAll((els) => els.map((e) => e.getAttribute('data-value')))).toEqual(['66', '67']);
-  await expect(chart.getByTestId('trend-value')).toHaveText(['66%', '67%']);
-  await expect(chart.getByTestId('trend-label')).toHaveText(['Q4 2025', 'Q1 2026']);
-  const [line, up] = await chart.getByTestId('trend-line').evaluate((el) => [getComputedStyle(el).stroke, getComputedStyle(document.documentElement).getPropertyValue('--up')]);
-  const rgb = await page.evaluate((c) => { const d = document.createElement('div'); d.style.color = c; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; }, up.trim());
-  expect(line).toBe(rgb);
-  // the later point sits higher
-  const ys = await chart.getByTestId('trend-point').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().top));
-  expect(ys[1]).toBeLessThan(ys[0]);
 });
 
 test('each contractor row has a sparkline of its audit scores, coloured up/down, no "+N" text', async ({ page }) => {
@@ -136,11 +112,10 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1366, height: 657 }, { 
     await expect(page.getByTestId('contractor-row')).toHaveCount(12);
     await expectNothingClipped(page, `/ at ${vp.width}×${vp.height}`);
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
-    for (const id of ['contractors', 'main-problem', 'kpi-score', 'kpi-repeats', 'kpi-positives']) {
+    for (const id of ['contractors', 'main-problem', 'kpi-regions', 'kpi-movers', 'kpi-coverage']) {
       await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
     }
     await expect(page.getByTestId('contractor-row').last()).toBeInViewport({ ratio: 1 });
-    await expect(page.getByTestId('trend-chart')).toBeInViewport({ ratio: 1 });
     await ctx.close();
   });
 }

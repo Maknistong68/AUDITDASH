@@ -72,17 +72,23 @@ test('the new-audit placeholder answers 200', async ({ page }) => {
   await expect(tabs(page).getByRole('button', { name: 'CRC' })).toHaveAttribute('aria-pressed', 'true');
 });
 
-test('a type with no audits shows its empty state, no H&S data', async ({ page }) => {
+test('a type with no audits shows its contractors awaiting the first audit and its own checklist, no H&S data', async ({ page }) => {
   await page.goto('/?t=security');
   const empty = page.getByTestId('type-empty');
   await expect(empty).toBeVisible();
   await expect(empty).toContainText('Security');
-  await expect(empty.getByRole('heading')).toHaveText('No audits yet');
+  await expect(empty.getByRole('heading')).toHaveText('Awaiting first audit');
+  await expect(empty.getByTestId('type-empty-row')).toHaveCount(12);
+  await expect(page.getByTestId('type-section')).toHaveCount(17);
+  await expect(page.getByTestId('type-sections')).toContainText('CCTV');
   await expect(empty.getByRole('link', { name: 'New Audit' })).toHaveAttribute('href', '/audits/new?type=security');
   await expect(page.locator('text=NaN')).toHaveCount(0);
   for (const id of ['contractor-row', 'main-problem', 'audit-overview', 'main-issues', 'reel', 'empty-state']) await expect(page.getByTestId(id)).toHaveCount(0);
   await page.goto('/?t=environmental');
   await expect(page.getByTestId('type-empty')).toContainText('Environmental');
+  await page.goto('/?t=crc');
+  await expect(page.getByTestId('type-sections')).toContainText('13 areas will be scored');
+  await expect(page.getByTestId('type-section')).toHaveCount(13);
 });
 
 test('the name is Audits, with no logo mark', async ({ page }) => {

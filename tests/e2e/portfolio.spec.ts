@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { getRepo } from '../../lib/data/repo';
-import { expectNothingClipped } from './clip';
-import { positiveSummary, repeatFindings, repeatMatrix } from '../../lib/analytics';
+import { coverage, movers, regionDuel } from '../../lib/analytics';
 import type { Filter } from '../../lib/types';
 
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
@@ -11,8 +10,7 @@ const hydrated = async (page: import('@playwright/test').Page) =>
 
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) test(`hero fits ${vp.width}`, async ({ page }) => {
   await page.setViewportSize(vp); await page.goto('/');
-  await expect(page.getByTestId('score-ring')).toBeVisible();
-  for (const id of ['main-problem', 'kpi-score', 'kpi-repeats', 'kpi-positives']) {
+  for (const id of ['main-problem', 'kpi-regions', 'kpi-movers', 'kpi-coverage']) {
     await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
   }
   await expect(page.getByTestId('contractor-row')).toHaveCount(12);
@@ -26,11 +24,12 @@ test('contractor rows are ranked by score, highest first', async ({ page }) => {
   expect(scores).toHaveLength(12);
   expect(scores).toEqual([...scores].sort((a, b) => b - a));
 });
-test('each row links to its contractor and has a compare toggle', async ({ page }) => {
+test('each row is one tap target to its contractor: no small icon buttons on the dashboard', async ({ page }) => {
   await page.goto('/');
   const row = page.getByTestId('contractor-row').first();
   await expect(row.getByRole('link')).toHaveAttribute('href', '/contractor/4800001131');
-  await expect(row.getByRole('button', { name: 'Compare JV-ECH (Port T1)' })).toBeVisible();
+  await expect(page.getByTestId('hero').getByRole('button')).toHaveCount(0);
+  await expect(page.getByTestId('card-chevron')).toHaveCount(0);
 });
 test('main problem names a category and links to its details', async ({ page }) => {
   await page.goto('/');
@@ -69,61 +68,63 @@ test('main problem tile lifts on hover', async ({ page }) => {
   await expect.poll(async () => y0 - (await mp.boundingBox())!.y).toBeGreaterThan(2);
 });
 
-test('the positives tile opens /positives with the filter', async ({ page }) => {
+test('the SR1 vs SR2 tile opens /audits with the filter', async ({ page }) => {
   await page.goto('/?q=Q1-2026&r=SR1');
   await hydrated(page);
-  const link = page.getByTestId('kpi-positives').getByRole('link');
-  await expect(link).toHaveAttribute('href', '/positives?q=Q1-2026&r=SR1');
+  const link = page.getByTestId('kpi-regions').getByRole('link');
+  await expect(link).toHaveAttribute('href', '/audits?q=Q1-2026&r=SR1');
   await link.click();
-  await expect(page).toHaveURL(/\/positives\?q=Q1-2026&r=SR1$/);
-  await expect(page.getByTestId('positives-header')).toBeVisible();
+  await expect(page).toHaveURL(/\/audits\?q=Q1-2026&r=SR1$/);
 });
 
-test('repeats card: total repeats, a plain caption and the three most repeated questions (no codes)', async ({ page }) => {
-  const repo = getRepo();
-  const count = (f: Filter) => repeatFindings(repo, f).length;
-  const m = repeatMatrix(repo, ALL);
-  expect(count(ALL)).toBe(228);
+test("SR1 vs SR2 tile: each side's average, base and the leader, same numbers as the analytics", async ({ page }) => {
+  const d = regionDuel(getRepo(), ALL)!;
   await page.goto('/');
-  const card = page.getByTestId('kpi-repeats');
-  await expect(card.getByTestId('repeats-count')).toHaveText('228');
-  await expect(card.getByTestId('repeats-rule')).toHaveText('questions noted again in the next audit');
-  const rows = card.getByTestId('repeats-top-row');
-  await expect(rows).toHaveCount(3);
-  for (let i = 0; i < 3; i++) {
-    await expect(rows.nth(i)).toHaveAttribute('title', m.questions[i].label);
-    await expect(rows.nth(i).getByTestId('repeats-top-times')).toHaveText(`×${m.questions[i].total}`);
+  const card = page.getByTestId('kpi-regions');
+  await expect(card).toContainText('Q1 2026');
+  for (const s of d.sides) {
+    const side = card.locator(`[data-region="${s.region}"]`);
+    await expect(side.getByTestId('region-score')).toHaveText(`${Math.round(s.score! * 100)}%`);
+    await expect(side).toContainText(`${s.audits} audits · ${s.contractors} contractors`);
   }
-  expect(await card.innerText()).not.toMatch(/\b[ABC]\d+(\.\d+)?\b/);
-  await expectNothingClipped(page, 'dashboard repeats card');
-  // Q4 has no follow-up visit (SIBS's two November audits are one visit): "—", never a count
-  expect(count({ ...ALL, quarter: 'Q4-2025' })).toBe(0);
-  await page.goto('/?q=Q4-2025&r=SR1,SR2');
-  await expect(card.getByTestId('repeats-count')).toHaveText('—');
-  await expect(card.getByTestId('repeats-top-row')).toHaveCount(0);
-  for (const r of ['SR1', 'SR2'] as const) {
-    await page.goto(`/?q=all&r=${r}`);
-    await expect(card.getByTestId('repeats-count')).toHaveText(String(count({ quarter: 'all', regions: [r] })));
-  }
+  await expect(card.getByTestId('regions-leader')).toHaveText('SR2 ahead by 7 pts');
+  await expect(card.getByTestId('regions-portfolio')).toHaveText('Portfolio 67%');
+  await page.goto('/?q=all&r=SR1');
+  await expect(card.getByTestId('region-side')).toHaveCount(1);
+  await expect(card.getByTestId('regions-leader')).toHaveCount(0);
 });
 
-test('positives card: total, coverage of audits and contractors', async ({ page }) => {
-  const s = positiveSummary(getRepo(), ALL);
-  expect(s.total).toBe(138);
+test('biggest movers: the biggest rise and fall since last quarter; rows open the contractor', async ({ page }) => {
+  const m = movers(getRepo(), ALL);
   await page.goto('/');
-  const card = page.getByTestId('kpi-positives');
-  await expect(card.getByTestId('positives-count')).toHaveText('138');
-  await expect(card.getByTestId('positives-coverage')).toHaveText(`${s.auditsWith} of ${s.audits} audits · ${s.contractorsWith} of ${s.contractors} contractors`);
+  const card = page.getByTestId('kpi-movers');
+  const rows = card.getByTestId('mover-row');
+  await expect(rows).toHaveCount(2);
+  await expect(rows.nth(0)).toContainText(m.up[0].contractor.name);
+  await expect(rows.nth(0)).toContainText('+14 pts');
+  await expect(rows.nth(1)).toContainText(m.down[0].contractor.name);
+  await expect(rows.nth(1)).toContainText('−6 pts');
+  await expect(rows.nth(0).getByRole('link')).toHaveAttribute('href', `/contractor/${m.up[0].contractor.id}?q=all&r=SR1%2CSR2`);
   await page.goto('/?q=Q4-2025&r=SR1,SR2');
-  await expect(card.getByTestId('positives-count')).toHaveText(String(positiveSummary(getRepo(), { ...ALL, quarter: 'Q4-2025' }).total));
+  await expect(card.getByTestId('movers-none')).toHaveText('No previous quarter to compare yet');
 });
 
-test('main problem reads "score lost" beside the %', async ({ page }) => {
+test("audits done: the quarter's audits, contractors audited per region and who is still waiting", async ({ page }) => {
+  const c = coverage(getRepo(), ALL);
+  await page.goto('/');
+  const card = page.getByTestId('kpi-coverage');
+  await expect(card.getByTestId('coverage-total')).toHaveText(String(c.regions.reduce((s, r) => s + r.audits, 0)));
+  await expect(card.locator('[data-region="SR1"]')).toContainText('8 of 9 contractors');
+  await expect(card.locator('[data-region="SR2"]')).toContainText('3 of 3 contractors');
+  await expect(card.getByTestId('coverage-missing')).toHaveText('Waiting: Al-Biriki');
+});
+
+test('main problem reads "of points lost" beside the % and says better/worse than Q4 in words', async ({ page }) => {
   await page.goto('/');
   const mp = page.getByTestId('main-problem');
-  await expect(mp.getByText('score lost', { exact: true })).toBeVisible();
+  await expect(mp.getByText('of points lost', { exact: true })).toBeVisible();
   await expect(mp.getByText('gap', { exact: true })).toHaveCount(0);
-  await expect(mp).toContainText(/vs Q4/);
+  await expect(mp).toContainText(/2 pts better\s*than Q4/);
 });
 
 test('no checklist codes anywhere in the hero', async ({ page }) => {
@@ -181,7 +182,7 @@ test('light theme: the orange bar fill is at least 3:1 on the white card (graphi
     const cv = document.createElement('canvas').getContext('2d')!;
     const rgb = (c: string) => { cv.fillStyle = '#000'; cv.fillStyle = c; cv.fillRect(0, 0, 1, 1); return [...cv.getImageData(0, 0, 1, 1).data].slice(0, 3); };
     const lum = (c: number[]) => { const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
-    const card = lum(rgb(getComputedStyle(document.querySelector('[data-testid="kpi-repeats"]')!).backgroundColor));
+    const card = lum(rgb(getComputedStyle(document.querySelector('[data-testid="kpi-coverage"]')!).backgroundColor));
     const bar = lum(rgb(getComputedStyle(document.documentElement).getPropertyValue('--minimal-dot').trim()));
     return (Math.max(bar, card) + 0.05) / (Math.min(bar, card) + 0.05);
   });

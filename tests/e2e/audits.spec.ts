@@ -44,11 +44,11 @@ async function noPageScroll(page: Page) {
 
 const rowIds = (page: Page) => page.getByTestId('audits-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-id')));
 
-test('the Portfolio score card opens /audits with a ~1 s shared hand-off; the header shows 67%', async ({ page }) => {
+test('the Audits done card opens /audits with a ~1 s shared hand-off; the header shows 67%', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
-  const card = page.getByTestId('kpi-score');
-  await expect(card.getByTestId('card-chevron')).toHaveCount(1);
+  const card = page.getByTestId('kpi-coverage');
+  await expect(card.getByTestId('card-chevron')).toHaveCount(0);
   await watchTransitions(page);
   await card.getByRole('link').click();
   await expect(page).toHaveURL(new RegExp(`/audits\\?${Q}$`));
@@ -59,9 +59,8 @@ test('the Portfolio score card opens /audits with a ~1 s shared hand-off; the he
   await expect.poll(async () => Object.keys((await transitions(page)).durations).length).toBeGreaterThan(0);
   const { handoffs, durations } = await transitions(page);
   expect(handoffs).toBe(1);
-  // the card grows into the header strip and the 67% flies into the header figure, each about 1 s
+  // the card grows into the header strip, about 1 s
   expect(durations['::view-transition-group(ps-card)']).toBeGreaterThanOrEqual(900);
-  expect(durations['::view-transition-group(ps-figure)']).toBeGreaterThanOrEqual(900);
   expect(durations['::view-transition-group(ps-card)']).toBeLessThanOrEqual(1100);
   await expect.poll(() => page.evaluate(() => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement).length)).toBe(0);
 });
@@ -184,12 +183,12 @@ test('/audits: Esc returns to the overview with the filter', async ({ page }) =>
   await expect(page).toHaveURL(/\/\?q=Q1-2026&r=SR1$/);
 });
 
-test('reduced motion: the Portfolio card still navigates, with no transition', async ({ browser }) => {
+test('reduced motion: the Audits done card still navigates, with no transition', async ({ browser }) => {
   const ctx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1366, height: 768 } });
   const page = await ctx.newPage();
   await page.goto('/');
   await watchTransitions(page);
-  await page.getByTestId('kpi-score').getByRole('link').click();
+  await page.getByTestId('kpi-coverage').getByRole('link').click();
   await expect(page).toHaveURL(new RegExp(`/audits\\?${Q}$`));
   await expect(page.getByTestId('audits-figure')).toHaveText('67%');
   expect((await transitions(page)).handoffs).toBe(0);
@@ -231,10 +230,10 @@ test('/audits under a non-H&S type, an empty filter or an empty band: calm empty
   await noPageScroll(page);
 });
 
-test('units and names: timeline scores in %, region changes in pts, the Portfolio card reads "Open portfolio"', async ({ page }) => {
+test('units and names: timeline scores in %, region changes in pts, the SR1 vs SR2 card reads "Open portfolio"', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
-  await expect(page.getByTestId('kpi-score').getByRole('link').first()).toHaveAttribute('aria-label', /\. Open portfolio$/);
+  await expect(page.getByTestId('kpi-regions').getByRole('link').first()).toHaveAttribute('aria-label', /\. Open portfolio$/);
   await page.goto('/audits?q=all&r=SR1%2CSR2');
   for (const t of (await page.getByTestId('audit-dot').allInnerTexts()).slice(0, 6)) expect(t.trim()).toMatch(/^\d+%$/);
   for (const t of await page.getByTestId('region-filter').allInnerTexts()) if (/[+−±]\d/.test(t)) expect(t).toMatch(/[+−±]\d+ pts?/);
