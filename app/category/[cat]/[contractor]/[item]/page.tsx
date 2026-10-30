@@ -62,7 +62,7 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
         </header>
 
         {/* The cards fill the screen under the title. */}
-        <div className="grid grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:min-h-0 min-[1200px]:flex-1 min-[1200px]:grid-cols-12 min-[1200px]:grid-rows-[minmax(0,1fr)]">
+        <div className="grid grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:min-h-0 min-[1200px]:flex-1 min-[1200px]:[&>*]:min-h-0 min-[1200px]:grid-cols-12 min-[1200px]:grid-rows-[minmax(0,1fr)]">
           <BentoCard i={0} testid="item-timeline" landing={DRILL_ITEM} className="gap-[clamp(8px,1.4svh,12px)] px-[clamp(14px,1.4vw,24px)] py-[clamp(12px,1.8svh,24px)] min-[1200px]:col-span-4">
             <TileLabel>History</TileLabel>
             {entries.length === 0 ? (

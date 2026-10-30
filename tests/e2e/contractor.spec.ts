@@ -170,7 +170,7 @@ test('Top 3 repeated observations match repeatMatrix for JV-ECH and SIBS; NBC sh
   await ready(page);
   const card = active(page).getByTestId('top-repeats');
   await expect(card.getByTestId('top-repeat')).toHaveCount(0);
-  await expect(card.getByTestId('top-repeats-empty')).toContainText('No earlier audit to compare');
+  await expect(card.getByTestId('top-repeats-empty')).toContainText('First audit');
   await expect(active(page).getByTestId('full-report')).toBeVisible();
 });
 

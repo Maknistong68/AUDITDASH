@@ -264,6 +264,7 @@ test('drill pages show plain labels, never codes: titles, item rows, siblings an
 for (const vp of [{ width: 1366, height: 768 }, { width: 1280, height: 600 }, { width: 1920, height: 1080 }]) {
   test(`the item page fits one screen at ${vp.width}×${vp.height}`, async ({ page }) => {
     await page.setViewportSize(vp);
+    await page.emulateMedia({ reducedMotion: 'reduce' }); // measure the resting layout, not the 1.5 s rise
     await page.goto('/category/subcontractor/4800001131/B6.1');
     await expect(page.getByTestId('item-timeline')).toBeVisible();
     const [sh, ih] = await page.evaluate(() => [document.documentElement.scrollHeight, innerHeight]);
