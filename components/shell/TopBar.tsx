@@ -6,6 +6,8 @@ import { NewAuditButton } from './NewAuditButton';
 import { ThemeToggle } from './ThemeToggle';
 import { TopBarHeight } from './TopBarHeight';
 import { TypeTabs } from './TypeTabs';
+import { MainNav } from './MainNav';
+import { Suspense } from 'react';
 
 /**
  * Frosted sticky bar, one row from 1200px: wordmark + audit-type tabs on the left; quarter, regions,
@@ -24,6 +26,9 @@ export function TopBar({ filter, detail = false }: { filter: Filter; detail?: bo
         ) : (
           <h1 className={`shrink-0 ${word}`}>Audits</h1>
         )}
+        <Suspense fallback={null}>
+          <MainNav />
+        </Suspense>
         <TypeTabs filter={filter} />
       </div>
       <div className="flex flex-wrap items-center gap-x-[clamp(10px,1.1vw,20px)] gap-y-2 min-[1200px]:flex-nowrap">

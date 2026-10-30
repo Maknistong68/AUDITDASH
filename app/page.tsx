@@ -1,10 +1,12 @@
 import { getRepo } from '@/lib/data/repo';
 import { href, toSearchParams, type SP } from '@/lib/details';
-import { QUARTERS, filterToQuery, parseFilter } from '@/lib/filters';
+import { filterToQuery, parseFilter } from '@/lib/filters';
 import {
-  compareContractors, contractorCards, filterAudits, followUps, mainProblem, portfolioSummary, positiveSummary,
-  repeatMatrix,
+  bandDistribution, categoryCards, compareContractors, contractorCards, excelCheck, filterAudits, followUps, monthlyScores,
+  portfolioSummary, positiveSummary, positivesByContractor, repeatMatrix,
 } from '@/lib/analytics';
+import { REGIONS } from '@/lib/filters';
+import { TrendCard } from '@/components/bento/TrendCard';
 import { MAX_COMPARE } from '@/lib/compare';
 import { TopBar } from '@/components/shell/TopBar';
 import { EmptyState } from '@/components/shell/EmptyState';
@@ -40,12 +42,18 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
     }
   }
 
-  const problem = empty ? null : mainProblem(repo, filter);
+  const ranked = empty ? [] : categoryCards(repo, filter);
+  const problem = ranked[0] ?? null;
   // Repeat findings: a question that is a finding again at the contractor's next audit; null without a follow-up audit ("—").
   const pairs = empty ? [] : followUps(repo, filter);
   const matrix = pairs.length ? repeatMatrix(repo, filter) : null;
   const query = filterToQuery(filter);
-  const byQuarter = QUARTERS.map((q) => ({ label: q.replace('-', ' '), value: portfolioSummary(repo, { ...filter, quarter: q }).avgScore }));
+  const insight = {
+    best: cards.length ? { name: cards[0].contractor.name, score: cards[0].total } : null,
+    worst: cards.length > 1 ? { name: cards.at(-1)!.contractor.name, score: cards.at(-1)!.total } : null,
+    regions: REGIONS.filter((r) => filter.regions.includes(r)).map((r) => ({ region: r, score: portfolioSummary(repo, { ...filter, regions: [r] }).avgScore })),
+    excel: excelCheck(repo, filter),
+  };
 
   return (
     <>
@@ -62,7 +70,12 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
             <EmptyState />
           ) : (
             <BentoGrid
-              left={<ContractorsCard cards={cards} compare={compare} />}
+              left={
+                <>
+                  <ContractorsCard cards={cards} compare={compare} />
+                  <TrendCard points={monthlyScores(repo, filter)} />
+                </>
+              }
               right={
                 <>
                   {problem && (
@@ -70,15 +83,32 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                       problem={problem}
                       audits={filterAudits(repo, { ...filter, quarter: problem.quarter }).length}
                       query={query}
+                      ranking={ranked.map((r) => ({ category: r.category, gapRate: r.gapRate }))}
                     />
                   )}
-                  <ScoreCard avgScore={summary.avgScore} band={summary.band} audits={summary.audits} byQuarter={byQuarter} href={href('/audits', query)} />
+                  <ScoreCard
+                    avgScore={summary.avgScore}
+                    band={summary.band}
+                    audits={summary.audits}
+                    delta={summary.delta}
+                    bands={bandDistribution(repo, filter)}
+                    insight={insight}
+                    href={href('/log', `${query}&view=audits`)}
+                  />
                   <RepeatsCard
                     repeats={matrix ? matrix.questions.reduce((s, q) => s + q.total, 0) : null}
                     top={(matrix?.questions ?? []).slice(0, 3).map((q) => ({ key: q.itemCode, label: q.label, times: q.total }))}
+                    byContractor={(matrix?.contractors ?? []).map((c) => ({ name: c.name, total: c.total }))}
                     href={href('/repeats', query)}
                   />
-                  <PositivesCard summary={positiveSummary(repo, filter)} href={href('/positives', query)} />
+                  <PositivesCard
+                    summary={positiveSummary(repo, filter)}
+                    leaders={positivesByContractor(repo, filter)
+                      .filter((p) => p.count > 0)
+                      .sort((a, b) => b.perAudit - a.perAudit)
+                      .map((p) => ({ name: p.contractor.name, count: p.count, perAudit: p.perAudit }))}
+                    href={href('/positives', query)}
+                  />
                 </>
               }
             />

@@ -864,3 +864,40 @@ export function auditReport(repo: Repo, audit: Audit): AuditReport {
     positives: obs.filter((o) => o.kind === 'positive'),
   };
 }
+
+// ---------------------------------------------------------------- dashboard trend and insights
+
+export interface MonthPoint {
+  /** "2026-03" */
+  month: string;
+  /** Average honest score of the month's audits. */
+  avg: number;
+  audits: { auditId: string; contractor: string; score: number }[];
+}
+
+/**
+ * The portfolio score over time: one point per calendar month with audits (filter respected, quarter included), the
+ * average of that month's audit scores, oldest first. Months without audits are absent (the chart shows the gap).
+ */
+export function monthlyScores(repo: Repo, filter: Filter): MonthPoint[] {
+  const name = new Map(repo.contractors().map((c) => [c.id, c.name]));
+  const byMonth = new Map<string, MonthPoint['audits']>();
+  for (const a of select(repo, filter)) {
+    const m = a.date.slice(0, 7);
+    const list = byMonth.get(m) ?? [];
+    list.push({ auditId: a.id, contractor: name.get(a.contractorId) ?? a.contractorId, score: a.totalScore });
+    byMonth.set(m, list);
+  }
+  return [...byMonth.entries()]
+    .sort(([x], [y]) => x.localeCompare(y))
+    .map(([month, audits]) => ({ month, avg: mean(audits.map((a) => a.score))!, audits: audits.sort((p, q) => q.score - p.score) }));
+}
+
+/** How many audits' typed Excel total differs from the score computed from their own points (whole %), and by how much on average. */
+export function excelCheck(repo: Repo, filter: Filter): { audits: number; differs: number; meanGap: number | null } {
+  const audits = select(repo, filter);
+  const gaps = audits
+    .filter((a) => typeof a.reportedScore === 'number' && Math.round(a.reportedScore * 100) !== Math.round(a.totalScore * 100))
+    .map((a) => a.reportedScore! - a.totalScore);
+  return { audits: audits.length, differs: gaps.length, meanGap: mean(gaps) };
+}

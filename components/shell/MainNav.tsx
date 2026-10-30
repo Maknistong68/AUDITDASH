@@ -1,0 +1,38 @@
+'use client';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { calm } from '@/lib/motion';
+
+const ITEMS = [
+  { href: '/', label: 'Overview', match: (p: string) => p === '/' },
+  { href: '/log', label: 'Log', match: (p: string) => p.startsWith('/log') },
+] as const;
+
+/**
+ * The app's two places: Overview (the dashboard: analysis) and Log (every audit and observation: search). + New audit
+ * (input) sits on the right of the bar. Quarter and regions travel with the link.
+ */
+export function MainNav() {
+  const path = usePathname();
+  const sp = useSearchParams();
+  const keep = new URLSearchParams([...sp].filter(([k]) => k === 'q' || k === 'r' || k === 't')).toString();
+  return (
+    <nav aria-label="Main" data-testid="main-nav" className="flex h-8 items-center gap-1">
+      {ITEMS.map((it) => {
+        const on = it.match(path);
+        return (
+          <Link
+            key={it.href}
+            href={keep ? `${it.href}?${keep}` : it.href}
+            aria-current={on ? 'page' : undefined}
+            className={`relative h-8 rounded-full px-3 text-[14px] leading-8 transition-colors duration-500 ${on ? 'font-semibold text-ink' : 'text-muted hover:text-ink'}`}
+          >
+            {on && <motion.span layoutId="main-nav-dot" className="absolute inset-x-3 -bottom-[3px] h-[2px] rounded-full bg-[var(--accent)]" transition={calm()} />}
+            {it.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}

@@ -1,5 +1,6 @@
 'use client';
 import { animate, useReducedMotion } from 'framer-motion';
+import { DUR, EASE } from '@/lib/motion';
 import { useEffect, useRef } from 'react';
 
 /**
@@ -11,7 +12,7 @@ import { useEffect, useRef } from 'react';
 export function CountUp({
   value,
   format,
-  duration = 1.1,
+  duration = DUR,
   delay = 0,
 }: { value: number; format: (n: number) => string; duration?: number; delay?: number }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -34,7 +35,7 @@ export function CountUp({
     const controls = animate(start, value, {
       duration,
       delay,
-      ease: [0.16, 1, 0.3, 1],
+      ease: EASE,
       onUpdate: (n) => { node.textContent = format(n); },
     });
     return () => controls.stop();

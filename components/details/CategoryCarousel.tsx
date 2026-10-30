@@ -11,12 +11,13 @@ import { href } from '@/lib/details';
 import { pct } from '@/lib/format';
 import { cardArrived, HANDOFF } from '@/lib/handoff';
 import type { CategoryId } from '@/lib/types';
+import { EASE, DUR } from '@/lib/motion';
 
 /**
  * Gliding the active card into its slot: a spring with no overshoot that keeps the release velocity, ~0.9 s, to match
- * the ~1 s card hand-off (lib/handoff HANDOFF_MS).
+ * the 1.5 s card hand-off (lib/handoff HANDOFF_MS).
  */
-const SLIDE = { type: 'spring', visualDuration: 0.9, bounce: 0 } as const;
+const SLIDE = { type: 'tween', ease: EASE, duration: DUR } as const;
 /** Share of the release velocity added to where the row lands (the momentum of a flick). */
 const POWER = 0.25;
 /**

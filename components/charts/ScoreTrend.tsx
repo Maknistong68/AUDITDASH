@@ -4,6 +4,7 @@ import { BANDS, bandFor } from '@/lib/scoring';
 import { bandColor, bandShort, pct } from '@/lib/format';
 import type { Band } from '@/lib/types';
 import { TREND_COLOR, trendOf } from './Trend';
+import { EASE, DUR } from '@/lib/motion';
 
 export interface ScoreTrendPoint { auditId: string; date: string; label: string; score: number }
 
@@ -88,7 +89,7 @@ export function ScoreTrend({ points, active, onSelect }: { points: ScoreTrendPoi
                 vectorEffect="non-scaling-stroke"
                 initial={reduce ? false : { opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+                transition={{ duration: DUR, ease: EASE, delay: 0.3 }}
               />
             </svg>
           )}
@@ -132,7 +133,7 @@ export function ScoreTrend({ points, active, onSelect }: { points: ScoreTrendPoi
                     }}
                     initial={reduce ? false : { scale: 0 }}
                     animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 0.15 + i * 0.08 }}
+                    transition={{ type: 'tween', ease: EASE, duration: DUR, delay: 0.15 + i * 0.08 }}
                   />
                 </button>
                 {n === 1 && (

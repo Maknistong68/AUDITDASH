@@ -1,6 +1,7 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
 import { pct } from '@/lib/format';
+import { EASE, DUR } from '@/lib/motion';
 
 const SECTIONS = [
   { key: 'A', label: 'A Management' },
@@ -29,7 +30,7 @@ export function SectionBars({ rings, delay = 0 }: { rings: Record<'A' | 'B' | 'C
                   style={{ width: `${Math.min(1, Math.max(0, v)) * 100}%`, transformOrigin: 'left' }}
                   initial={reduce ? false : { scaleX: 0 }}
                   animate={{ scaleX: 1 }}
-                  transition={{ type: 'spring', stiffness: 140, damping: 22, delay: delay + i * 0.06 }}
+                  transition={{ type: 'tween', ease: EASE, duration: DUR, delay: delay + i * 0.06 }}
                 />
               )}
             </span>

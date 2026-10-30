@@ -1,6 +1,7 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowDown, ArrowUp, ChevronRight } from 'lucide-react';
+import { EASE, DUR } from '@/lib/motion';
 
 export const whole = (n: number) => String(Math.round(n));
 export const PAD = 'px-[clamp(16px,1.5vw,28px)] py-[clamp(12px,1.8svh,24px)]';
@@ -34,7 +35,7 @@ export function ScoreBar({ value, delay }: { value: number; delay: number }) {
         style={{ width: `${Math.min(1, Math.max(0, value)) * 100}%`, background: 'var(--tone-dot)', transformOrigin: 'left' }}
         initial={reduce ? false : { scaleX: 0 }}
         animate={{ scaleX: 1 }}
-        transition={{ type: 'spring', stiffness: 100, damping: 20, delay }}
+        transition={{ type: 'tween', ease: EASE, duration: DUR, delay }}
       />
     </span>
   );

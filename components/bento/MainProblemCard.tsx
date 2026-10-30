@@ -10,6 +10,7 @@ import { HANDOFF } from '@/lib/handoff';
 import { itemLabel } from '@/lib/itemLabels';
 import type { CategoryId, Quarter } from '@/lib/types';
 import { SPRING } from './BentoGrid';
+import { calm, QUICK, STAGGER } from '@/lib/motion';
 
 export interface MainProblem {
   category: CategoryId;
@@ -41,7 +42,11 @@ const figureSize = (gapRate: number) =>
  * The whole tile opens the category details; where view transitions run (and motion is allowed) the tile itself travels
  * and shrinks into the category page's active carousel card (lib/handoff).
  */
-export function MainProblemCard({ problem, audits, query }: { problem: MainProblem; audits: number; query: string }) {
+export function MainProblemCard({ problem, audits, query, ranking }: {
+  problem: MainProblem; audits: number; query: string;
+  /** Every category's score lost, worst first: the card's hover layer. */
+  ranking?: { category: CategoryId; gapRate: number }[];
+}) {
   const reduce = useReducedMotion();
   const cat = categoryById(problem.category);
   const url = `/category/${problem.category}?${query}`;
@@ -54,16 +59,16 @@ export function MainProblemCard({ problem, audits, query }: { problem: MainProbl
       initial={reduce ? false : { opacity: 0, y: 22, scale: 0.985 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ ...SPRING, delay: 0.12 }}
-      whileHover={reduce ? undefined : { y: -4, transition: { type: 'spring', stiffness: 400, damping: 28 } }}
+      whileHover={reduce ? undefined : { y: -4, transition: QUICK }}
       whileTap={reduce ? undefined : { scale: 0.99, y: -1 }}
-      className="hero-tile lift group relative col-span-full flex min-h-0 min-w-0 rounded-[var(--radius-card)]"
+      className="hero-tile lift reveal-host group relative col-span-full flex min-h-0 min-w-0 rounded-[var(--radius-card)]"
     >
       <HandoffLink
         href={url}
         aria-label={`Main problem ${qLabel(problem.quarter)}: ${cat.name}, ${pct(problem.gapRate)}% score lost. Open details`}
         className="absolute inset-0 z-[2] rounded-[var(--radius-card)]"
       />
-      <ProblemCardContent problem={problem} audits={audits} label="Main problem" />
+      <ProblemCardContent problem={problem} audits={audits} label="Main problem" ranking={ranking} />
       <span
         aria-hidden
         className="absolute right-[clamp(12px,1.6svh,22px)] top-[clamp(12px,1.6svh,22px)] grid size-9 place-items-center rounded-full transition-transform duration-300 group-hover:translate-x-0.5"
@@ -86,7 +91,9 @@ export function ProblemCardContent({
   headingId = 'mp-title',
   as: Heading = 'h2',
   countUp = true,
+  ranking,
 }: {
+  ranking?: { category: CategoryId; gapRate: number }[];
   problem: MainProblem;
   audits: number;
   label: string;
@@ -112,7 +119,7 @@ export function ProblemCardContent({
         <div className="flex items-end gap-[clamp(10px,1vw,18px)]">
           <div className="@container min-w-0 flex-1">
             <p data-testid="main-problem-gap" className="figure" style={{ color: 'var(--hero-accent)', fontSize: figureSize(problem.gapRate) }}>
-              {countUp ? <CountUp value={problem.gapRate * 100} format={whole} duration={1.2} delay={0.3} /> : whole(problem.gapRate * 100)}
+              {countUp ? <CountUp value={problem.gapRate * 100} format={whole} delay={0.3} /> : whole(problem.gapRate * 100)}
               <span className="text-[0.42em] tracking-normal">%</span>
             </p>
           </div>
@@ -137,26 +144,79 @@ export function ProblemCardContent({
         </div>
       </div>
 
-      <div className="flex min-h-0 min-w-0 flex-col justify-center gap-[clamp(6px,1.2svh,14px)]">
-        <p className="text-[13px] font-semibold" style={{ color: 'var(--hero-muted)' }}>
-          Driven by
-        </p>
-        <ol className="flex flex-col gap-[clamp(6px,1.3svh,14px)]">
-          {problem.items.map((it) => (
-            <li
-              key={it.itemCode}
-              data-testid="main-problem-driver"
-              className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-2.5"
-              title={`${it.question} (noted in ${it.hits} of ${audits} audits)`}
-            >
-              <span className="line-clamp-2 text-[clamp(13px,1.55svh,15px)] leading-snug">{itemLabel(it.itemCode, it.question)}</span>
-              <span className="num whitespace-nowrap text-[13px]" style={{ color: 'var(--hero-muted)' }}>
-                <span className="font-semibold" style={{ color: 'var(--hero-text)' }}>{it.hits}</span> of {audits} audits
-              </span>
-            </li>
-          ))}
-        </ol>
+      <div className={`min-h-0 min-w-0 ${ranking ? 'swap content-center' : 'flex flex-col justify-center'}`}>
+        <Drivers problem={problem} audits={audits} className={ranking ? 'swap-a' : ''} />
+        {ranking && <Ranking ranking={ranking} current={problem.category} />}
       </div>
+    </div>
+  );
+}
+
+/** "Driven by": the top 3 questions behind the problem, each a thin bar of the audits that noted it. */
+function Drivers({ problem, audits, className = '' }: { problem: MainProblem; audits: number; className?: string }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className={`flex flex-col justify-center gap-[clamp(6px,1.2svh,14px)] ${className}`}>
+      <p className="text-[13px] font-semibold" style={{ color: 'var(--hero-muted)' }}>
+        Driven by
+      </p>
+      <ol className="flex flex-col gap-[clamp(8px,1.5svh,16px)]">
+        {problem.items.map((it, k) => (
+          <li
+            key={it.itemCode}
+            data-testid="main-problem-driver"
+            className="flex flex-col gap-1.5"
+            title={`${it.question} (noted in ${it.hits} of ${audits} audits)`}
+          >
+            <span className="flex items-baseline justify-between gap-2.5">
+              <span className="line-clamp-1 text-[clamp(13px,1.55svh,15px)] leading-snug">{itemLabel(it.itemCode, it.question)}</span>
+              <span className="num shrink-0 whitespace-nowrap text-[13px]" style={{ color: 'var(--hero-muted)' }}>
+                <span className="font-semibold" style={{ color: 'var(--hero-text)' }}>{it.hits}</span>/{audits}
+              </span>
+            </span>
+            <span className="block h-[5px] overflow-hidden rounded-full" style={{ background: 'var(--hero-chip)' }} aria-hidden>
+              <motion.span
+                className="block h-full rounded-full"
+                style={{ width: `${audits ? (it.hits / audits) * 100 : 0}%`, background: 'var(--hero-accent)', transformOrigin: 'left' }}
+                initial={reduce ? false : { scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={calm(0.45 + k * STAGGER)}
+              />
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
+/** The hover layer: every category's score lost, worst first, the main problem highlighted. */
+function Ranking({ ranking, current }: { ranking: { category: CategoryId; gapRate: number }[]; current: CategoryId }) {
+  const max = Math.max(...ranking.map((r) => r.gapRate), 0.01);
+  return (
+    <div data-testid="main-problem-ranking" className="swap-b flex flex-col justify-center gap-[clamp(4px,0.8svh,9px)]" aria-hidden>
+      <p className="text-[13px] font-semibold" style={{ color: 'var(--hero-muted)' }}>
+        Score lost · all categories
+      </p>
+      <ol className="flex flex-col gap-[clamp(3px,0.6svh,7px)]">
+        {ranking.map((r) => {
+          const on = r.category === current;
+          return (
+            <li key={r.category} className="grid grid-cols-[minmax(0,7.5em)_minmax(0,1fr)_2.4em] items-center gap-2 text-[12.5px]">
+              <span className="truncate" style={{ color: on ? 'var(--hero-text)' : 'var(--hero-muted)', fontWeight: on ? 600 : 400 }}>
+                {categoryById(r.category).short}
+              </span>
+              <span className="block h-[5px] rounded-full" style={{ background: 'var(--hero-chip)' }}>
+                <span
+                  className="block h-full rounded-full"
+                  style={{ width: `${(r.gapRate / max) * 100}%`, background: on ? 'var(--hero-accent)' : 'var(--hero-muted)', opacity: on ? 1 : 0.55 }}
+                />
+              </span>
+              <span className="num text-right font-semibold" style={{ color: on ? 'var(--hero-accent)' : 'var(--hero-text)' }}>{pct(r.gapRate)}%</span>
+            </li>
+          );
+        })}
+      </ol>
     </div>
   );
 }

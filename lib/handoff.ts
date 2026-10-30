@@ -16,11 +16,6 @@ export const REPEATS_FIGURE = 'rp-figure';
 /** Positive observations card → the /positives header strip, and its figure → the header figure. */
 export const POSITIVES_CARD = 'po-card';
 export const POSITIVES_FIGURE = 'po-figure';
-/** Portfolio score card → the /audits header strip, and its figure → the header figure. The /audits bands and regions panels keep their own names. */
-export const PORTFOLIO_CARD = 'ps-card';
-export const PORTFOLIO_FIGURE = 'ps-figure';
-export const BANDS_CARD = 'ps-bands';
-export const REGIONS_CARD = 'ps-regions';
 /** A Contractors card row → the contractor page: its name → the page title, its score → the opened audit's score. */
 export const CONTRACTOR_NAME = 'ct-name';
 export const CONTRACTOR_SCORE = 'ct-score';
@@ -36,7 +31,7 @@ export const DRILL_NOTE = 'dl-note'; // the question page's history entry → th
  * Length of the morph, in ms (mirrors `::view-transition-group(*)` in globals.css, with its ease-out
  * cubic-bezier(0.22, 1, 0.36, 1)); the category carousel's glide is tuned to about the same length.
  */
-export const HANDOFF_MS = 1000;
+export const HANDOFF_MS = 1500;
 
 let arrived: (() => void) | null = null;
 

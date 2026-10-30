@@ -53,9 +53,12 @@ export function scoreResponses(
 /** Every band, best first: the one order the dashboard, /audits and the analytics count them in. */
 export const BANDS: Band[] = ['Excellent', 'Good', 'Partially Compliant', 'Minimally Compliant', 'Non-Compliant'];
 
-/** Score as a fraction (0..1). Bands: ≥90 Excellent, ≥80 Good, ≥70 Partially, ≥60 Minimally, else Non-Compliant. */
+/**
+ * Score as a fraction (0..1). Bands on the whole percentage shown (the Excel's band table is in whole %: 60–69%
+ * Minimally Compliant): ≥90 Excellent, ≥80 Good, ≥70 Partially, ≥60 Minimally, else Non-Compliant.
+ */
 export function bandFor(score: number): Band {
-  const pct = score * 100;
+  const pct = Math.round(score * 100);
   if (pct >= 90) return 'Excellent';
   if (pct >= 80) return 'Good';
   if (pct >= 70) return 'Partially Compliant';

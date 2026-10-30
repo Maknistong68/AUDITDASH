@@ -1,6 +1,7 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
 import { deltaPoints, pct } from '@/lib/format';
+import { DUR, EASE } from '@/lib/motion';
 
 export type TrendDir = 'up' | 'down' | 'flat' | 'single';
 
@@ -65,7 +66,7 @@ export function Sparkline({ values, width = 56, height = 20, delay = 0 }: { valu
           strokeLinejoin="round"
           initial={reduce ? false : { pathLength: 0 }}
           animate={{ pathLength: 1 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay }}
+          transition={{ duration: DUR, ease: EASE, delay }}
         />
       )}
       {values.map((v, i) => {
@@ -124,7 +125,7 @@ export function TrendChart({ points, className = '' }: { points: { label: string
             vectorEffect="non-scaling-stroke"
             initial={reduce ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
+            transition={{ duration: DUR, ease: EASE, delay: 0.4 }}
           />
         </svg>
       )}

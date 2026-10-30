@@ -5,6 +5,7 @@ import { useTransition } from 'react';
 import { AUDIT_TYPES } from '@/lib/auditTypeIds';
 import { filterToQuery } from '@/lib/filters';
 import type { AuditType, Filter } from '@/lib/types';
+import { EASE, DUR } from '@/lib/motion';
 
 /**
  * Audit-type tabs: the quarter segmented control's look, primary navigation. Switching writes `t`
@@ -43,7 +44,7 @@ export function TypeTabs({ filter }: { filter: Filter }) {
               <motion.span
                 layoutId="type-thumb"
                 className="absolute inset-0 rounded-full bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#636366]"
-                transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                transition={{ type: 'tween', ease: EASE, duration: DUR }}
               />
             )}
             <span className="relative">{t.short}</span>

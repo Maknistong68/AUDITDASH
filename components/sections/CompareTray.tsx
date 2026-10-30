@@ -10,6 +10,7 @@ import { itemLabel } from '@/lib/itemLabels';
 import type { ContractorCard as Card } from '@/lib/analytics';
 import type { CategoryId } from '@/lib/types';
 import { Delta } from '@/components/bento/ContractorsCard';
+import { EASE, DUR } from '@/lib/motion';
 
 export interface CompareEntry {
   card: Card;
@@ -18,7 +19,7 @@ export interface CompareEntry {
   topRepeats: { itemCode: string; question: string }[];
 }
 
-const SHEET = { type: 'spring', stiffness: 320, damping: 34, mass: 0.9 } as const;
+const SHEET = { type: 'tween', ease: EASE, duration: DUR } as const;
 
 /** Two-point trend: previous audit → latest, on a fixed 40–100% scale so columns compare honestly. */
 function Trend({ card }: { card: Card }) {
@@ -109,7 +110,7 @@ export function CompareTray({
           aria-label="Compare contractors"
           initial={reduce ? false : { y: '104%' }}
           animate={{ y: 0 }}
-          exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { y: '104%', transition: { type: 'spring', stiffness: 380, damping: 40 } }}
+          exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { y: '104%', transition: { type: 'tween', ease: EASE, duration: DUR } }}
           transition={SHEET}
           className="glass sheet fixed inset-x-0 bottom-0 z-40 max-h-[calc(100svh-var(--topbar)-12px)] overflow-y-auto rounded-t-[28px] [box-shadow:var(--shadow-sheet)]"
         >
@@ -268,7 +269,7 @@ function GapBar({ value, max, best, worst }: { value: number | null; max: number
             style={{ width: `${w * 100}%`, background: 'var(--gap)', opacity: worst ? 1 : 0.42, transformOrigin: 'left' }}
             initial={reduce ? false : { scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ type: 'spring', stiffness: 140, damping: 22, delay: 0.2 }}
+            transition={{ type: 'tween', ease: EASE, duration: DUR, delay: 0.2 }}
           />
         )}
       </div>
