@@ -52,7 +52,7 @@ for (const path of ['/', '/contractor/4800001131', `/audit/${auditId}`]) {
     await page.goto(path);
     await expect(page.getByTestId('new-audit')).toBeVisible();
     await expect(page.getByTestId('new-audit')).toHaveAttribute('href', '/audits/new?type=hs');
-    await expect(page.getByTestId('new-audit')).toHaveAccessibleName('New Audit');
+    await expect(page.getByTestId('new-audit')).toHaveAccessibleName('New audit');
     await page.goto(`${path}?q=all&r=SR1%2CSR2&t=security`);
     await expect(page.getByTestId('new-audit')).toHaveAttribute('href', '/audits/new?type=security');
   });
@@ -95,8 +95,15 @@ test('the name is Audits, with no logo mark', async ({ page }) => {
   await expect(page).toHaveTitle('JV-ECH (Port T1) · Audits');
 });
 
-test('dark is the default theme; a stored light choice wins', async ({ browser }) => {
-  const fresh = await browser.newContext({ colorScheme: 'light' });
+test('dark is the one theme: no switch, a stored light choice is ignored', async ({ browser }) => {
+  const light = await browser.newContext({ colorScheme: 'light' });
+  await light.addInitScript(() => { try { localStorage.setItem('theme', 'light'); } catch { /* private mode */ } });
+  const q = await light.newPage();
+  await q.goto('/');
+  await expect(q.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(q.getByRole('button', { name: /theme/i })).toHaveCount(0);
+  await light.close();
+});
   const p = await fresh.newPage();
   await p.goto('/');
   await expect(p.locator('html')).toHaveAttribute('data-theme', 'dark');

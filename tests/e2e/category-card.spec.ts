@@ -317,7 +317,7 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) 
   });
 }
 
-test('the drivers are plain labels with a bar and "N of M audits", most noted first (bars never grow down the list)', async ({ page }) => {
+test('the drivers are plain labels with a bar and "N/M", most noted first (bars never grow down the list)', async ({ page }) => {
   const q = categoryQuarters(getRepo(), ALL, 'subcontractor')[0];
   for (let i = 1; i < q.items.length; i++) expect(q.items[i - 1].hits).toBeGreaterThanOrEqual(q.items[i].hits);
   await page.setViewportSize({ width: 1920, height: 1080 });
@@ -327,7 +327,7 @@ test('the drivers are plain labels with a bar and "N of M audits", most noted fi
   await expect(items).toHaveCount(q.items.length);
   for (let i = 0; i < q.items.length; i++) {
     await expect(items.nth(i).getByTestId('driving-item-label')).toHaveText(itemLabel(q.items[i].itemCode, q.items[i].question));
-    await expect(items.nth(i).getByTestId('driving-item-count')).toHaveText(`${q.items[i].hits} of ${q.audits} audits`);
+    await expect(items.nth(i).getByTestId('driving-item-count')).toHaveText(`${q.items[i].hits}/${q.audits}`);
     await expect(items.nth(i).locator('span[aria-hidden]')).toHaveCount(1); // the bar
   }
   await expect(slide(page).getByTestId('driving-items')).not.toContainText(CODE);

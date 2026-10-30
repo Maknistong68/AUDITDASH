@@ -112,7 +112,7 @@ export function AuditCarousel({
   const nav = (
     <div className="flex items-center gap-3">
       {/* The slides by name (dates or quarters), latest first: the current one in ink. */}
-      <div role="group" aria-label={unit === 'audit' ? 'Audits' : 'Quarters'} className="flex items-center gap-1 rounded-full bg-fill p-[2px]">
+      <div role="group" aria-label={unit === 'audit' ? 'Audits' : 'Quarters'} className="hidden items-center gap-1 rounded-full bg-fill p-[2px] min-[700px]:flex">
         {labels.map((l, i) => (
           <button
             key={l + i}

@@ -46,7 +46,6 @@ test('no rings: the only svg circles in the hero are sparkline and quarter-chart
   expect(await circles.count()).toBeGreaterThan(0);
   expect(await circles.evaluateAll((els) => els.every((e) => e.getAttribute('data-testid') === 'spark-point' || e.closest('[data-testid="quarter-lines"]')))).toBe(true);
 });
-test('theme toggle persists', async ({ page }) => { await page.goto('/'); await hydrated(page); await page.getByRole('button', { name: /theme/i }).click(); const t = await page.locator('html').getAttribute('data-theme'); await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-theme', t!); });
 test('empty filter shows empty state', async ({ page }) => { await page.goto('/?q=Q4-2025&r='); await expect(page.getByTestId('empty-state')).toBeVisible(); await expect(page.locator('text=NaN')).toHaveCount(0); await expect(page.getByTestId('contractor-row')).toHaveCount(0); });
 test('filter changes URL and numbers', async ({ page }) => {
   await page.goto('/'); await hydrated(page); await page.getByRole('button', { name: 'Q4 2025' }).click();
@@ -80,7 +79,7 @@ test('the positives tile opens /positives with the filter', async ({ page }) => 
   await expect(page.getByTestId('positives-header')).toBeVisible();
 });
 
-test('repeats card: total repeats, a plain caption and the three most repeated questions (no codes)', async ({ page }) => {
+test('repeats card: total repeats and the three most repeated questions (no caption, no codes)', async ({ page }) => {
   const repo = getRepo();
   const count = (f: Filter) => repeatFindings(repo, f).length;
   const m = repeatMatrix(repo, ALL);
@@ -88,7 +87,7 @@ test('repeats card: total repeats, a plain caption and the three most repeated q
   await page.goto('/');
   const card = page.getByTestId('kpi-repeats');
   await expect(card.getByTestId('repeats-count')).toHaveText('228');
-  await expect(card.getByTestId('repeats-rule')).toHaveText('questions noted again in the next audit');
+  await expect(card.getByTestId('repeats-rule')).toHaveCount(0); // no caption: the title says it
   const rows = card.getByTestId('repeats-top-row');
   await expect(rows).toHaveCount(3);
   for (let i = 0; i < 3; i++) {

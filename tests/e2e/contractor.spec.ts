@@ -152,7 +152,7 @@ test('Top 3 repeated observations match repeatMatrix for JV-ECH and SIBS; NBC sh
     await page.goto(`/contractor/${id}`);
     await ready(page);
     const card = active(page).getByTestId('top-repeats');
-    await expect(card.getByRole('heading')).toHaveText('Top 3 repeated observations');
+    await expect(card.getByRole('heading')).toHaveText('Repeated');
     const rows = card.getByTestId('top-repeat');
     await expect(rows).toHaveCount(3);
     expect(await rows.evaluateAll((els) => els.map((e) => [e.getAttribute('data-item'), Number(e.getAttribute('data-times'))])))

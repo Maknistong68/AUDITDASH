@@ -101,9 +101,9 @@ export default async function ItemPage({ params, searchParams }: { params: Promi
             )}
           </BentoCard>
 
-          <BentoCard i={1} testid="item-summary" className="justify-center gap-[clamp(12px,2.4svh,28px)] p-[clamp(14px,2svh,26px)] min-[1200px]:col-span-3">
+          <BentoCard i={1} testid="item-summary" className="justify-center gap-[clamp(8px,1.8svh,28px)] overflow-hidden p-[clamp(14px,2svh,26px)] min-[1200px]:col-span-3">
             <TileLabel>Noted</TileLabel>
-            <p className="figure text-[clamp(56px,10svh,120px)]" data-testid="noted-count">
+            <p className="figure text-[clamp(44px,9svh,120px)]" data-testid="noted-count">
               {n('noted')}
               <span className="ml-2 text-[0.3em] font-semibold tracking-normal text-muted">/ {entries.length - n('na')}</span>
             </p>

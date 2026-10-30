@@ -60,7 +60,7 @@ test('the dashboard Repeat findings card opens /repeats with a 1.5 s shared hand
   await card.getByRole('link').click();
   await expect(page).toHaveURL(new RegExp(`/repeats\\?${Q}$`));
   await expect(page.getByTestId('repeats-figure')).toHaveText(TOTAL);
-  await expect(page.getByTestId('repeats-header')).toContainText('questions noted again in the next audit');
+  await expect(page.getByTestId('repeats-header')).toContainText('Repeat findings');
   await expect(page.getByTestId('breadcrumb')).toHaveText(/Overview\s*Repeat findings/);
   await expect.poll(async () => Object.keys((await transitions(page)).durations).length).toBeGreaterThan(0);
   const { handoffs, durations } = await transitions(page);
@@ -197,14 +197,14 @@ test('/repeats without a follow-up audit: calm empty state, same header, no NaN'
   }
 });
 
-test('/repeats header: "N repeats", questions · contractors, the basis; no reach bar or threshold', async ({ page }) => {
+test('/repeats header: "N repeats", questions · contractors; no caption, reach bar or threshold', async ({ page }) => {
   await page.goto(`/repeats?${Q}`);
   const header = page.getByTestId('repeats-header');
   await expect(header.getByTestId('repeats-total')).toHaveText(`${TOTAL} repeats`);
-  await expect(header.getByTestId('repeats-rule')).toHaveText('questions noted again in the next audit');
+  await expect(header.getByTestId('repeats-rule')).toHaveCount(0);
   await expect(header.getByTestId('repeats-questions')).toHaveText(`${ROWS.length} questions`);
   await expect(header.getByTestId('repeats-contractors')).toHaveText(`${COLS.length} contractors`);
-  await expect(header.getByTestId('repeats-basis')).toHaveText('based on auditor notes');
+  await expect(header.getByTestId('repeats-basis')).toHaveCount(0);
   await expect(page.getByTestId('repeats-spread')).toHaveCount(0);
   await expect(page.getByTestId('repeats-followups')).toHaveCount(0);
   expect(await page.locator('main').innerText()).not.toMatch(/\bof 7\b|≥\s*5/);

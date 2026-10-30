@@ -63,7 +63,7 @@ test('dragging left swipes to the earlier audit', async ({ page }) => {
 test('deep link ?s=1 opens the earlier (Q4) audit in view', async ({ page }) => {
   await page.goto('/contractor/4800001131?s=1');
   const slide = active(page);
-  await expect(slide.getByTestId('slide-header')).toContainText('Q4 2025');
+  await expect(slide.getByTestId('slide-header')).toContainText('3 Nov 2025');
   await expect(slide.getByTestId('slide-score')).toHaveText('76%');
   await ready(page);
   await expect(slide.getByTestId('slide-header')).toBeInViewport();
@@ -83,7 +83,8 @@ test('category carousel is by quarter, latest first, with quarter arrows', async
   await page.goto('/category/subcontractor');
   // Under "All": every audit first (the dashboard card's figure), then Q1 2026, Q4 2025
   await expect(page.getByTestId('slide')).toHaveCount(3);
-  await expect(active(page).getByTestId('slide-header')).toContainText('All audits');
+  await expect(active(page).getByTestId('slide-header')).toContainText('20 audits');
+  await expect(page.getByRole('group', { name: 'Quarters' }).getByRole('button', { name: 'All audits' })).toHaveAttribute('aria-current', 'true');
   await ready(page);
   await page.getByRole('button', { name: 'Previous quarter' }).click();
   await expect(page).toHaveURL(/s=1/);
@@ -193,7 +194,7 @@ test('reduced motion zeroes CSS transitions and press transforms', async ({ brow
   const page = await ctx.newPage();
   await page.goto('/contractor/4800001131');
   await ready(page);
-  const dot = page.getByRole('group', { name: 'Audits' }).getByRole('button', { name: /Mar 2026/ }).locator('span');
+  const dot = page.getByRole('group', { name: 'Audits' }).getByRole('button', { name: /Mar 2026/ });
   expect(await dot.evaluate((el) => getComputedStyle(el).transitionDuration)).toBe('0s');
   const btn = page.getByRole('button', { name: 'Previous audit' });
   await btn.hover();
