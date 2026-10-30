@@ -65,10 +65,11 @@ test('+ New Audit href follows every tab', async ({ page }) => {
   }
 });
 
-test('the new-audit placeholder answers 200', async ({ page }) => {
+test('the new-audit page answers 200', async ({ page }) => {
   const res = await page.goto('/audits/new?type=crc');
   expect(res!.status()).toBe(200);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('New audit — coming in this release');
+  await expect(page.getByTestId('new-audit-page')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('New audit');
   await expect(tabs(page).getByRole('button', { name: 'CRC' })).toHaveAttribute('aria-pressed', 'true');
 });
 

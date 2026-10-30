@@ -1,14 +1,20 @@
 # Audits
 
-A dashboard for directors that turns contractor HSE (health, safety and environment) audit results into a quick, honest picture: who is doing well, where the gaps are, and what to do about them. Built with Next.js 15 on mock data generated from the real audit workbooks.
+A dashboard for directors that turns contractor HSE (health, safety and environment) audit results into a quick, honest picture: who is doing well, where the gaps are, and what to do about them. Built with Next.js 15. **The Excel workbooks are the source of truth**: every figure is imported from them.
 
 ## Screens
 
-- **Main bento**: portfolio overview of contractors and categories at a glance.
-- **Details with swipe**: per-contractor details; swipe (or arrow keys) between that contractor's audits, latest first.
-- **Category drill**: drill into a category to see where scores are lost.
-- **Item / observation**: the individual checklist item and its observation.
-- **Audit report**: the full report for one audit.
+- **Overview** (`/`): contractors ranked, score over time (line chart by month), main problem, portfolio, repeat findings, positives. Hover any card for a second layer of detail.
+- **Log** (`/log`): every observation and every audit, with search and filters (contractor, category, kind, quarter, region).
+- **New audit** (`/audits/new`): upload the completed Excel checklist (read in the browser, pictures never imported, observations categorised automatically) or fill the checklist in; live score with the Excel formula.
+- Drill-downs: category (where score is lost), contractor, question, observation, audit report, repeat findings, positives.
+
+## Scoring (the Excel formula, applied honestly)
+
+Full = 1, Partial = 0.5, No = 0, N/A excluded. A and B = points scored ÷ possible; C = mean of C1 and C2; total = mean of A, B, C.
+The app computes every total from the workbook's own points. The typed Excel total is kept as `reportedScore` and shown only as a data check
+(the template adds +0.012 to the total and several totals were edited by hand). Bands follow the whole % shown: 90+ Excellent, 80+ Good,
+70+ Partially, 60+ Minimally, below 60 Non-Compliant.
 
 ## Local setup
 
@@ -21,15 +27,24 @@ Then open http://localhost:3000.
 
 ## Regenerating mock data
 
-Place the two workbooks in `data/source/` (git-ignored), then:
+Place the workbooks in `data/source/` (git-ignored), then:
 
 ```bash
 pip install -r requirements-dev.txt
 python3 -I scripts/import_excel.py \
-  --results data/source/HS_AUDIT_FINDINGS_SAMPLES.xlsx \
-  --checklist data/source/Excellence_HS_checklist.xlsx \
+  --results data/source/HS_AUDIT_FINDINGS.xlsx \
+  --checklist data/source/AL_FAHD_1272_checklist.xlsx \
+  --audit data/source/AL_FAHD_1272_checklist.xlsx \
+  --previous data/seed/observations.json \
   --out data/seed
 ```
+
+- `--results`: the findings workbook (one 10-column block per audit, one sheet per quarter and sub-region).
+- `--checklist`: a checklist workbook; its Part 1 gives the questions and weights (latest template revision).
+- `--audit` (repeatable): a completed checklist workbook imported as one more audit, with its Part 1 answers.
+- `--previous`: keeps item codes recovered by an earlier import for notes whose code is no longer readable.
+
+The importer prints every data check (Excel total differing from its own points, points over possible, copied blocks).
 
 ## Tests
 
@@ -61,4 +76,4 @@ The seed data in `data/seed/` contains real contractor and auditor names and rea
 
 ## Roadmap
 
-Plan 2: Supabase backend (with RLS), an audit wizard for capturing new audits, and expiring share links for reports.
+Plan 2: Supabase backend (with RLS) so audits entered in the app reach everyone (today they stay in the browser and download as JSON), and expiring share links for reports.

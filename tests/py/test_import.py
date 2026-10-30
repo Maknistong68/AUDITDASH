@@ -11,14 +11,15 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import import_excel  # noqa: E402
 from site_keywords import category_for  # noqa: E402
 
-RESULTS = ROOT / "data/source/HS_AUDIT_FINDINGS_SAMPLES.xlsx"
-CHECKLIST = ROOT / "data/source/Excellence_HS_checklist.xlsx"
+RESULTS = ROOT / "data/source/HS_AUDIT_FINDINGS.xlsx"
+CHECKLIST = ROOT / "data/source/AL_FAHD_1272_checklist.xlsx"
 
 
 @pytest.fixture(scope="session")
 def seed_dir(tmp_path_factory):
     out = tmp_path_factory.mktemp("seed")
-    import_excel.main(["--results", str(RESULTS), "--checklist", str(CHECKLIST), "--out", str(out)])
+    import_excel.main(["--results", str(RESULTS), "--checklist", str(CHECKLIST), "--audit", str(CHECKLIST),
+                       "--previous", str(ROOT / "data/seed/observations.json"), "--out", str(out)])
     return out
 
 
@@ -38,7 +39,7 @@ def seed_text(seed_dir):
     return "".join(p.read_text() for p in sorted(seed_dir.glob("*.json")))
 
 
-def test_twenty_audits_twelve_contractors(seed): assert len(seed.audits) == 20 and len(seed.contractors) == 12
+def test_twenty_one_audits_twelve_contractors(seed): assert len(seed.audits) == 21 and len(seed.contractors) == 12
 # Every audit's "TOTAL FINAL SCORE" cell, read straight from the workbook (checked cell by cell, not via the parser).
 EXCEL_TOTALS = {
     '4800001134-Q4-2025-20251022': 0.67, '4800000901-Q4-2025-20251020': 0.68, '4800000838-Q4-2025-20251112': 0.62,
@@ -48,12 +49,33 @@ EXCEL_TOTALS = {
     '4200000026-Q1-2026-20260208': 0.60, '4800001322-Q1-2026-20260118': 0.76, '4800001440-Q1-2026-20260302': 0.60,
     '4800000838-Q1-2026-20260201': 0.72, '4800000892-Q1-2026-20260315': 0.62, '4800001272-Q1-2026-20260223': 0.65,
     '4800001131-Q1-2026-20260301': 0.85, '4800000876-Q1-2026-20260215': 0.66,
+    '4800001272-Q3-2026-20260719': 0.6204731670445957,  # the checklist workbook's cached total (template adds +0.012)
 }
-def test_totals_match_excel(seed):
-    t = {a['id']: a['totalScore'] for a in seed.audits}
-    assert len(EXCEL_TOTALS) == 20 and set(t) == set(EXCEL_TOTALS)
+def test_reported_totals_match_excel(seed):
+    t = {a['id']: a['reportedScore'] for a in seed.audits}
+    assert len(EXCEL_TOTALS) == 21 and set(t) == set(EXCEL_TOTALS)
     for audit_id, expected in EXCEL_TOTALS.items():
         assert abs(t[audit_id] - expected) < 1e-9, audit_id
+def test_total_is_the_formula_on_the_points(seed):
+    for a in seed.audits:
+        s = {x['code']: x for x in a['sections']}
+        r = lambda c: min(s[c]['scored'], s[c]['possible']) / s[c]['possible']
+        expected = (r('A') + r('B') + (r('C1') + r('C2')) / 2) / 3
+        assert abs(a['totalScore'] - round(expected, 4)) < 1e-9, a['id']
+    rpco = next(a for a in seed.audits if a['id'] == '4800001440-Q1-2026-20260302')
+    assert rpco['totalScore'] == 0.4364 and any('60%' in i and '44%' in i for i in rpco['issues'])
+def test_capped_and_copied_blocks_flagged(seed):
+    by = {a['id']: a for a in seed.audits}
+    assert any('21.5 points scored of 21' in i for i in by['4800001131-Q1-2026-20260301']['issues'])
+    assert any('identical' in i for i in by['4800001322-Q4-2025-20251013']['issues'])
+def test_july_audit_from_part1(seed):
+    a = next(a for a in seed.audits if a['id'] == '4800001272-Q3-2026-20260719')
+    assert len(a['answers']) == 81 and a['totalScore'] == 0.5955
+    s = {x['code']: x for x in a['sections']}
+    assert (s['A']['possible'], s['A']['scored']) == (49, 23) and (s['B8']['possible'], s['B8']['scored']) == (4, 2)
+    obs = [o for o in seed.observations if o['auditId'] == a['id']]
+    assert len(obs) == 84 and sum(o['kind'] == 'positive' for o in obs) == 5 and sum(o['kind'] == 'site' for o in obs) == 11
+def test_no_photos(seed): assert all('hasPhoto' not in o for o in seed.observations)
 def test_sibs_has_three_audits(seed): assert sum(a['contractorId']=='4800000838' for a in seed.audits) == 3
 def test_alfahd_1272_q4_counts(seed):
     obs = [o for o in seed.observations if o['auditId']=='4800001272-Q4-2025-20251029']
@@ -63,7 +85,10 @@ def test_multiline_observation_joined(seed):  # B4.1 for Al Fahd 1272 Q4 spans s
     assert 'permit register' in o['text'] and '\n' in o['text']
 def test_checklist_weights(seed):
     w = {i['code']: i['weight'] for i in seed.checklist}
-    assert sum(v for k,v in w.items() if k.startswith('A')) == 45 and w['B2.2'] == 2 and w['C2.17'] == 3
+    # The Rev template's weights (A totals 49; B11/B12 sub-headers mislabelled in the sheet, subsection from the code)
+    assert sum(v for k,v in w.items() if k.startswith('A')) == 49 and w['B2.2'] == 2 and w['C2.17'] == 3
+    sub = {i['code']: i['subsection'] for i in seed.checklist}
+    assert sub['B11.2'] == 'B11' and sub['B12.1'] == 'B12' and sub['C1.3'] == 'C1'
 def test_every_item_has_category(seed): assert all(i['category'] for i in seed.checklist)
 def test_no_phone_numbers(seed_text): assert '055-' not in seed_text
 def test_site_keywords(): assert category_for(None,'site','Tower light found operational without earthing') == 'site'
@@ -112,7 +137,12 @@ TYPES = ("hs", "security", "environmental", "welfare", "crc")
 
 @pytest.fixture(scope="session")
 def typed(seed_dir):
-    return {t: json.loads((seed_dir / "checklists" / f"{t}.json").read_text()) for t in TYPES}
+    # The checklist workbook in data/source has only the H&S sheet; the other types' checklists come from the committed
+    # import of the full checklist workbook (data/seed/checklists), which the importer leaves untouched.
+    def load(t):
+        p = seed_dir / "checklists" / f"{t}.json"
+        return json.loads((p if p.exists() else ROOT / "data/seed/checklists" / f"{t}.json").read_text())
+    return {t: load(t) for t in TYPES}
 
 
 def test_checklists_written_for_every_type(typed):
@@ -207,7 +237,7 @@ def test_nbc_q1_markers(marker_tally):
 
 
 def test_marker_totals_reported_per_audit(marker_tally, seed):
-    assert set(marker_tally) == {a["id"] for a in seed.audits}
+    assert set(marker_tally) == {a["id"] for a in seed.audits if "answers" not in a}  # results-workbook audits
     assert all(set(t) == {"compliant", "na"} for t in marker_tally.values())
     assert sum(t["compliant"] for t in marker_tally.values()) > sum(t["na"] for t in marker_tally.values()) > 0
 

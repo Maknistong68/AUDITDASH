@@ -128,7 +128,7 @@ function Row({
       data-score={total}
       onMouseEnter={(e) => onHover(contractor.id, e.currentTarget)}
       onFocus={(e) => onHover(contractor.id, e.currentTarget)}
-      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.4em_minmax(0,1.5fr)_minmax(0,1fr)_3em_56px_24px] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
+      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.4em_minmax(0,1.5fr)_minmax(0,1fr)_3em_56px_clamp(18px,2.7svh,24px)] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
         selected ? 'bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]' : ''
       }`}
     >
@@ -172,7 +172,7 @@ function Row({
         disabled={disabled}
         onClick={onToggle}
         title={disabled ? 'Up to 3 contractors' : selected ? 'Remove from compare' : 'Add to compare'}
-        className={`relative z-[2] grid size-[24px] place-items-center rounded-full transition-[background-color,transform,opacity] duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 ${
+        className={`relative z-[2] grid size-[clamp(18px,2.7svh,24px)] place-items-center rounded-full transition-[background-color,transform,opacity] duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 ${
           selected
             ? 'bg-[var(--accent)] text-[var(--on-accent)]'
             : 'bg-fill-2 text-muted shadow-[inset_0_0_0_1.5px_var(--control)] hover:text-ink enabled:hover:bg-fill'

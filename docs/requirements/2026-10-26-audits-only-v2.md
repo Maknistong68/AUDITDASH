@@ -119,3 +119,22 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
   next audit; "times repeated" counts consecutive repeats. Labelled "based on auditor notes".
 - Owner decision 2026-10-27: SIBS's two Q4 2025 audits (12 Nov and 19 Nov) are treated as ONE Q4 visit for repeats —
   a finding in either counts once — so SIBS has a single Q4 → Q1 comparison.
+
+## 22. Owner direction 2026-10-30 — "the Excel is the truth"
+- **Rely 100% on the Excel.** Data comes only from the workbooks (`HS_AUDIT_FINDINGS.xlsx`, plus completed checklist workbooks).
+  **No pictures** are imported or shown.
+- **Scores were edited in the Excel**: keep the scoring concept, not the typed totals. Every total is recomputed from the
+  workbook's own points (A, B points ratio; C = mean of C1, C2; total = mean). The typed total stays as a data check only.
+  Counter-check found: 19 of 21 typed totals differ (RPCO Q1 60% vs 44%, NBC 60% vs 50%, JV-ECH Q1 85% vs 74%, PPCO Q1 76% vs 68%,
+  Abyatona H55 Q4 67% vs 58%); JV-ECH Q1 C2 scored 21.5 of 21; PPCO Q4 and SIBS 12 Nov have identical section points; the
+  checklist template adds +0.012 to the total, hard-codes B8 = 0.65 and reads B8's answer from the wrong row.
+- **Audit AL FAHD 4800001272, 19 Jul 2026 (Q3 2026)** imported from its completed checklist (exact Part 1 answers).
+- **Dashboard for executives**: less text, more charts. The biggest card is split in the middle: contractors ranked (top),
+  **score over time line chart** (bottom). Hovering any card shows a second layer of detail.
+- **Motion**: one calm language, 1.5 s expo-out for every entrance, draw and page transition; no bounce.
+- **Auditor's view**: a **Log** of every observation and audit with search and filters; **New audit** imports the Excel
+  checklist in the browser (auto-categorised, no pictures) or takes manual entry, scored live with the Excel formula.
+- **One place per thing**: navigation is Overview · Log · + New audit. The /audits portfolio page is retired (its trend is on
+  the Overview, its audit list is the Log, bands are on the Portfolio card).
+- Under the "All" quarter filter headline figures use every audit (a quarter with one audit never decides the headline);
+  a selected quarter is compared with the quarter before it.
