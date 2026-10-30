@@ -9,7 +9,7 @@ import { EASE, DUR } from '@/lib/motion';
 
 /**
  * Apple segmented control for the quarter (sliding thumb) and pill toggles for the sub-regions.
- * State lives in the URL (?q=&r=) of the current page; a compare selection (?c=) is carried over.
+ * State lives in the URL (?q=&r=) of the current page; every other parameter (compare ?c=, Log search) is carried over.
  * A details page keeps its path and restarts its carousel at the latest slide (`s` dropped).
  */
 export function FilterBar({ filter }: { filter: Filter }) {
@@ -17,8 +17,12 @@ export function FilterBar({ filter }: { filter: Filter }) {
   const pathname = usePathname();
   const [pending, start] = useTransition();
   const go = (next: Filter) => {
-    const c = new URLSearchParams(window.location.search).get('c');
-    start(() => router.push(`${pathname}?${filterToQuery(next)}${c ? `&c=${encodeURIComponent(c)}` : ''}`, { scroll: false }));
+    // Overwrite quarter, regions and type only; the page's own state (compare ?c=, the Log's search and filters) stays.
+    // A carousel slide (?s=) belongs to the old filter and restarts at the latest.
+    const sp = new URLSearchParams(window.location.search);
+    for (const k of ['q', 'r', 't', 's']) sp.delete(k);
+    const rest = sp.toString();
+    start(() => router.push(`${pathname}?${filterToQuery(next)}${rest ? `&${rest}` : ''}`, { scroll: false }));
   };
   const toggleRegion = (r: Subregion) => {
     const on = filter.regions.includes(r);
