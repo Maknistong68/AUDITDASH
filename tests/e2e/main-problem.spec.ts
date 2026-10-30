@@ -7,7 +7,7 @@ const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2'
 /** The gap figure before this change: clamp(52px, 9svh, 104px). */
 const OLD_FIGURE = (h: number) => Math.min(104, Math.max(52, 0.09 * h));
 
-test('main problem drivers are plain labels with "N of M audits", no item codes', async ({ page }) => {
+test('main problem drivers are plain labels with "N/M" audits and a bar, no item codes', async ({ page }) => {
   const repo = getRepo();
   const problem = mainProblem(repo, ALL)!;
   const audits = filterAudits(repo, { ...ALL, quarter: problem.quarter }).length;
@@ -20,19 +20,19 @@ test('main problem drivers are plain labels with "N of M audits", no item codes'
     const label = itemLabel(it.itemCode, it.question);
     expect(label.length).toBeLessThanOrEqual(40);
     await expect(rows.nth(i)).toContainText(label);
-    await expect(rows.nth(i)).toContainText(`${it.hits} of ${audits} audits`);
+    await expect(rows.nth(i)).toContainText(`${it.hits}/${audits}`);
   }
   expect(await mp.innerText()).not.toMatch(/\bB\d+\.\d+\b/);
   expect(await mp.innerText()).not.toMatch(/\b[ABC]\d+(\.\d+)?\b/);
   // label left, count right-aligned at the row's end
   const row = (await rows.first().boundingBox())!;
-  const count = (await rows.first().locator(':scope > span').last().boundingBox())!;
+  const count = (await rows.first().locator(':scope > span').first().locator(':scope > span').last().boundingBox())!;
   expect(Math.abs(count.x + count.width - (row.x + row.width))).toBeLessThan(2);
 });
 
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) test(`main problem gap figure is larger than before and not clipped at ${vp.width}`, async ({ page }) => {
   await page.setViewportSize(vp);
-  await page.goto('/');
+  await page.goto('/?q=Q1-2026&r=SR1%2CSR2'); // a quarter: compared with the one before it
   const mp = page.getByTestId('main-problem');
   const fig = mp.getByTestId('main-problem-gap');
   const size = await fig.evaluate((e) => parseFloat(getComputedStyle(e).fontSize));

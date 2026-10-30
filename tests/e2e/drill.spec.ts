@@ -35,14 +35,14 @@ test('four-level drill from the main problem to an observation, Esc back to the 
 test('ArrowRight moves to the earlier audit and writes s=1', async ({ page }) => {
   await page.goto('/contractor/4800001131?q=all&r=SR1%2CSR2');
   await ready(page);
-  await expect(active(page).getByTestId('slide-score')).toHaveText('85%');
+  await expect(active(page).getByTestId('slide-score')).toHaveText('74%');
   await page.keyboard.press('ArrowRight');
   await expect(page).toHaveURL(/[?&]s=1(&|$)/);
   await expect(page).toHaveURL(/q=all/);
-  await expect(active(page).getByTestId('slide-score')).toHaveText('74%');
+  await expect(active(page).getByTestId('slide-score')).toHaveText('76%');
   await page.keyboard.press('ArrowLeft');
   await expect(page).not.toHaveURL(/s=1/);
-  await expect(active(page).getByTestId('slide-score')).toHaveText('85%');
+  await expect(active(page).getByTestId('slide-score')).toHaveText('74%');
 });
 
 test('dragging left swipes to the earlier audit', async ({ page }) => {
@@ -57,14 +57,14 @@ test('dragging left swipes to the earlier audit', async ({ page }) => {
   for (let i = 1; i <= 10; i++) await page.mouse.move(box.x + box.width - 40 - i * 60, y);
   await page.mouse.up();
   await expect(page).toHaveURL(/[?&]s=1(&|$)/);
-  await expect(active(page).getByTestId('slide-score')).toHaveText('74%');
+  await expect(active(page).getByTestId('slide-score')).toHaveText('76%');
 });
 
 test('deep link ?s=1 opens the earlier (Q4) audit in view', async ({ page }) => {
   await page.goto('/contractor/4800001131?s=1');
   const slide = active(page);
   await expect(slide.getByTestId('slide-header')).toContainText('Q4 2025');
-  await expect(slide.getByTestId('slide-score')).toHaveText('74%');
+  await expect(slide.getByTestId('slide-score')).toHaveText('76%');
   await ready(page);
   await expect(slide.getByTestId('slide-header')).toBeInViewport();
   const box = (await slide.boundingBox())!;
@@ -81,12 +81,13 @@ test('a contractor audited once has no audit arrows', async ({ page }) => {
 
 test('category carousel is by quarter, latest first, with quarter arrows', async ({ page }) => {
   await page.goto('/category/subcontractor');
-  await expect(page.getByTestId('slide')).toHaveCount(2);
-  await expect(active(page).getByTestId('slide-header')).toContainText('Q1 2026');
+  // Under "All": every audit first (the dashboard card's figure), then Q3 2026, Q1 2026, Q4 2025
+  await expect(page.getByTestId('slide')).toHaveCount(4);
+  await expect(active(page).getByTestId('slide-header')).toContainText('All audits');
   await ready(page);
   await page.getByRole('button', { name: 'Previous quarter' }).click();
   await expect(page).toHaveURL(/s=1/);
-  await expect(active(page).getByTestId('slide-header')).toContainText('Q4 2025');
+  await expect(active(page).getByTestId('slide-header')).toContainText('Q3 2026');
   const href = await active(page).getByTestId('contractor-row').first().getAttribute('href');
   expect(href).toMatch(/q=all&r=SR1%2CSR2/);
 });
@@ -204,17 +205,17 @@ test('a Q4 contractor row opens the contractor on that Q4 audit (same score)', a
   await page.goto('/?q=Q4-2025&r=SR1%2CSR2');
   await expect(page.getByTestId('contractors')).toHaveAttribute('data-hydrated', '');
   const link = page.locator('[data-testid="contractor-row"] a[href^="/contractor/4800001131"]');
-  await expect(link).toHaveAttribute('aria-label', /, 74%, /);
+  await expect(link).toHaveAttribute('aria-label', /, 76%, /);
   await link.click();
   await expect(page).toHaveURL(/\/contractor\/4800001131\?q=Q4-2025/);
   await ready(page);
-  await expect(active(page).getByTestId('slide-score')).toHaveText('74%');
+  await expect(active(page).getByTestId('slide-score')).toHaveText('76%');
   // going to the latest audit writes s=0, so a reload stays there instead of jumping back to Q4
   await page.keyboard.press('ArrowLeft');
   await expect(page).toHaveURL(/[?&]s=0(&|$)/);
   await page.reload();
   await ready(page);
-  await expect(active(page).getByTestId('slide-score')).toHaveText('85%');
+  await expect(active(page).getByTestId('slide-score')).toHaveText('74%');
 });
 
 test('the Q4 main-problem tile opens its category on Q4 with the same gap and item anchors', async ({ page }) => {

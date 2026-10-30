@@ -11,8 +11,8 @@ const hydrated = async (page: import('@playwright/test').Page) =>
 
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) test(`hero fits ${vp.width}`, async ({ page }) => {
   await page.setViewportSize(vp); await page.goto('/');
-  await expect(page.getByTestId('score-ring')).toBeVisible();
-  for (const id of ['main-problem', 'kpi-score', 'kpi-repeats', 'kpi-positives']) {
+  await expect(page.getByTestId('score-line')).toBeVisible();
+  for (const id of ['main-problem', 'kpi-score', 'kpi-repeats', 'kpi-positives', 'score-trend']) {
     await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
   }
   await expect(page.getByTestId('contractor-row')).toHaveCount(12);
@@ -38,12 +38,13 @@ test('main problem names a category and links to its details', async ({ page }) 
   await expect(mp.getByRole('heading')).toHaveText('Subcontractor Control');
   await expect(mp.getByRole('link')).toHaveAttribute('href', '/category/subcontractor?q=all&r=SR1%2CSR2');
 });
-test('no rings: the only svg circles in the hero are sparkline points', async ({ page }) => {
+test('no rings: the only svg circles in the hero are sparkline and line-chart points', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByTestId('contractor-row')).toHaveCount(12);
+  await expect(page.getByTestId('score-line-point')).toHaveCount(7);
   const circles = page.getByTestId('hero').locator('svg circle');
   expect(await circles.count()).toBeGreaterThan(0);
-  expect(await circles.evaluateAll((els) => els.every((e) => e.closest('[data-testid="spark"]') && e.getAttribute('data-testid') === 'spark-point'))).toBe(true);
+  expect(await circles.evaluateAll((els) => els.every((e) => ['spark-point', 'score-line-point'].includes(e.getAttribute('data-testid') ?? '')))).toBe(true);
 });
 test('theme toggle persists', async ({ page }) => { await page.goto('/'); await hydrated(page); await page.getByRole('button', { name: /theme/i }).click(); const t = await page.locator('html').getAttribute('data-theme'); await page.reload(); await expect(page.locator('html')).toHaveAttribute('data-theme', t!); });
 test('empty filter shows empty state', async ({ page }) => { await page.goto('/?q=Q4-2025&r='); await expect(page.getByTestId('empty-state')).toBeVisible(); await expect(page.locator('text=NaN')).toHaveCount(0); await expect(page.getByTestId('contractor-row')).toHaveCount(0); });
@@ -83,10 +84,10 @@ test('repeats card: total repeats, a plain caption and the three most repeated q
   const repo = getRepo();
   const count = (f: Filter) => repeatFindings(repo, f).length;
   const m = repeatMatrix(repo, ALL);
-  expect(count(ALL)).toBe(228);
+  expect(count(ALL)).toBe(267); // 228 at Q1 2026 + 39 at Al Fahd (Coast Guard)'s July 2026 audit
   await page.goto('/');
   const card = page.getByTestId('kpi-repeats');
-  await expect(card.getByTestId('repeats-count')).toHaveText('228');
+  await expect(card.getByTestId('repeats-count')).toHaveText('267');
   await expect(card.getByTestId('repeats-rule')).toHaveText('questions noted again in the next audit');
   const rows = card.getByTestId('repeats-top-row');
   await expect(rows).toHaveCount(3);
@@ -109,21 +110,23 @@ test('repeats card: total repeats, a plain caption and the three most repeated q
 
 test('positives card: total, coverage of audits and contractors', async ({ page }) => {
   const s = positiveSummary(getRepo(), ALL);
-  expect(s.total).toBe(138);
+  expect(s.total).toBe(143);
   await page.goto('/');
   const card = page.getByTestId('kpi-positives');
-  await expect(card.getByTestId('positives-count')).toHaveText('138');
+  await expect(card.getByTestId('positives-count')).toHaveText('143');
   await expect(card.getByTestId('positives-coverage')).toHaveText(`${s.auditsWith} of ${s.audits} audits · ${s.contractorsWith} of ${s.contractors} contractors`);
   await page.goto('/?q=Q4-2025&r=SR1,SR2');
   await expect(card.getByTestId('positives-count')).toHaveText(String(positiveSummary(getRepo(), { ...ALL, quarter: 'Q4-2025' }).total));
 });
 
 test('main problem reads "score lost" beside the %', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?q=Q1-2026&r=SR1%2CSR2');
   const mp = page.getByTestId('main-problem');
   await expect(mp.getByText('score lost', { exact: true })).toBeVisible();
   await expect(mp.getByText('gap', { exact: true })).toHaveCount(0);
   await expect(mp).toContainText(/vs Q4/);
+  await page.goto('/');
+  await expect(mp).not.toContainText(/vs Q/); // every audit: no comparison
 });
 
 test('no checklist codes anywhere in the hero', async ({ page }) => {

@@ -49,8 +49,8 @@ async function noPageScroll(page: Page) {
   expect(sw).toBeLessThanOrEqual(iw);
 }
 
-test('the dashboard Repeat findings card opens /repeats with a ~1 s shared hand-off; the header shows the same count', async ({ page }) => {
-  expect(TOTAL).toBe('228');
+test('the dashboard Repeat findings card opens /repeats with a 1.5 s shared hand-off; the header shows the same count', async ({ page }) => {
+  expect(TOTAL).toBe('267');
   expect(TOTAL).toBe(String(repeatFindings(getRepo(), ALL).length));
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
@@ -65,22 +65,22 @@ test('the dashboard Repeat findings card opens /repeats with a ~1 s shared hand-
   await expect.poll(async () => Object.keys((await transitions(page)).durations).length).toBeGreaterThan(0);
   const { handoffs, durations } = await transitions(page);
   expect(handoffs).toBe(1);
-  // the card grows into the header strip and the figure flies into the header figure, each about 1 s
-  expect(durations['::view-transition-group(rp-card)']).toBeGreaterThanOrEqual(900);
-  expect(durations['::view-transition-group(rp-figure)']).toBeGreaterThanOrEqual(900);
-  expect(durations['::view-transition-group(rp-card)']).toBeLessThanOrEqual(1100);
+  // the card grows into the header strip and the figure flies into the header figure, each 1.5 s (the house motion, lib/motion)
+  expect(durations['::view-transition-group(rp-card)']).toBeGreaterThanOrEqual(1400);
+  expect(durations['::view-transition-group(rp-figure)']).toBeGreaterThanOrEqual(1400);
+  expect(durations['::view-transition-group(rp-card)']).toBeLessThanOrEqual(1600);
   // the hand-off landed: nothing left running, the names are only on the landing elements
   await expect.poll(() => page.evaluate(() => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.pseudoElement).length)).toBe(0);
   expect(await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('*')].map((e) => getComputedStyle(e).viewTransitionName).filter((n) => n !== 'none' && n !== 'root').sort())).toEqual(['rp-card', 'rp-figure']);
 });
 
-test('the Main problem hand-off also runs about 1 s', async ({ page }) => {
+test('the Main problem hand-off also runs 1.5 s', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
   await watchTransitions(page);
   await page.getByTestId('main-problem').getByRole('link').click();
   await expect(page).toHaveURL(/\/category\//);
-  await expect.poll(async () => (await transitions(page)).durations['::view-transition-group(mp-card)'] ?? 0).toBeGreaterThanOrEqual(900);
+  await expect.poll(async () => (await transitions(page)).durations['::view-transition-group(mp-card)'] ?? 0).toBeGreaterThanOrEqual(1400);
   // the category carousel cards use the dashboard's wording
   await expect(page.locator('[data-testid="category-card"][data-active]')).toContainText('score lost');
   await expect(page.locator('[data-testid="category-card"][data-active]').getByText('score lost')).toBeVisible();

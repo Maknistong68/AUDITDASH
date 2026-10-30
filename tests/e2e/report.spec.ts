@@ -2,9 +2,9 @@ import { test, expect } from '@playwright/test';
 
 const REPORT = '/audit/4800001272-Q4-2025-20251029';
 
-test('report shows the official score and band', async ({ page }) => {
+test('report shows the score computed from the Excel points, and its band', async ({ page }) => {
   await page.goto(REPORT);
-  await expect(page.getByTestId('report-total')).toHaveText('71%');
+  await expect(page.getByTestId('report-total')).toHaveText('74%'); // the Excel typed 71%
   await expect(page.getByTestId('report-band')).toHaveText('Partially Compliant');
   await expect(page.getByTestId('section-row')).toHaveCount(15);
   const crumbs = page.getByTestId('breadcrumb');
@@ -54,9 +54,9 @@ test('an unknown audit id returns 404', async ({ page }) => {
   await expect(page.getByTestId('not-found')).toBeVisible();
 });
 
-test('a past-audits dot on the portfolio view opens a report that renders', async ({ page }) => {
-  await page.goto('/audits?q=all&r=SR1%2CSR2');
-  const dot = page.getByTestId('audit-dot').first();
+test('an audit row in the Log opens a report that renders', async ({ page }) => {
+  await page.goto('/log?view=audits&q=all&r=SR1%2CSR2');
+  const dot = page.getByTestId('log-audit').first();
   const link = (await dot.getAttribute('href'))!;
   expect(link).toMatch(/\?q=all&r=SR1%2CSR2$/);
   const id = link.replace(/^\/audit\//, '').split('?')[0];
@@ -71,7 +71,7 @@ test('"Full report" on a contractor page opens its report; Esc goes back to the 
   await expect(page.getByTestId('carousel')).toHaveAttribute('data-ready', '');
   await page.locator('[data-testid="slide"][data-active]').getByRole('link', { name: 'Full report' }).click();
   await expect(page).toHaveURL(/\/audit\/4800001131-Q1-2026-20260301\?/);
-  await expect(page.getByTestId('report-total')).toHaveText('85%');
+  await expect(page.getByTestId('report-total')).toHaveText('74%'); // the Excel typed 85%
   await expect(page.locator('body')).toHaveAttribute('data-esc-ready', '');
   await page.keyboard.press('Escape');
   await expect(page).toHaveURL(/\/contractor\/4800001131\?/);
@@ -98,16 +98,19 @@ test('print media hides the top bar and chrome and shows both tabs', async ({ pa
   expect(bg).toBe('rgb(255, 255, 255)');
 });
 
-test('the report total carries the official-total note', async ({ page }) => {
+test('the report total says how it is computed, and shows the Excel data check', async ({ page }) => {
   await page.goto(REPORT);
-  await expect(page.getByTestId('report-total-note')).toHaveText('Official total from the audit workbook');
+  const note = page.getByTestId('report-total-note');
+  await expect(note).toContainText('Computed from the Excel points: A, B, mean of C1 & C2');
+  await expect(page.getByTestId('report-issues')).toHaveText('Excel total 71% differs from 74% computed from its own points');
+  await expect(note).toContainText('Source: HS_AUDIT_FINDINGS.xlsx');
   await expect(page.getByRole('tab', { name: /^Observations/ })).toBeVisible();
   await expect(page.getByText(/Negative observations/)).toHaveCount(0);
 });
 
-test('past-audits dot links keep the quarter and region filter', async ({ page }) => {
-  await page.goto('/audits?q=Q4-2025&r=SR2');
-  const hrefs = await page.getByTestId('audit-dot').evaluateAll((els) => els.map((e) => e.getAttribute('href')));
+test('Log audit links keep the quarter and region filter', async ({ page }) => {
+  await page.goto('/log?view=audits&q=Q4-2025&r=SR2');
+  const hrefs = await page.getByTestId('log-audit').evaluateAll((els) => els.map((e) => e.getAttribute('href')));
   expect(hrefs.length).toBeGreaterThan(0);
   for (const h of hrefs) expect(h).toMatch(/^\/audit\/[\w-]+\?q=Q4-2025&r=SR2$/);
 });

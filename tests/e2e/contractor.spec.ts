@@ -110,16 +110,17 @@ test('the score chart has one band-coloured point per audit in date order, a gre
       await expect(chart.getByTestId('score-trend-line')).toHaveCount(0);
       await expect(chart.getByTestId('score-trend-first')).toHaveText(/first audit/i);
     } else {
-      // JV-ECH 74 → 85 and SIBS 65 → 72: up, so the line is green (--up)
-      await expect(chart).toHaveAttribute('data-trend', 'up');
-      const [stroke, up] = await chart.getByTestId('score-trend-line').evaluate((el) => {
+      // Computed from the Excel points: JV-ECH 76 → 74 fell (red, --down); SIBS 64 → 66 → 72 rose (green, --up)
+      const dir = id === SIBS ? 'up' : 'down';
+      await expect(chart).toHaveAttribute('data-trend', dir);
+      const [stroke, up] = await chart.getByTestId('score-trend-line').evaluate((el, d) => {
         const probe = document.createElement('span');
-        probe.style.color = 'var(--up)';
+        probe.style.color = `var(--${d})`;
         document.body.append(probe);
         const want = getComputedStyle(probe).color;
         probe.remove();
         return [getComputedStyle(el).stroke, want];
-      });
+      }, dir);
       expect(stroke).toBe(up);
     }
   }
@@ -133,7 +134,7 @@ test('the chart follows the slide, and clicking the earlier point switches s', a
   await points.first().click(); // the earliest audit = the last slide
   await expect(page).toHaveURL(/[?&]s=2(&|$)/);
   await expect(page.getByTestId('carousel')).toHaveAttribute('data-index', '2');
-  await expect(active(page).getByTestId('slide-score')).toHaveText('62%');
+  await expect(active(page).getByTestId('slide-score')).toHaveText('64%'); // SIBS 12 Nov 2025, computed from its points
   await expect(points.first()).toHaveAttribute('data-active', '');
   // keys move the chart's active point too
   await page.keyboard.press('ArrowLeft');

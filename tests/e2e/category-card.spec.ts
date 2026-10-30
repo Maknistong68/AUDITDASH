@@ -98,12 +98,9 @@ test('the compact card: essentials only, at most 55% of the dashboard card width
   const small = (await active(page).boundingBox())!;
   expect(small.width).toBeLessThanOrEqual(big.width * 0.55);
   expect(small.height).toBeLessThanOrEqual(big.height * 0.55);
-  // rank, name, gap %, Δ vs Q4; no "Driven by" rows
+  // rank, name, gap %; under "All" there is no comparison quarter; no "Driven by" rows
   const c = RANKED[0];
-  const d = Math.round(c.gapRate * 100) - Math.round(c.prevGapRate! * 100);
-  await expect(active(page)).toHaveText(
-    `#1${nameOf(ORDER[0])}${Math.round(c.gapRate * 100)}%score lost${d > 0 ? '+' : d < 0 ? '−' : '±'}${Math.abs(d)} ${Math.abs(d) === 1 ? 'pt' : 'pts'}vs Q4`,
-  );
+  await expect(active(page)).toHaveText(`#1${nameOf(ORDER[0])}${Math.round(c.gapRate * 100)}%score lost`);
   await expect(page.getByTestId('main-problem-driver')).toHaveCount(0);
   await expect(page.getByTestId('category-deck')).not.toContainText('Driven by');
 });
@@ -263,20 +260,21 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) 
   expect(await noScroll()).toBe(true);
 });
 
-test('the dashboard Main problem card renders exactly as before the refactor', async ({ page }) => {
+test('the dashboard Main problem card: every audit, drivers as bars, all categories on hover', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const mp = page.getByTestId('main-problem');
   await expect(mp.getByTestId('main-problem-gap')).toHaveText('73%');
-  // captured from the dashboard at b43b7ad, before the card was factored out; "gap" became "score lost" (one-page step).
-  // Driver counts follow the one findings rule (isFinding): 11 of 11 audits with a note → 9 of 11 with a finding.
+  // Under "All": every audit (21), no comparison; drivers are "audits with the finding / audits"; the hover layer ranks
+  // every category (owner direction 2026-10-30).
   await expect.poll(() => mp.innerText()).toBe(
-    'Main problem · Q1 2026\n\nSubcontractor Control\n\n73%\n\nscore lost\n−2 pts\nvs Q4\n\nDriven by\n\n' +
-      'Subcontractor screening & evaluation\n9 of 11 audits\nSubcontractor pre-start safety check\n9 of 11 audits\n' +
-      'Subcontractor past safety record\n9 of 11 audits',
+    'Main problem · All audits\n\nSubcontractor Control\n\n73%\n\nscore lost\n\nDriven by\n\n' +
+      'Subcontractor screening & evaluation\n18/21\nSubcontractor supervision arrangements\n17/21\nSubcontractor performance tracking\n17/21\n\n' +
+      'Score lost · all categories\n\nSubcontractors\n73%\nMonitoring\n44%\nLeadership\n44%\nCompetence\n34%\nSite\n29%\n' +
+      'Documents\n29%\nEmergency\n29%\nHealth\n24%',
   );
-  await expect(mp.getByRole('link')).toHaveAttribute('aria-label', 'Main problem Q1 2026: Subcontractor Control, 73% score lost. Open details');
+  await expect(mp.getByRole('link')).toHaveAttribute('aria-label', 'Main problem All audits: Subcontractor Control, 73% score lost. Open details');
   await expect(mp.getByRole('heading', { level: 2 })).toHaveText('Subcontractor Control');
   await expect(mp.getByRole('heading', { level: 2 })).toHaveAttribute('id', 'mp-title');
   await expect(mp).not.toContainText('#');

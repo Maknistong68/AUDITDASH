@@ -4,8 +4,8 @@ import { deltaPoints } from '../../lib/format';
 import { expectNothingClipped } from './clip';
 
 /**
- * Owner direction §21 "only what the Excel can tell us": no keyword-inferred high-risk work, one Portfolio score card
- * (bands and regions live on /audits only), and small up/down charts in place of "+1 / −2" text.
+ * Owner direction §21/§22 "only what the Excel can tell us": no keyword-inferred high-risk work, one Portfolio score card
+ * (bands on it, the trend in the Score over time card), and small up/down charts in place of "+1 / −2" text.
  */
 const repo = getRepo();
 const NAME = new Map(repo.contractors().map((c) => [c.name, c.id]));
@@ -40,38 +40,17 @@ test('the dashboard has one Portfolio card and no band or region card', async ({
   await expect(page.getByTestId('kpi-score')).toHaveCount(1);
   for (const id of ['kpi-bands', 'region-compare', 'region-row']) await expect(page.getByTestId(id)).toHaveCount(0);
   await expect(page.getByRole('heading', { name: /Contractors by band|Region/ })).toHaveCount(0);
-  await expect(page.getByTestId('hero').locator('section.card')).toHaveCount(4); // contractors, score, repeats, positives (the main problem is the dark hero tile)
+  // contractors, score over time, score, repeats, positives (the main problem is the dark hero tile)
+  await expect(page.getByTestId('hero').locator('section.card')).toHaveCount(5);
 });
 
-test('/audits is the home of the timeline, the bands and the regions', async ({ page }) => {
-  await page.goto('/audits?q=all&r=SR1%2CSR2');
-  await expect(page.getByTestId('audits-timeline')).toBeVisible();
-  await expect(page.getByTestId('audits-bands')).toBeVisible();
-  await expect(page.getByTestId('audits-regions')).toBeVisible();
-  await expect(page.getByTestId('region-quarter-bar')).toHaveCount(4);
-});
-
-test('the Portfolio card draws Q4 2025 → Q1 2026 as a green up chart (66 → 67), with the big figure and band', async ({ page }) => {
+test('the Portfolio card shows the honest average, its band and the contractors per band', async ({ page }) => {
   await page.goto('/');
   const card = page.getByTestId('kpi-score');
-  await expect(card.getByTestId('kpi-score-delta')).toHaveCount(0);
-  await expect(card).not.toContainText(/Q1 vs Q4/);
   await expect(card.getByText('Minimal', { exact: true })).toBeVisible();
-  await expect(card.locator('[data-handoff="ps-figure"]')).toHaveAttribute('aria-label', '67 percent');
-  const chart = card.getByTestId('trend-chart');
-  await expect(chart).toHaveAttribute('data-points', '2');
-  await expect(chart).toHaveAttribute('data-trend', 'up');
-  await expect(chart).toHaveAttribute('aria-label', 'Q4 2025 66% → Q1 2026 67%');
-  await expect(chart.getByTestId('trend-point')).toHaveCount(2);
-  expect(await chart.getByTestId('trend-point').evaluateAll((els) => els.map((e) => e.getAttribute('data-value')))).toEqual(['66', '67']);
-  await expect(chart.getByTestId('trend-value')).toHaveText(['66%', '67%']);
-  await expect(chart.getByTestId('trend-label')).toHaveText(['Q4 2025', 'Q1 2026']);
-  const [line, up] = await chart.getByTestId('trend-line').evaluate((el) => [getComputedStyle(el).stroke, getComputedStyle(document.documentElement).getPropertyValue('--up')]);
-  const rgb = await page.evaluate((c) => { const d = document.createElement('div'); d.style.color = c; document.body.append(d); const v = getComputedStyle(d).color; d.remove(); return v; }, up.trim());
-  expect(line).toBe(rgb);
-  // the later point sits higher
-  const ys = await chart.getByTestId('trend-point').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().top));
-  expect(ys[1]).toBeLessThan(ys[0]);
+  await expect(card.locator('p[aria-label="63 percent"]')).toHaveCount(1); // 21 audits, computed from their points
+  await expect(card.getByTestId('band-bar')).toHaveAttribute('aria-label', '4 Partially Compliant, 3 Minimally Compliant, 5 Non-Compliant');
+  await expect(card.getByTestId('trend-chart')).toHaveCount(0); // the trend lives in the Score over time card
 });
 
 test('each contractor row has a sparkline of its audit scores, coloured up/down, no "+N" text', async ({ page }) => {
@@ -81,8 +60,8 @@ test('each contractor row has a sparkline of its audit scores, coloured up/down,
   // the named cases
   const jv = row(page, NAME.get('JV-ECH (Port T1)')!).getByTestId('spark');
   await expect(jv).toHaveAttribute('data-points', '2');
-  await expect(jv).toHaveAttribute('data-trend', 'up');
-  await expect(jv).toHaveAttribute('aria-label', '74% → 85%');
+  await expect(jv).toHaveAttribute('data-trend', 'down');
+  await expect(jv).toHaveAttribute('aria-label', '76% → 74%'); // computed from the points (the Excel typed 74% → 85%)
   const nbc = row(page, NAME.get('NBC')!).getByTestId('spark');
   await expect(nbc).toHaveAttribute('data-points', '1');
   await expect(nbc).toHaveAttribute('data-trend', 'single');
@@ -140,7 +119,7 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1366, height: 657 }, { 
       await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
     }
     await expect(page.getByTestId('contractor-row').last()).toBeInViewport({ ratio: 1 });
-    await expect(page.getByTestId('trend-chart')).toBeInViewport({ ratio: 1 });
+    await expect(page.getByTestId('score-line')).toBeInViewport({ ratio: 1 });
     await ctx.close();
   });
 }
