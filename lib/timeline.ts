@@ -49,7 +49,8 @@ export function timelineRows(
   return rows.sort((a, b) => a.latest - b.latest || a.name.localeCompare(b.name));
 }
 
-const QUARTER_START: Record<Quarter, [number, number]> = { 'Q4-2025': [2025, 9], 'Q1-2026': [2026, 0] };
+/** "Q3-2026" -> [2026, 6]: year and first month (0-based). */
+const quarterStart = (q: Quarter): [number, number] => [Number(q.slice(3)), (Number(q[1]) - 1) * 3];
 const day = (iso: string) => {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   return m ? Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) / 864e5 : NaN;
@@ -58,7 +59,7 @@ const day = (iso: string) => {
 /** The axis: from the first day of the first quarter to the first day after the last (UTC days). */
 export function timeDomain(quarters: Quarter[]): { start: number; end: number; quarters: { quarter: Quarter; from: number; to: number }[] } {
   const qs = quarters.map((quarter) => {
-    const [y, m] = QUARTER_START[quarter];
+    const [y, m] = quarterStart(quarter);
     return { quarter, start: Date.UTC(y, m, 1) / 864e5, end: Date.UTC(y, m + 3, 1) / 864e5 };
   });
   if (!qs.length) return { start: 0, end: 1, quarters: [] };

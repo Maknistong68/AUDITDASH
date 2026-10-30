@@ -5,7 +5,6 @@ import { useTransition } from 'react';
 import { QUARTERS, REGIONS, filterToQuery } from '@/lib/filters';
 import type { Filter, Subregion } from '@/lib/types';
 
-const QUARTER_LABEL: Record<Filter['quarter'], string> = { 'Q4-2025': 'Q4 2025', 'Q1-2026': 'Q1 2026', all: 'All' };
 
 /**
  * Apple segmented control for the quarter (sliding thumb) and pill toggles for the sub-regions.
@@ -45,7 +44,7 @@ export function FilterBar({ filter }: { filter: Filter }) {
                   transition={{ type: 'spring', stiffness: 420, damping: 34 }}
                 />
               )}
-              <span className="relative">{QUARTER_LABEL[q]}</span>
+              <span className="relative">{q === 'all' ? 'All' : q.replace('-', ' ')}</span>
             </button>
           );
         })}

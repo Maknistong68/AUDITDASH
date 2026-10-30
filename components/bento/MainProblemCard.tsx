@@ -15,13 +15,13 @@ export interface MainProblem {
   category: CategoryId;
   gapRate: number;
   prevGapRate: number | null;
-  quarter: Quarter;
+  quarter: Quarter | 'all';
   items: { itemCode: string; question: string; hits: number; severity?: number }[];
 }
 
-export const qLabel = (q: Quarter) => q.replace('-', ' ');
-export const prevLabel = (q: Quarter) => {
-  const i = QUARTERS.indexOf(q);
+export const qLabel = (q: Quarter | 'all') => (q === 'all' ? 'All audits' : q.replace('-', ' '));
+export const prevLabel = (q: Quarter | 'all') => {
+  const i = q === 'all' ? -1 : QUARTERS.indexOf(q);
   return i > 0 ? QUARTERS[i - 1].slice(0, 2) : null;
 };
 const whole = (n: number) => String(Math.round(n));

@@ -1,4 +1,4 @@
-import { Camera, ThumbsUp } from 'lucide-react';
+import { ThumbsUp } from 'lucide-react';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
 import { CodeChip } from '@/components/details/parts';
 import type { Category, Observation } from '@/lib/types';
@@ -13,7 +13,7 @@ export function Entry({ o, question }: { o: Observation; question?: string }) {
       data-testid="report-entry"
       data-kind={o.kind}
       data-category={o.category ?? undefined}
-      className="grid break-inside-avoid grid-cols-[3.6em_minmax(0,1fr)_18px] items-start gap-3 py-[clamp(9px,1.3svh,13px)] print:py-2"
+      className="grid break-inside-avoid grid-cols-[3.6em_minmax(0,1fr)] items-start gap-3 py-[clamp(9px,1.3svh,13px)] print:py-2"
     >
       <span className="flex flex-col items-stretch gap-1 pt-[2px]">
         {o.kind === 'positive' ? (
@@ -32,14 +32,6 @@ export function Entry({ o, question }: { o: Observation; question?: string }) {
         )}
       </span>
       <p className="whitespace-pre-line break-words text-[15px] leading-[1.55] [overflow-wrap:anywhere]">{o.text}</p>
-      <span className="pt-[3px] text-faint">
-        {o.hasPhoto && (
-          <span title="Photo in the audit report">
-            <Camera size={16} strokeWidth={2} aria-hidden />
-            <span className="sr-only">Photo attached</span>
-          </span>
-        )}
-      </span>
     </li>
   );
 }

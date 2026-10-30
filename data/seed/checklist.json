@@ -4,15 +4,15 @@
     "section": "A",
     "subsection": null,
     "question": "Is there a strategic plan detailing the program vision, strategic aims, HSSE objectives and targets?",
-    "weight": 3,
+    "weight": 4,
     "category": "documents"
   },
   {
     "code": "A2",
     "section": "A",
     "subsection": null,
-    "question": "Is there a HSSE execution plan (Bridging Document) outlining how Contractor Management deliver their roles & responsibilities?",
-    "weight": 3,
+    "question": "Is there a HSSE execution plan outlining how Contractor Management deliver their roles & responsibilities?",
+    "weight": 2,
     "category": "documents"
   },
   {
@@ -28,7 +28,7 @@
     "section": "A",
     "subsection": null,
     "question": "Is there specific HSSE audit and inspection schedules? Complied with?",
-    "weight": 3,
+    "weight": 4,
     "category": "monitoring"
   },
   {
@@ -36,7 +36,7 @@
     "section": "A",
     "subsection": null,
     "question": "How is HSSE data and reporting managed, monitored & evaluated (including but not limited to Enablon).",
-    "weight": 3,
+    "weight": 4,
     "category": "monitoring"
   },
   {
@@ -44,7 +44,7 @@
     "section": "A",
     "subsection": null,
     "question": "Enablon process, management and utilization (users, review and validation process etc.?)",
-    "weight": 3,
+    "weight": 4,
     "category": "documents"
   },
   {
@@ -60,7 +60,7 @@
     "section": "A",
     "subsection": null,
     "question": "How is HSSE information communicated (alerts, campaigns, LL) and actions tracked where required?",
-    "weight": 3,
+    "weight": 4,
     "category": "monitoring"
   },
   {
@@ -76,7 +76,7 @@
     "section": "A",
     "subsection": null,
     "question": "How does Contractor ensure that HSSE related non-conformities and corrective action are escalated where required? What is the escalation process and responsibilities?",
-    "weight": 3,
+    "weight": 2,
     "category": "monitoring"
   },
   {
@@ -84,7 +84,7 @@
     "section": "A",
     "subsection": null,
     "question": "Is there a Reward & Recognition award program and a consequence process?",
-    "weight": 3,
+    "weight": 4,
     "category": "leadership"
   },
   {
@@ -92,7 +92,7 @@
     "section": "A",
     "subsection": null,
     "question": "Show evidence of Monthly HSSE Executive Leadership Meetings, schedule, MoM and action log",
-    "weight": 3,
+    "weight": 4,
     "category": "leadership"
   },
   {
@@ -116,7 +116,7 @@
     "section": "A",
     "subsection": null,
     "question": "How are leadership engagement tours scheduled, measured/recorded and tracked etc.?",
-    "weight": 3,
+    "weight": 2,
     "category": "leadership"
   },
   {
@@ -324,7 +324,7 @@
     "section": "B",
     "subsection": "B8",
     "question": "Are employees aware of a process for reporting incidents and observations? Posters/Charts displayed?",
-    "weight": 3,
+    "weight": 4,
     "category": "incident"
   },
   {
@@ -412,7 +412,7 @@
     "section": "C",
     "subsection": "C1",
     "question": "Do you have an established Health & Safety Steering Committee, and is senior management represented on it?",
-    "weight": 1,
+    "weight": 2,
     "category": "leadership"
   },
   {
@@ -420,7 +420,7 @@
     "section": "C",
     "subsection": "C1",
     "question": "What actions were made by the Sr management during the walkthrough",
-    "weight": 1,
+    "weight": 2,
     "category": "leadership"
   },
   {
@@ -452,7 +452,7 @@
     "section": "C",
     "subsection": "C1",
     "question": "What NC's / Opportunity For Improvements and recomendations for Corrective Action's were made by the auditor?",
-    "weight": 1,
+    "weight": 3,
     "category": "monitoring"
   },
   {
@@ -476,7 +476,7 @@
     "section": "C",
     "subsection": "C1",
     "question": "Do managers and supervisors ensure that Risk Assessments and Method Statements (RAMS) are approved, communicated, and implemented for all work activities?",
-    "weight": 1,
+    "weight": 2,
     "category": "documents"
   },
   {
@@ -492,7 +492,7 @@
     "section": "C",
     "subsection": "C1",
     "question": "Do the requirements specified in the RAMS accurately reflect the work activity being conducted? (Specific activity covered, all relevant significant hazards identified, all mandated controls in place)",
-    "weight": 2,
+    "weight": 3,
     "category": "documents"
   },
   {

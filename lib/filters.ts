@@ -1,7 +1,9 @@
 import { isAuditType } from './auditTypeIds';
+import meta from '../data/seed/meta.json';
 import type { Filter, Quarter, Subregion } from './types';
 
-export const QUARTERS: Quarter[] = ['Q4-2025', 'Q1-2026'];
+/** Quarters that have audits in the Excel, oldest first (written by scripts/import_excel.py). */
+export const QUARTERS = meta.quarters as Quarter[];
 export const REGIONS: Subregion[] = ['SR1', 'SR2'];
 
 /** Parse `q`, `r` and `t` (audit type; absent/invalid -> hs, represented by an absent `type`) URL params. Absent/invalid q -> 'all'; absent/all-invalid r -> both; `r=` -> none. */

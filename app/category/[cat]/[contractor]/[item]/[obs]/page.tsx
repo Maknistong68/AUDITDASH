@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowRight, Camera, ImageOff } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { getRepo } from '@/lib/data/repo';
-import { isNaObservation } from '@/lib/analytics';
+import { isNaObservation, subsectionOf } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
 import { detailContext, href, type SP } from '@/lib/details';
 import { dateLabel, quarterLabel } from '@/lib/format';
@@ -17,6 +17,7 @@ import { CategoryChip } from '@/components/details/parts';
 type Params = { cat: string; contractor: string; item: string; obs: string };
 
 /** The organisation's own terms; neutral styling (a note on an item is not a pass/fail verdict). */
+const ANSWER = { full: 'Full', partial: 'Partial', no: 'No', na: 'N/A' } as const;
 const KIND = { negative: 'Observation', site: 'Site observation', positive: 'Positive observation' } as const;
 
 /** The observation in full: the only level with long text. */
@@ -33,6 +34,9 @@ export default async function ObservationPage({ params, searchParams }: { params
   }
   const { filter, query } = detailContext(await searchParams);
   const c = categoryById(cat);
+  const answer = audit.answers?.[item.code];
+  const sub = subsectionOf(item.code);
+  const sec = audit.sections.find((s) => s.code === sub);
   const itemHref = href(`/category/${cat}/${contractor.id}/${encodeURIComponent(item.code)}`, query);
   const crumbs = [
     { label: 'Overview', href: `/?${query}` },
@@ -70,13 +74,23 @@ export default async function ObservationPage({ params, searchParams }: { params
         </BentoCard>
 
         <div className="flex min-w-0 flex-col gap-[var(--gap-grid)] min-[1100px]:col-span-4">
-          <BentoCard i={1} testid="photo" className="overflow-hidden">
-            <div className="grid aspect-[4/3] place-items-center bg-surface-2 text-muted" role="img" aria-label={obs.hasPhoto ? 'Photo placeholder: a photo is attached in the audit report' : 'No photo for this observation'}>
-              <div className="flex flex-col items-center gap-2 text-center">
-                {obs.hasPhoto ? <Camera size={34} strokeWidth={1.8} aria-hidden /> : <ImageOff size={34} strokeWidth={1.8} aria-hidden />}
-                <span className="text-[14px]">{obs.hasPhoto ? 'Photo in the audit report' : 'No photo'}</span>
-              </div>
-            </div>
+          <BentoCard i={1} testid="observation-score" className="gap-3 p-[clamp(16px,2.2svh,26px)]">
+            <TileLabel>{answer ? 'Answer in the checklist' : `Section ${sub} in this audit`}</TileLabel>
+            {answer ? (
+              <span className="text-[34px] font-semibold leading-none tracking-[-0.03em]">{ANSWER[answer]}</span>
+            ) : sec && sec.possible > 0 ? (
+              <>
+                <span className="text-[34px] font-semibold leading-none tracking-[-0.03em] tabular-nums">
+                  {Math.round((sec.scored / sec.possible) * 100)}<span className="text-[18px] text-muted">%</span>
+                </span>
+                <div className="h-2 overflow-hidden rounded-full bg-fill" aria-hidden>
+                  <div className="h-full rounded-full bg-[var(--accent)]" style={{ width: `${(sec.scored / sec.possible) * 100}%` }} />
+                </div>
+                <span className="text-[13px] text-muted tabular-nums">{sec.scored} of {sec.possible} points</span>
+              </>
+            ) : (
+              <span className="text-[15px] text-muted">Not applicable</span>
+            )}
           </BentoCard>
           <BentoCard i={2} testid="observation-meta" className="gap-4 p-[clamp(16px,2.2svh,26px)]">
             <TileLabel>Where it was seen</TileLabel>

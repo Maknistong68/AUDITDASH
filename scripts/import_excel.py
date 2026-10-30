@@ -67,7 +67,8 @@ def parse_checklist(path):
             items.append({
                 "code": code,
                 "section": section,
-                "subsection": subsection,
+                # From the code itself: the Rev template labels the B11/B12 sub-headers "B1.1"/"B1.2".
+                "subsection": code.split(".")[0] if section in ("B", "C") else None,
                 "question": " ".join(str(row[2]).split()),
                 "weight": weight,
                 "category": CODE_CATEGORY.get(code),
@@ -352,8 +353,9 @@ def _parse_observations(rows, start, audit_id, questions=(), findings=(), tally=
             if e["code"] and e["marker"]:
                 t[e["marker"]] += 1
 
-    # Template rows: a checklist code with no comment and no photo is not an observation.
-    # Ids are numbered before dropping "Not Applicable" notes, so ids stay stable (gaps allowed).
+    # Template rows: a checklist code with no comment and no photo is not an observation. Pictures are never
+    # imported (owner, 2026-10-30); a photo-only row still takes an id so ids stay stable (gaps allowed), like
+    # dropped "Not Applicable" notes.
     entries = [e for e in entries if e["parts"] or e["photo"]]
     out = []
     for n, e in enumerate(entries, 1):
@@ -365,10 +367,9 @@ def _parse_observations(rows, start, audit_id, questions=(), findings=(), tally=
             "kind": e["kind"],
             "text": text,
             "category": category_for(e["code"], e["kind"], text),
-            "hasPhoto": e["photo"],
             "marker": e["marker"],
         })
-    return [o for o in out if not is_na_note(o["text"])]
+    return [o for o in out if o["text"].strip() and not is_na_note(o["text"])]
 
 
 _COMPLIANT = re.compile(r"(?<![a-z])compliant(?![a-z])", re.I)
@@ -434,6 +435,8 @@ def parse_results(path, checklist=(), checklist_path=None, tally=None):
             total = _num(_after_label(rows, start, "TOTAL FINAL SCORE"))
             if hdr is None or tot is None or total is None:
                 raise ValueError(f"Missing Part 2 score table for {audit_id}")
+            sections = _parse_sections(rows, start, hdr[0], tot[0])
+            score, issues = true_score(sections, total)
             audits.append({
                 "id": audit_id,
                 "contractorId": info["contractNo"],
@@ -442,8 +445,11 @@ def parse_results(path, checklist=(), checklist_path=None, tally=None):
                 "location": " ".join(str(location).split()),
                 "inspectionNo": str(inspection).strip(),
                 "auditors": auditors,
-                "totalScore": total,
-                "sections": _parse_sections(rows, start, hdr[0], tot[0]),
+                "totalScore": score,
+                "reportedScore": total,
+                "source": f"{Path(path).name} › {ws.title} › column {openpyxl.utils.get_column_letter(start + 1)}",
+                "issues": issues,
+                "sections": sections,
             })
             contractors.setdefault(info["contractNo"], {
                 "id": info["contractNo"], "name": info["name"],
@@ -453,6 +459,147 @@ def parse_results(path, checklist=(), checklist_path=None, tally=None):
     return (sorted(contractors.values(), key=lambda c: order[c["id"]]), audits, observations)
 
 
+# --------------------------------------------------------------------------- honest score
+
+def _ratio(sec):
+    return None if not sec or not sec["possible"] else min(sec["scored"], sec["possible"]) / sec["possible"]
+
+
+def true_score(sections, reported=None):
+    """(score, issues): the workbook formula applied to the workbook's own points, nothing added.
+
+    Section A = points scored / possible; B = points scored / possible; C = mean(C1, C2) (the template's
+    AVERAGE(C1, C2)); total = mean of the applicable sections. Points scored above possible are capped. The
+    template's "+0.012" on the total and hand-typed Final Score cells are ignored; each difference is reported.
+    """
+    by = {s["code"]: s for s in sections}
+    issues = []
+    for s in sections:
+        if s["scored"] > s["possible"]:
+            issues.append(f"{s['code']}: {s['scored']:g} points scored of {s['possible']:g} possible (capped at {s['possible']:g})")
+    c_parts = [r for r in (_ratio(by.get("C1")), _ratio(by.get("C2"))) if r is not None]
+    parts = [r for r in (_ratio(by.get("A")), _ratio(by.get("B")), sum(c_parts) / len(c_parts) if c_parts else None) if r is not None]
+    score = round(sum(parts) / len(parts), 4) if parts else None
+    if reported is not None and score is not None and round(reported * 100) != round(score * 100):
+        issues.append(f"Excel total {round(reported * 100)}% differs from {round(score * 100)}% computed from its own points")
+    return score, issues
+
+
+def flag_duplicates(audits):
+    """Audits of different contractors whose section points are identical: likely a copied block."""
+    seen = {}
+    for a in audits:
+        key = tuple((s["code"], s["possible"], s["scored"]) for s in a["sections"])
+        if key in seen and seen[key]["contractorId"] != a["contractorId"]:
+            for x, y in ((a, seen[key]), (seen[key], a)):
+                x["issues"].append(f"Section points identical to audit {y['id']}: check for a copied block")
+        seen.setdefault(key, a)
+
+
+# --------------------------------------------------------------------------- completed checklist workbook
+
+def _quarter_of(d):
+    return f"Q{(d.month - 1) // 3 + 1}-{d.year}"
+
+
+def _label_value(rows, label):
+    """Value right of a header label (' Project:', ' Date:', ...) in the first rows of the H&S sheet."""
+    for row in rows[:6]:
+        for i, v in enumerate(row):
+            if isinstance(v, str) and v.strip() == label:
+                return next((x for x in row[i + 1:] if not _empty(x)), None)
+    return None
+
+
+SECTION_LABELS = {"A": "MANAGEMENT", "B": "PROCESS AND PROCEDURES (ASSESSED ON SITE)", "C": "PLANNING AND COMMITMENT"}
+# Part 2 row names (results workbook); Part 1 sub-headers are used when present, these when mislabelled.
+SUB_LABELS = {
+    "B1": "Risk Assessments Method Statements", "B2": "Competent Person Designation", "B3": "Emergency Response",
+    "B4": "Work Permit", "B5": "Utility Clearance", "B6": "Subcontractor Management", "B7": "Training",
+    "B8": "Incident reporting", "B9": "Fire Prevention", "B10": "Personal Protective Equipment", "B11": "Medical",
+    "B12": "Occupational and Health Surveillance", "C1": "Leadership Engagement", "C2": "Planning",
+}
+
+
+def sections_from_answers(checklist, answers, labels):
+    """Part 2 rebuilt from Part 1: A, B, B1..B12, C, C1, C2 as {code, label, possible, scored}.
+
+    Full = weight, Partial = weight / 2, No = 0; N/A items count in neither possible nor scored.
+    """
+    value = {"full": 1, "partial": 0.5, "no": 0}
+    acc = {}
+    for item in checklist:
+        a = answers.get(item["code"])
+        if a is None or a == "na":
+            continue
+        for code in {item["section"], item["subsection"] or item["section"]}:
+            p, sc = acc.get(code, (0, 0))
+            acc[code] = (p + item["weight"], sc + item["weight"] * value[a])
+    order = ["A", "B"] + [f"B{i}" for i in range(1, 13)] + ["C", "C1", "C2"]
+    num = lambda x: int(x) if float(x).is_integer() else x
+    return [{"code": c, "label": SECTION_LABELS.get(c) or SUB_LABELS[c],
+             "possible": num(acc.get(c, (0, 0))[0]), "scored": num(acc.get(c, (0, 0))[1])} for c in order]
+
+
+def parse_checklist_audit(path, checklist):
+    """One completed H&S checklist workbook (Part 1 answers + Part 3 notes) -> (contractor, audit, observations).
+
+    Scores come from Part 1 answers with the workbook formula (true_score); Part 2's cached values are only
+    compared, never used. Pictures are not imported.
+    """
+    ws = _load(path)["Health & Safety"]
+    rows = [list(r) for r in ws.iter_rows(values_only=True)]
+    info = contractor_for(_label_value(rows, "Project:"))
+    when = _to_date(_label_value(rows, "Date:"))
+    quarter = _quarter_of(when)
+    audit_id = f"{info['contractNo']}-{quarter}-{when:%Y%m%d}"
+    answers, labels, reported, part2 = {}, {}, None, {}
+    for row in rows:
+        code = re.sub(r"\s+", "", str(row[1])) if row[1] is not None else ""
+        if code == "TOTAL FINAL SCORE".replace(" ", ""):
+            reported = _num(row[7])
+        if ITEM_CODE.match(code) and isinstance(row[9], str) and row[9].strip().lower() in COMPLIANCE:
+            answers.setdefault(code, {"n/a": "na"}.get(row[9].strip().lower(), row[9].strip().lower()))
+        elif re.fullmatch(r"B\d+|C\d+", code) and isinstance(row[2], str):
+            labels[code] = " ".join(row[2].split())
+    sections = sections_from_answers(checklist, answers, labels)
+    score, issues = true_score(sections, reported)
+    observations = _parse_observations(rows, 1, audit_id)
+    return (
+        {"id": info["contractNo"], "name": info["name"], "contractNo": info["contractNo"], "subregion": info["subregion"]},
+        {
+            "id": audit_id,
+            "contractorId": info["contractNo"],
+            "quarter": quarter,
+            "date": when.isoformat(),
+            "location": " ".join(str(_label_value(rows, "Location:")).split()),
+            "inspectionNo": str(_label_value(rows, "Inspection No.:")).strip(),
+            "auditors": [" ".join(a.split()) for a in str(_label_value(rows, "Auditor:")).split(",") if a.strip()],
+            "totalScore": score,
+            "reportedScore": reported,
+            "source": f"{Path(path).name} › Health & Safety",
+            "issues": issues,
+            "answers": answers,
+            "sections": sections,
+        },
+        observations,
+    )
+
+
+def keep_codes(observations, previous):
+    """Reuse a previous seed's itemCode for notes whose code cannot be read now (same id, same text).
+
+    Audit 4800001112-Q4-2025-20251015's codes were recovered from that audit's own checklist workbook, which is
+    no longer in data/source; its earlier import keeps them.
+    """
+    prev = {o["id"]: o for o in previous}
+    for o in observations:
+        p = prev.get(o["id"])
+        if o["itemCode"] is None and p and p.get("itemCode") and p["text"] == o["text"]:
+            o["itemCode"] = p["itemCode"]
+            o["category"] = p["category"]
+
+
 # --------------------------------------------------------------------------- CLI
 
 def main(argv=None):
@@ -460,22 +607,46 @@ def main(argv=None):
     ap.add_argument("--results", required=True)
     ap.add_argument("--checklist", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--audit", action="append", default=[],
+                    help="a completed H&S checklist workbook to import as one more audit (repeatable)")
+    ap.add_argument("--previous", help="earlier observations.json whose recovered item codes are kept")
     args = ap.parse_args(argv)
     checklist = parse_checklist(args.checklist)
     tally = {}
-    contractors, audits, observations = parse_results(args.results, checklist, args.checklist, tally)
+    contractors, audits, observations = parse_results(args.results, checklist, None, tally)
+    for path in args.audit:
+        c, a, obs = parse_checklist_audit(path, checklist)
+        if any(x["id"] == a["id"] for x in audits):
+            raise ValueError(f"Audit {a['id']} is already in the results workbook")
+        if all(x["id"] != c["id"] for x in contractors):
+            contractors.append(c)
+        audits.append(a)
+        observations.extend(obs)
+    audits.sort(key=lambda a: (a["date"], a["id"]))
+    flag_duplicates(audits)
+    if args.previous and Path(args.previous).exists():
+        keep_codes(observations, json.loads(Path(args.previous).read_text(encoding="utf-8")))
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for name, data in (("checklist", checklist), ("contractors", contractors),
                        ("audits", audits), ("observations", observations)):
         (out / f"{name}.json").write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    quarters = sorted({a["quarter"] for a in audits}, key=lambda q: (q[3:], q[:2]))
+    meta = {"quarters": quarters, "source": [Path(args.results).name, *(Path(p).name for p in args.audit)]}
+    (out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
     (out / "checklists").mkdir(exist_ok=True)
-    for kind, doc in parse_all_checklists(args.checklist, checklist).items():
+    (out / "checklists" / "hs.json").write_text(
+        json.dumps(parse_hs_typed(args.checklist, checklist), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    sheets = set(_load(args.checklist).sheetnames)
+    for kind, doc in parse_all_checklists(args.checklist, checklist).items() if set(TYPE_SHEETS.values()) <= sheets else ():
         (out / "checklists" / f"{kind}.json").write_text(
             json.dumps(doc, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     for audit_id, t in tally.items():
         if t["compliant"] or t["na"]:
             print(f"  {audit_id}: {t['compliant']} COMPLIANT, {t['na']} N/A evidence markers")
+    for a in audits:
+        for issue in a["issues"]:
+            print(f"  ! {a['id']}: {issue}")
     print(f"{len(contractors)} contractors, {len(audits)} audits, "
           f"{len(observations)} observations, {len(checklist)} checklist items")
 

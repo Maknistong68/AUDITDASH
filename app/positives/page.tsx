@@ -23,7 +23,7 @@ export default async function PositivesPage({ searchParams }: { searchParams: Pr
     href: href(`/contractor/${r.contractor.id}`, query),
   }));
   const notes = positiveNotes(repo, filter).map((n) => ({
-    id: n.id, text: n.text, hasPhoto: n.hasPhoto, contractor: n.contractor.name, date: dateLabel(n.date),
+    id: n.id, text: n.text, contractor: n.contractor.name, date: dateLabel(n.date),
     href: `${href(`/audit/${encodeURIComponent(n.auditId)}`, query)}&tab=positive`,
   }));
   const empty = summary.audits === 0 ? 'No audits match this filter' : summary.total === 0 ? 'No positive observations' : null;

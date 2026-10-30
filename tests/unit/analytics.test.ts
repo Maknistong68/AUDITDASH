@@ -84,13 +84,13 @@ describe('score-based gap', () => {
   const gap = (c: string, f: Filter = ALL) => categoryGaps(repo, f).find((x) => x.category === c)!;
   test('hand-computed permit-subsection compliance 4800001272-Q4', () => {
     const a = repo.audits().find((x) => x.id === '4800001272-Q4-2025-20251029')!;
-    const items = repo.checklist().filter((i) => i.category === 'documents' && ['B4', 'B5'].includes(i.subsection));
+    const items = repo.checklist().filter((i) => i.category === 'documents' && ['B4', 'B5'].includes(i.subsection ?? ''));
     expect(auditCompliance(a, items)).toBeCloseTo((3 * 0.5 + 1 * 0.5 + 3 + 1 + 1) / 9, 10);
     expect(auditCompliance(a, items)).toBeCloseTo(0.7778, 4);
   });
   test('N/A subsection excluded from compliance', () => {
     const a = repo.audits().find((x) => x.id === '4800001112-Q4-2025-20251015')!;
-    const permits = repo.checklist().filter((i) => i.category === 'documents' && ['B4', 'B5'].includes(i.subsection));
+    const permits = repo.checklist().filter((i) => i.category === 'documents' && ['B4', 'B5'].includes(i.subsection ?? ''));
     const b4 = a.sections.find((s) => s.code === 'B4')!;
     expect(auditCompliance(a, permits)).toBeCloseTo(b4.scored / b4.possible, 10);
   });

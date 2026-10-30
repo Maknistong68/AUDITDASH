@@ -1,11 +1,11 @@
 'use client';
 import Link from 'next/link';
-import { Camera, ThumbsUp } from 'lucide-react';
+import { ThumbsUp } from 'lucide-react';
 import { HandoffLanding } from '@/components/motion/HandoffLink';
 import { POSITIVES_CARD, POSITIVES_FIGURE } from '@/lib/handoff';
 
 export interface PositiveContractor { id: string; name: string; count: number; audits: number; perAudit: number; href: string }
-export interface PositiveNote { id: string; text: string; hasPhoto: boolean; contractor: string; date: string; href: string }
+export interface PositiveNote { id: string; text: string; contractor: string; date: string; href: string }
 type Summary = { total: number; audits: number; auditsWith: number; contractors: number; contractorsWith: number };
 
 /**
@@ -138,12 +138,6 @@ function Notes({ notes }: { notes: PositiveNote[] }) {
                 <span className="flex flex-wrap items-center gap-x-2 text-[12px] leading-none text-muted">
                   <span className="font-semibold text-ink">{n.contractor}</span>
                   <span>{n.date}</span>
-                  {n.hasPhoto && (
-                    <span className="inline-flex items-center gap-1" data-testid="positives-photo">
-                      <Camera size={12} aria-hidden />
-                      photo
-                    </span>
-                  )}
                 </span>
               </span>
             </Link>

@@ -3,8 +3,9 @@ import type { Repo } from './data/repo';
 import type { Audit, Band, CategoryId, ChecklistItem, Contractor, Filter, Observation, Quarter, Subregion } from './types';
 import { CATEGORIES } from './categories';
 import { itemLabel } from './itemLabels';
+import { QUARTERS } from './filters';
 
-const QUARTER_ORDER: Quarter[] = ['Q4-2025', 'Q1-2026'];
+const QUARTER_ORDER: Quarter[] = QUARTERS;
 const mean = (xs: number[]): number | null => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
 const byDate = (a: Audit, b: Audit) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id);
 
@@ -41,11 +42,9 @@ export function portfolioSummary(repo: Repo, filter: Filter): {
   const avgScore = avg(audits);
   const obs = obsByAudit(repo, audits);
   let delta: number | null = null;
-  if (filter.quarter === 'Q1-2026' || filter.quarter === 'all') {
-    const q1 = avg(select(repo, filter, 'Q1-2026'));
-    const q4 = avg(select(repo, filter, 'Q4-2025'));
-    if (q1 !== null && q4 !== null) delta = q1 - q4;
-  }
+  const { prevAudits } = scopeOf(repo, filter);
+  const before = avg(prevAudits);
+  if (avgScore !== null && before !== null) delta = avgScore - before;
   return {
     avgScore,
     band: avgScore === null ? null : bandFor(avgScore),
@@ -157,8 +156,8 @@ function findingsOf(repo: Repo, audits: Audit[], obs: Observation[], cat: Catego
 }
 
 export function categoryGaps(repo: Repo, filter: Filter): ReturnType<typeof gapsOver> {
-  const prevAudits = filter.quarter === 'Q1-2026' ? select(repo, filter, 'Q4-2025') : null;
-  return gapsOver(repo, filter, select(repo, filter), prevAudits);
+  const { audits, prevAudits } = scopeOf(repo, filter);
+  return gapsOver(repo, filter, audits, prevAudits.length ? prevAudits : null);
 }
 
 /** Per-category gaps over an explicit audit set (prevAudits -> prevGapRate, null when absent). */
@@ -354,6 +353,8 @@ export const subsectionOf = (itemCode: string): string => (itemCode.startsWith('
  */
 export function isFinding(audit: Audit, o: Observation): boolean {
   if (o.kind !== 'negative' || !o.itemCode || o.auditId !== audit.id) return false;
+  // Exact rule when Part 1 was imported: the question was answered Partial or No.
+  if (audit.answers) return audit.answers[o.itemCode] === 'partial' || audit.answers[o.itemCode] === 'no';
   if (o.marker) return false;
   if (!o.text.trim()) return false;
   const code = subsectionOf(o.itemCode);
@@ -574,7 +575,7 @@ export function positivesByContractor(repo: Repo, filter: Filter): { contractor:
 
 /** The positive observations themselves, newest audit first (then id), with their contractor and audit date. */
 export function positiveNotes(repo: Repo, filter: Filter): {
-  id: string; text: string; hasPhoto: boolean; auditId: string; date: string; contractor: Contractor;
+  id: string; text: string; auditId: string; date: string; contractor: Contractor;
 }[] {
   const audits = select(repo, filter);
   const audit = new Map(audits.map((a) => [a.id, a]));
@@ -583,7 +584,7 @@ export function positiveNotes(repo: Repo, filter: Filter): {
     .filter((o) => o.kind === 'positive')
     .map((o) => {
       const a = audit.get(o.auditId)!;
-      return { id: o.id, text: o.text, hasPhoto: o.hasPhoto, auditId: a.id, date: a.date, contractor: contractor.get(a.contractorId)! };
+      return { id: o.id, text: o.text, auditId: a.id, date: a.date, contractor: contractor.get(a.contractorId)! };
     })
     .sort((x, y) => y.date.localeCompare(x.date) || x.id.localeCompare(y.id, undefined, { numeric: true }));
 }
@@ -624,34 +625,31 @@ export function compareContractors(repo: Repo, filter: Filter, ids: string[]): {
 }
 
 /**
- * The quarter's main problem: worst category by score-based gap on the LATEST quarter present in the filtered
- * audits. prevGapRate = the same category's gap in the previous quarter (same regions/contractor) or null.
- * items = that quarter's top 3 driving items by impact (audits noted × subsection score lost). Null when the filter has no audits.
+ * The scope every headline figure uses: the filter's audits (all quarters under 'all', so a quarter with a single
+ * audit never decides the headline) and, for a selected quarter, the audits of the quarter before it that has audits
+ * (the comparison). Under 'all' there is no comparison: the score trend chart shows the change over time.
  */
-export function mainProblem(repo: Repo, filter: Filter): {
-  category: CategoryId; gapRate: number; prevGapRate: number | null; quarter: Quarter;
-  items: { itemCode: string; question: string; hits: number; severity: number; impact: number }[];
-} | null {
+export function scopeOf(repo: Repo, filter: Filter): { quarter: Quarter | 'all'; audits: Audit[]; prevAudits: Audit[] } {
   const audits = select(repo, filter);
-  if (!audits.length) return null;
-  const quarter = QUARTER_ORDER.filter((q) => audits.some((a) => a.quarter === q)).at(-1)!;
-  const qf: Filter = { ...filter, quarter };
-  let worst: { category: CategoryId; gapRate: number } | null = null;
-  for (const g of categoryGaps(repo, qf)) {
-    if (g.gapRate !== null && (!worst || g.gapRate > worst.gapRate)) worst = { category: g.category, gapRate: g.gapRate };
-  }
-  if (!worst) return null;
-  const qi = QUARTER_ORDER.indexOf(quarter);
-  const prevAudits = qi > 0 ? select(repo, filter, QUARTER_ORDER[qi - 1]) : [];
-  return {
-    ...worst,
-    prevGapRate: prevAudits.length ? scoreGap(repo, prevAudits, worst.category) : null,
-    quarter,
-    items: categoryDetail(repo, qf, worst.category).items.slice(0, 3),
-  };
+  if (filter.quarter === 'all') return { quarter: 'all', audits, prevAudits: [] };
+  const qi = QUARTER_ORDER.indexOf(filter.quarter);
+  const prevQ = QUARTER_ORDER.slice(0, Math.max(qi, 0)).filter((q) => select(repo, filter, q).length).at(-1);
+  return { quarter: filter.quarter, audits, prevAudits: prevQ ? select(repo, filter, prevQ) : [] };
 }
 
-type CategoryCard = NonNullable<ReturnType<typeof mainProblem>>;
+/**
+ * The main problem: worst category by score-based gap over the scope's audits (scopeOf). prevGapRate = the same
+ * category's gap in the comparison quarter, or null. items = top 3 driving items by impact (audits noted × subsection
+ * score lost). Null when the filter has no audits.
+ */
+export function mainProblem(repo: Repo, filter: Filter): CategoryCard | null {
+  return categoryCards(repo, filter)[0] ?? null;
+}
+
+export interface CategoryCard {
+  category: CategoryId; gapRate: number; prevGapRate: number | null; quarter: Quarter | 'all';
+  items: { itemCode: string; question: string; hits: number; severity: number; impact: number }[];
+}
 
 /**
  * The main-problem card's figures for any category: the same latest quarter, score-based gap, previous-quarter gap
@@ -667,15 +665,12 @@ export function categoryCard(repo: Repo, filter: Filter, cat: CategoryId): Categ
  * card #1 is mainProblem. Categories with no applicable item in that quarter are left out. [] for an empty filter.
  */
 export function categoryCards(repo: Repo, filter: Filter): CategoryCard[] {
-  const audits = select(repo, filter);
+  const { quarter, audits, prevAudits } = scopeOf(repo, filter);
   if (!audits.length) return [];
-  const quarter = QUARTER_ORDER.filter((q) => audits.some((a) => a.quarter === q)).at(-1)!;
   const qf: Filter = { ...filter, quarter };
-  const qi = QUARTER_ORDER.indexOf(quarter);
-  const prevAudits = qi > 0 ? select(repo, filter, QUARTER_ORDER[qi - 1]) : [];
   return categoryGaps(repo, qf)
     .filter((g): g is typeof g & { gapRate: number } => g.gapRate !== null)
-    .sort((a, b) => b.gapRate - a.gapRate)
+    .sort((a, b) => b.gapRate - a.gapRate || CATEGORIES.findIndex((c) => c.id === a.category) - CATEGORIES.findIndex((c) => c.id === b.category))
     .map((g) => ({
       category: g.category,
       gapRate: g.gapRate,
@@ -699,10 +694,8 @@ export function categoryCards(repo: Repo, filter: Filter): CategoryCard[] {
  * share desc, then gapRate desc, then category order. [] for an empty filter, a non-H&S type, or nothing lost.
  */
 export function gapContribution(repo: Repo, filter: Filter): { category: CategoryId; gapRate: number; share: number }[] {
-  const all = select(repo, filter);
-  if (!all.length) return [];
-  const quarter = QUARTER_ORDER.filter((q) => all.some((a) => a.quarter === q)).at(-1)!;
-  const audits = all.filter((a) => a.quarter === quarter);
+  const { audits } = scopeOf(repo, filter);
+  if (!audits.length) return [];
   const checklist = repo.checklist();
   const shareSum = new Map<CategoryId, number>();
   for (const a of audits) {
