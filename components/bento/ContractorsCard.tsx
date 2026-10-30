@@ -235,7 +235,7 @@ export function ContractorsCard({ cards, compare }: { cards: Card[]; compare: Re
         </div>
         <TileLabel className="!font-normal">
           <span aria-live="polite">
-            {selected.length === 0 ? 'Latest score · trend' : `${selected.length} of ${MAX_COMPARE} to compare`}
+            {selected.length === 0 ? '' : `${selected.length} of ${MAX_COMPARE} to compare`}
           </span>
         </TileLabel>
       </div>

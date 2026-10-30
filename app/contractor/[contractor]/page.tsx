@@ -5,7 +5,7 @@ import { getRepo } from '@/lib/data/repo';
 import { auditFindings, auditGaps, contractorAudits, contractorRepeats, sectionRatios, regionPath } from '@/lib/analytics';
 import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
-import { dateLabel, quarterLabel } from '@/lib/format';
+import { dateLabel } from '@/lib/format';
 import { DetailEmpty, DetailFrame, PageTitle } from '@/components/details/DetailFrame';
 import { ContractorSlide } from '@/components/details/ContractorSlide';
 import { AuditCarousel } from '@/components/motion/AuditCarousel';
@@ -70,7 +70,7 @@ export default async function ContractorPage({ params, searchParams }: { params:
           unit="audit"
           fit
           initial={initial}
-          labels={rows.map((r) => `${dateLabel(r.audit.date)} · ${quarterLabel(r.audit.quarter)}`)}
+          labels={rows.map((r) => dateLabel(r.audit.date))}
           slides={slides}
           trend={[...rows].reverse().map(({ audit }) => ({ auditId: audit.id, date: audit.date, label: dateLabel(audit.date), score: audit.totalScore }))}
           title={

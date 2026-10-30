@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
-import { auditReport, contractorAudits, sectionRatios } from '@/lib/analytics';
+import { auditReport, contractorAudits } from '@/lib/analytics';
 import { CATEGORIES } from '@/lib/categories';
 import { detailContext, href, toSearchParams, type SP } from '@/lib/details';
 import { bandTone, dateLabel, pct, quarterLabel } from '@/lib/format';
@@ -11,7 +11,6 @@ import { bandFor } from '@/lib/scoring';
 import type { CategoryId } from '@/lib/types';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
 import { ScoreBar } from '@/components/bento/parts';
-import { SectionBars } from '@/components/charts/SectionBars';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
 import { DetailFrame } from '@/components/details/DetailFrame';
 import { AuditDelta } from '@/components/details/parts';
@@ -98,12 +97,11 @@ export default async function AuditReportPage({ params, searchParams }: { params
       </header>
 
       <div className="grid grid-cols-1 gap-[var(--gap-grid)] px-[var(--gutter)] min-[1100px]:grid-cols-12">
-        <BentoCard i={0} testid="report-score" className={`tone-${bandTone(band)} gap-[clamp(12px,2svh,20px)] p-[clamp(16px,2.2svh,28px)] min-[1100px]:col-span-12 min-[1500px]:col-span-4`}>
-          <div className="grid flex-1 content-between gap-[clamp(12px,2svh,20px)] min-[1100px]:max-[1499px]:grid-cols-2 min-[1100px]:max-[1499px]:items-end min-[1100px]:max-[1499px]:gap-x-[clamp(40px,5vw,80px)]">
+        <BentoCard i={0} testid="report-score" className={`tone-${bandTone(band)} gap-[clamp(12px,2svh,20px)] p-[clamp(16px,2.2svh,28px)] min-[1100px]:col-span-4`}>
+          <div className="grid flex-1 content-between gap-[clamp(12px,2svh,20px)] ">
             <div className="flex flex-col gap-[clamp(12px,2svh,20px)]">
-              <TileLabel>Score</TileLabel>
               <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
-                <p className="figure text-[clamp(64px,11svh,112px)]" data-testid="report-total">
+                <p className="figure text-[clamp(72px,17svh,168px)]" data-testid="report-total">
                   {pct(audit.totalScore)}
                   <span className="ml-0.5 text-[0.42em] tracking-normal text-muted">%</span>
                 </p>
@@ -120,13 +118,10 @@ export default async function AuditReportPage({ params, searchParams }: { params
                 </p>
               )}
             </div>
-            <div className="min-[1100px]:max-[1499px]:pb-[2px]">
-              <SectionBars rings={sectionRatios(audit)} delay={0.2} />
-            </div>
           </div>
         </BentoCard>
 
-        <BentoCard i={1} testid="report-sections" className="gap-2 px-[clamp(10px,1vw,18px)] py-[clamp(14px,2svh,24px)] min-[1100px]:col-span-12 min-[1500px]:col-span-8">
+        <BentoCard i={1} testid="report-sections" className="gap-2 px-[clamp(10px,1vw,18px)] py-[clamp(14px,2svh,24px)] min-[1100px]:col-span-8">
           <TileLabel className="px-[clamp(6px,0.6vw,10px)]">
             Sections
           </TileLabel>

@@ -111,26 +111,20 @@ export function AuditCarousel({
   const many = n > 1;
   const nav = (
     <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2 text-[13px] text-muted">
-        <span>Latest</span>
-        <div role="group" aria-label={unit === 'audit' ? 'Audits' : 'Quarters'} className="flex items-center gap-1">
-          {labels.map((l, i) => (
-            <button
-              key={l + i}
-              type="button"
-              onClick={() => go(i)}
-              aria-label={l}
-              aria-current={i === index ? 'true' : undefined}
-              title={l}
-              className="grid h-6 place-items-center px-[3px]"
-            >
-              <span
-                className={`block h-[7px] rounded-full transition-[width,background-color] duration-300 ${i === index ? 'w-5 bg-ink' : 'w-[7px] bg-[var(--control)] hover:bg-faint'}`}
-              />
-            </button>
-          ))}
-        </div>
-        <span>Earlier</span>
+      {/* The slides by name (dates or quarters), latest first: the current one in ink. */}
+      <div role="group" aria-label={unit === 'audit' ? 'Audits' : 'Quarters'} className="flex items-center gap-1 rounded-full bg-fill p-[2px]">
+        {labels.map((l, i) => (
+          <button
+            key={l + i}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={l}
+            aria-current={i === index ? 'true' : undefined}
+            className={`h-7 whitespace-nowrap rounded-full px-3 text-[13px] transition-colors duration-500 ${i === index ? 'bg-surface font-semibold text-ink dark:bg-[#636366]' : 'text-muted hover:text-ink'}`}
+          >
+            {l}
+          </button>
+        ))}
       </div>
       <div className="flex items-center gap-1.5">
         <NavButton label={newer} hint={unit === 'audit' ? 'Newer audit (←)' : 'Newer quarter (←)'} disabled={index === 0} onClick={() => go(index - 1)}>

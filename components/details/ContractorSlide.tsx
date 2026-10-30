@@ -5,7 +5,7 @@ import { ScoreBar } from '@/components/bento/parts';
 import { SectionBars } from '@/components/charts/SectionBars';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
 import { categoryById } from '@/lib/categories';
-import { bandShort, bandTone, dateLabel, pct, quarterLabel } from '@/lib/format';
+import { bandShort, bandTone, dateLabel, pct } from '@/lib/format';
 import { bandFor } from '@/lib/scoring';
 import { href } from '@/lib/details';
 import { CONTRACTOR_SCORE } from '@/lib/handoff';
@@ -28,15 +28,11 @@ export interface ContractorSlideData {
   query: string;
 }
 
-/** The slide header line: date, quarter and inspection number. */
+/** The slide header line: the audit's date. */
 export function AuditLine({ audit }: { audit: Audit }) {
   return (
     <TileLabel className="flex-wrap !gap-x-2">
       <span className="text-ink">{dateLabel(audit.date)}</span>
-      <span aria-hidden>·</span>
-      <span>{quarterLabel(audit.quarter)}</span>
-      <span aria-hidden>·</span>
-      <span>Inspection {audit.inspectionNo}</span>
     </TileLabel>
   );
 }
@@ -89,7 +85,7 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
       </BentoCard>
 
       <BentoCard i={1} testid="category-gaps" className="gap-1 px-[clamp(10px,1vw,18px)] py-[clamp(12px,1.8svh,22px)] min-[900px]:col-span-4">
-        <TileLabel className="px-[clamp(6px,0.6vw,10px)] pb-1">Score lost by category · worst first</TileLabel>
+        <TileLabel className="px-[clamp(6px,0.6vw,10px)] pb-1">Score lost</TileLabel>
         <ul className="grid min-h-0 flex-auto content-evenly">
           {d.gaps.map((g) => {
             const c = categoryById(g.category);
@@ -119,7 +115,7 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
       </BentoCard>
 
       <BentoCard i={2} testid="top-repeats" className="gap-[clamp(6px,1svh,10px)] px-[clamp(10px,1vw,18px)] py-[clamp(12px,1.8svh,22px)] min-[900px]:col-span-4">
-        <TileLabel className="px-[clamp(6px,0.6vw,10px)]">Top 3 repeated observations</TileLabel>
+        <TileLabel className="px-[clamp(6px,0.6vw,10px)]">Repeated</TileLabel>
         {d.repeats.length ? (
           <ol className="grid min-h-0 flex-auto auto-rows-fr gap-[clamp(6px,1svh,10px)]">
             {d.repeats.map((r) => {
@@ -152,7 +148,6 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
                     </span>
                     <span className="flex items-center gap-2">
                       <span className="flex flex-col items-end leading-none">
-                        <span className="text-[12px] text-muted">repeated</span>
                         <span data-testid="top-repeat-times" className="figure num mt-1 text-[clamp(22px,3.6svh,36px)]">{r.times}×</span>
                       </span>
                       <ChevronRight size={14} strokeWidth={2.4} className="shrink-0 text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
@@ -164,8 +159,7 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
           </ol>
         ) : (
           <div data-testid="top-repeats-empty" className="flex min-h-[clamp(120px,20svh,220px)] flex-auto flex-col items-center justify-center gap-1.5 rounded-[14px] bg-fill-2 px-6 text-center">
-            <p className="text-[clamp(15px,1.8svh,18px)] font-semibold">No earlier audit to compare</p>
-            <p className="text-[14px] text-muted">Repeats show from this contractor&rsquo;s second audit.</p>
+            <p className="text-[clamp(15px,1.8svh,18px)] font-semibold">First audit</p>
           </div>
         )}
       </BentoCard>

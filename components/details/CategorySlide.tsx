@@ -37,8 +37,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
     <div className="grid min-h-0 flex-initial grid-cols-1 gap-[var(--gap-grid)] min-[900px]:grid-cols-12 min-[900px]:grid-rows-[minmax(0,1fr)]">
       <BentoCard i={0} testid="slide-header" className="justify-between gap-[clamp(10px,1.6svh,20px)] p-[clamp(16px,2.2svh,28px)] min-[900px]:col-span-3 [@media(max-height:700px)]:gap-2">
         <TileLabel>
-          <span className="text-ink">{quarterLabel(q.quarter)}</span>
-          <span aria-hidden>·</span>
+          {q.quarter !== 'all' && <><span className="text-ink">{quarterLabel(q.quarter)}</span><span aria-hidden>·</span></>}
           <span>{q.audits} {q.audits === 1 ? 'audit' : 'audits'}</span>
         </TileLabel>
         <div className="flex flex-wrap items-end gap-x-4 gap-y-1">
@@ -54,7 +53,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
                 <span className="text-muted">vs {d.prevQuarter?.slice(0, 2)}</span>
               </span>
             ) : (
-              <span className="text-muted">No earlier quarter</span>
+              null
             )}
             </div>
         </div>
@@ -67,7 +66,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
             ].map(({ k, r }) => (
               <div key={k} data-testid="slide-extreme" className="flex min-w-0 flex-col gap-0.5 rounded-[14px] bg-surface-2 px-3 py-[clamp(8px,1.6svh,18px)] [@media(max-height:700px)]:flex-row [@media(max-height:700px)]:items-baseline [@media(max-height:700px)]:gap-2.5 [@media(max-height:700px)]:py-1.5">
                 {/* Short screens: one line per box ("Worst  RPCO  77%"); the meaning stays for screen readers. */}
-                <dt className="shrink-0 text-[13px] text-muted">{k}<span className="[@media(max-height:700px)]:sr-only"> · score lost</span></dt>
+                <dt className="shrink-0 text-[13px] text-muted">{k}</dt>
                 <dd className="flex min-w-0 flex-1 items-baseline justify-between gap-2">
                   <span className="truncate text-[clamp(14px,1.6svh,18px)] font-semibold" title={r.contractor.name}>{r.contractor.name}</span>
                   <span className="num text-[clamp(15px,1.9svh,22px)] font-semibold">{pct(r.gapRate)}%</span>
@@ -80,8 +79,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
 
       <BentoCard i={1} testid="ranked-contractors" className="gap-1.5 px-[clamp(10px,1vw,18px)] py-[clamp(12px,1.8svh,22px)] min-[900px]:col-span-4">
         <div className="flex items-baseline justify-between gap-3 px-[clamp(6px,0.6vw,10px)]">
-          <TileLabel>Contractors · worst first</TileLabel>
-          <span className="text-[12px] text-muted">score lost</span>
+          <TileLabel>Contractors</TileLabel>
         </div>
         <FitList testid="contractor-list" label="contractors" className="grid content-evenly">
           {q.contractors.map((r, i) => (
@@ -107,7 +105,6 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
       <BentoCard i={2} testid="driving-items" className="gap-1.5 px-[clamp(10px,1vw,18px)] py-[clamp(12px,1.8svh,22px)] min-[900px]:col-span-5">
         <div className="flex items-baseline justify-between gap-3 px-[clamp(6px,0.6vw,10px)]">
           <TileLabel>Driven by</TileLabel>
-          <span className="text-[12px] text-muted">audits noted</span>
         </div>
         {q.items.length ? (
           <FitList testid="driver-list" label="items" className="grid content-evenly">
@@ -124,7 +121,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
                   <span className="flex min-w-0 items-baseline justify-between gap-3">
                     <span data-testid="driving-item-label" className="truncate text-[clamp(14px,1.6svh,18px)] font-semibold leading-tight tracking-[-0.01em]">{label}</span>
                     <span data-testid="driving-item-count" className="num shrink-0 whitespace-nowrap text-right text-[13px] text-muted">
-                      <span className="text-[15px] font-semibold text-ink">{it.hits}</span> of {q.audits} audits
+                      <span className="text-[15px] font-semibold text-ink">{it.hits}</span>/{q.audits}
                     </span>
                   </span>
                   <GapBar value={q.audits ? it.hits / q.audits : null} className="!h-[clamp(7px,1.1svh,12px)]" />
@@ -133,7 +130,7 @@ export function CategorySlide({ d }: { d: CategorySlideData }) {
             })}
           </FitList>
         ) : (
-          <p className="px-2 text-[15px] text-muted">No item-level notes this quarter.</p>
+          <p className="px-2 text-[15px] text-muted">—</p>
         )}
       </BentoCard>
     </div>

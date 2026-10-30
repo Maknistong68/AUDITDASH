@@ -43,9 +43,7 @@ export function RepeatsCard({ repeats, top, byContractor, href }: {
         <p data-testid="repeats-count" data-handoff={REPEATS_FIGURE} className={`${BIG} shrink-0`}>
           {repeats === null ? <span className="text-faint">—</span> : <CountUp value={repeats} format={int} delay={0.3} />}
         </p>
-        <p className="min-w-0 pb-[0.5em] text-[13px] leading-tight text-muted">
-          {repeats === null ? 'Needs a follow-up audit' : <RepeatRule />}
-        </p>
+        {repeats === null && <p className="min-w-0 pb-[0.5em] text-[13px] leading-tight text-muted">—</p>}
       </div>
       {repeats !== null && top.length > 0 && (
         <div className="swap">

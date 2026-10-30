@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { Plus } from 'lucide-react';
 import type { AuditType } from '@/lib/types';
 
 /** Filled accent pill: where an auditor enters an audit for the current type. */
@@ -13,8 +12,7 @@ export function NewAuditButton({ type, size = 'sm' }: { type: AuditType | undefi
         lg ? 'h-10 px-5 text-[14px]' : 'h-8 pl-3 pr-3.5 text-[13px]'
       }`}
     >
-      <Plus size={lg ? 16 : 15} strokeWidth={2.6} aria-hidden />
-      New Audit
+      New audit
     </Link>
   );
 }

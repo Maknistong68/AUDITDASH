@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { useCallback, useState } from 'react';
-import { RepeatRule, RepeatStats } from '@/components/bento/RepeatsCard';
+import { RepeatStats } from '@/components/bento/RepeatsCard';
 import { HandoffLanding } from '@/components/motion/HandoffLink';
 import { REPEATS_CARD, REPEATS_FIGURE } from '@/lib/handoff';
 
@@ -33,7 +33,7 @@ export function RepeatsView({ count, stats, groups, cols, empty }: {
   return (
     <div className="tone-minimal flex min-h-0 flex-1 flex-col gap-[var(--gap-grid)] px-[var(--gutter)]">
       <HandoffLanding />
-      <Header count={count} stats={stats} />
+      <Header count={count} stats={stats} multi={groups.some((g) => g.rows.some((r) => r.cells.some((c) => c.n > 1)))} />
       {empty ? (
         <section data-testid="empty-state" className="card flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
           <p className="figure text-[clamp(56px,10svh,112px)] text-faint" aria-hidden>{count === null ? '—' : '0'}</p>
@@ -46,7 +46,7 @@ export function RepeatsView({ count, stats, groups, cols, empty }: {
   );
 }
 
-function Header({ count, stats }: { count: number | null; stats: { questions: number; contractors: number } }) {
+function Header({ count, stats, multi }: { count: number | null; stats: { questions: number; contractors: number }; multi: boolean }) {
   return (
     <section
       data-testid="repeats-header"
@@ -54,7 +54,7 @@ function Header({ count, stats }: { count: number | null; stats: { questions: nu
       style={{ viewTransitionName: REPEATS_CARD }}
     >
       <div className="flex flex-col gap-1">
-        <h1 className="flex items-center gap-1.5 text-[clamp(13px,1.5svh,16px)] font-semibold tracking-[-0.01em]" style={{ color: 'var(--tone)' }}>
+        <h1 className="text-[clamp(13px,1.5svh,16px)] font-semibold tracking-[-0.01em] text-muted">
           Repeat findings
         </h1>
         <div data-testid="repeats-total" className="flex items-baseline gap-2.5">
@@ -65,11 +65,11 @@ function Header({ count, stats }: { count: number | null; stats: { questions: nu
         </div>
       </div>
       <div className="flex min-w-0 flex-col gap-1.5 pb-[0.35em]">
-        <p className="text-[13px] leading-tight text-muted">{count === null ? 'Needs a follow-up audit' : <RepeatRule />}</p>
+        {count === null && <p className="text-[13px] leading-tight text-muted">—</p>}
         {count !== null && <RepeatStats {...stats} />}
-        <p data-testid="repeats-basis" className="text-[12px] leading-tight text-muted">based on auditor notes</p>
       </div>
-      {count !== null ? <Legend /> : <div />}
+      {/* The colour key only when a question repeated more than once: with every cell at 1 it says nothing. */}
+      {count !== null && multi ? <Legend /> : <div />}
     </section>
   );
 }

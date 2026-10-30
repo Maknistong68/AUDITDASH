@@ -32,7 +32,7 @@ const whole = (n: number) => String(Math.round(n));
  * plus ~0.5em for the small "%".
  */
 const figureSize = (gapRate: number) =>
-  `clamp(52px, min(calc(100cqw / ${(0.6 * String(Math.round(gapRate * 100)).length + 0.5).toFixed(2)}), 16svh), 220px)`;
+  `clamp(52px, min(calc(100cqw / ${(0.6 * String(Math.round(gapRate * 100)).length + 0.5).toFixed(2)}), 21svh), 260px)`;
 
 /**
  * L tile, the right side's hero: this quarter's worst category by score-based gap. Inverted (dark) Apple tile.

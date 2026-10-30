@@ -50,21 +50,20 @@ function Header({ summary }: { summary: Summary }) {
       style={{ viewTransitionName: POSITIVES_CARD }}
     >
       <div className="flex flex-col gap-1">
-        <h1 className="flex items-center gap-1.5 text-[clamp(13px,1.5svh,16px)] font-semibold tracking-[-0.01em]" style={{ color: 'var(--tone)' }}>
+        <h1 className="text-[clamp(13px,1.5svh,16px)] font-semibold tracking-[-0.01em] text-muted">
           Positive observations
         </h1>
         <div className="flex items-end gap-3">
           <p data-testid="positives-figure" className="figure text-[clamp(40px,6.2svh,76px)]" style={{ viewTransitionName: POSITIVES_FIGURE }}>
             {total}
           </p>
-          <p className="pb-[0.5em] text-[13px] leading-tight text-muted">good practice noted</p>
         </div>
       </div>
       {audits > 0 ? (
         <div className="flex flex-wrap items-center gap-x-[clamp(24px,4vw,72px)] gap-y-3">
-          {stat(<>{auditsWith} <span className="text-[0.6em] font-normal text-muted">of {audits}</span></>, 'audits noted good practice', 'positives-audits')}
-          {stat(<>{contractorsWith} <span className="text-[0.6em] font-normal text-muted">of {contractors}</span></>, 'contractors recognised', 'positives-contractors')}
-          {stat((total / audits).toFixed(1), 'per audit, on average', 'positives-per-audit')}
+          {stat(<>{auditsWith} <span className="text-[0.6em] font-normal text-muted">of {audits}</span></>, 'audits', 'positives-audits')}
+          {stat(<>{contractorsWith} <span className="text-[0.6em] font-normal text-muted">of {contractors}</span></>, 'contractors', 'positives-contractors')}
+          {stat((total / audits).toFixed(1), 'per audit', 'positives-per-audit')}
         </div>
       ) : (
         <div />
@@ -79,7 +78,6 @@ function Contractors({ rows }: { rows: PositiveContractor[] }) {
     <section data-testid="positives-contractors" aria-labelledby="positives-contractors-h" className="card flex min-h-0 flex-col px-[clamp(14px,1.3vw,24px)] py-[clamp(10px,1.5svh,20px)]">
       <div className="flex shrink-0 items-baseline justify-between gap-3 pb-[clamp(6px,1svh,12px)]">
         <h2 id="positives-contractors-h" className="text-[clamp(14px,1.7svh,17px)] font-semibold tracking-[-0.01em]">By contractor</h2>
-        <span className="text-[11px] leading-none text-muted">per audit</span>
       </div>
       <ol className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain">
         {rows.map((r, k) => {
@@ -104,7 +102,6 @@ function Contractors({ rows }: { rows: PositiveContractor[] }) {
                 </span>
                 <span className="num flex min-w-[8ch] items-baseline justify-end gap-1.5 text-[12px]">
                   <span data-testid="positives-contractor-rate" className={`font-semibold ${none ? '' : 'text-ink'}`}>{r.perAudit.toFixed(1)}</span>
-                  <span className="text-muted">({r.count})</span>
                 </span>
               </Link>
             </li>
@@ -120,7 +117,6 @@ function Notes({ notes }: { notes: PositiveNote[] }) {
     <section data-testid="positives-notes" aria-labelledby="positives-notes-h" className="card flex min-h-0 flex-col py-[clamp(10px,1.5svh,20px)]">
       <div className="flex shrink-0 items-baseline justify-between gap-3 px-[clamp(14px,1.3vw,24px)] pb-[clamp(6px,1svh,12px)]">
         <h2 id="positives-notes-h" className="text-[clamp(14px,1.7svh,17px)] font-semibold tracking-[-0.01em]">Good practice</h2>
-        <span className="text-[11px] leading-none text-muted">newest first</span>
       </div>
       <ul className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-[clamp(8px,0.8vw,16px)]">
         {notes.map((n) => (

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { RotateCcw } from 'lucide-react';
+
 
 /** Whole-hero empty state: no audits match the filter. One line and one action, no NaN anywhere. */
 export function EmptyState() {
@@ -15,7 +15,6 @@ export function EmptyState() {
         href="/"
         className="inline-flex h-10 items-center gap-2 rounded-full bg-ink px-5 text-[14px] font-semibold text-ground transition-transform motion-safe:active:scale-[0.97]"
       >
-        <RotateCcw size={15} aria-hidden />
         Show all audits
       </Link>
     </section>

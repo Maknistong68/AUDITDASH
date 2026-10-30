@@ -1,35 +1,25 @@
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
-import { CodeChip } from '@/components/details/parts';
+import { itemLabel } from '@/lib/itemLabels';
 import type { Category, Observation } from '@/lib/types';
 
 /**
- * One observation in full: item code chip (or the Site tag), the auditor's text with its line breaks kept,
- * and a camera icon when the report has a photo. Long text is allowed here (the report is the long-form level).
+ * One observation in full: the question it was noted on (its plain label, never the code; "Site" for a site finding),
+ * then the auditor's text with its line breaks kept. Long text is allowed here (the report is the long-form level).
  */
 export function Entry({ o, question }: { o: Observation; question?: string }) {
+  const label = o.itemCode && question ? itemLabel(o.itemCode, question) : o.kind === 'site' ? 'Site' : null;
   return (
     <li
       data-testid="report-entry"
       data-kind={o.kind}
       data-category={o.category ?? undefined}
-      className="grid break-inside-avoid grid-cols-[3.6em_minmax(0,1fr)] items-start gap-3 py-[clamp(9px,1.3svh,13px)] print:py-2"
+      className="flex break-inside-avoid flex-col gap-1 py-[clamp(9px,1.3svh,13px)] print:py-2"
     >
-      <span className="flex flex-col items-stretch gap-1 pt-[2px]">
-        {o.kind === 'positive' ? (
-          <span className="rounded-md bg-[var(--good-bg)] px-1.5 py-[1px] text-center text-[12px] font-semibold text-[var(--good)]" aria-label="Positive observation">Good</span>
-        ) : (
-          <>
-            {o.itemCode && (
-              <span title={question}>
-                <CodeChip code={o.itemCode} className="w-full" />
-              </span>
-            )}
-            {o.kind === 'site' && (
-              <span data-testid="site-tag" className="rounded-md bg-fill-2 px-1.5 py-[1px] text-center text-[12px] font-semibold text-muted">Site</span>
-            )}
-          </>
-        )}
-      </span>
+      {label && (
+        <span data-testid={o.kind === 'site' ? 'site-tag' : 'entry-question'} className="text-[13px] font-semibold text-muted" title={question}>
+          {label}
+        </span>
+      )}
       <p className="whitespace-pre-line break-words text-[15px] leading-[1.55] [overflow-wrap:anywhere]">{o.text}</p>
     </li>
   );

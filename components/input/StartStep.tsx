@@ -100,9 +100,7 @@ export function StartStep({
             style={over ? { boxShadow: 'inset 0 0 0 2px var(--accent), var(--shadow-lift)' } : undefined}
           >
             <span aria-hidden className="pointer-events-none absolute inset-3 rounded-[16px] border-2 border-dashed transition-colors duration-500" style={{ borderColor: over ? 'var(--accent)' : 'var(--hairline)' }} />
-            <span className="relative grid size-14 place-items-center rounded-2xl bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-[var(--accent)]">
-              {busy ? <Loader2 size={26} className="motion-safe:animate-spin" aria-hidden /> : <span className="text-[22px] font-semibold leading-none">xlsx</span>}
-            </span>
+            {busy ? <Loader2 size={26} className="relative text-[var(--accent)] motion-safe:animate-spin" aria-hidden /> : <span aria-hidden />}
             <div className="relative flex flex-col gap-2">
               <h2 className="text-[clamp(21px,2.6svh,26px)] font-semibold tracking-[-0.025em]">Upload the Excel checklist</h2>
               <p className="text-[15px] text-muted">
@@ -129,8 +127,7 @@ export function StartStep({
             onClick={() => onStart({ ...emptyDraft(type), source: 'manual' })}
             className="card lift group flex h-full min-h-[clamp(220px,34svh,340px)] w-full flex-col justify-between gap-6 p-[clamp(20px,2.4vw,36px)] text-left"
           >
-            <span className="grid size-14 place-items-center rounded-2xl bg-fill-2 text-ink">
-            </span>
+            <span aria-hidden />
             <div className="flex flex-col gap-2">
               <h2 className="text-[clamp(21px,2.6svh,26px)] font-semibold tracking-[-0.025em]">Fill in the checklist here</h2>
               <p className="text-[15px] text-muted">

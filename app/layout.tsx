@@ -22,10 +22,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Runs before first paint: marks JS as available (count-ups hide their server value until they start)
- * and applies the stored theme, else dark (the default). Never throws.
+ * Runs before first paint: marks JS as available (count-ups hide their server value until they start) and sets the one
+ * theme, dark (owner, 2026-10-30: no theme switch). Never throws.
  */
-const THEME_SCRIPT = `(function(){var d=document.documentElement,t;d.classList.add('js');try{t=localStorage.getItem('theme')}catch(e){}if(t!=='light'){t='dark'}d.setAttribute('data-theme',t)})()`;
+const THEME_SCRIPT = `(function(){var d=document.documentElement;d.classList.add('js');d.setAttribute('data-theme','dark')})()`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

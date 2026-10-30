@@ -4,7 +4,7 @@ import { auditCompliance, auditItemStates, contractorAudits, regionPath } from '
 import { categoryById } from '@/lib/categories';
 import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
-import { dateLabel, quarterLabel } from '@/lib/format';
+import { dateLabel } from '@/lib/format';
 import { findCategory, findContractor } from '@/lib/routeParams';
 import { DetailEmpty, DetailFrame, PageTitle } from '@/components/details/DetailFrame';
 import { ItemsSlide } from '@/components/details/ItemsSlide';
@@ -42,7 +42,7 @@ export default async function ContractorInCategoryPage({ params, searchParams }:
   );
 
   return (
-    <DetailFrame filter={filter} crumbs={crumbs} parent={parent}>
+    <DetailFrame filter={filter} crumbs={crumbs} parent={parent} fit>
       {rows.length === 0 ? (
         <>
           <div className="px-[var(--gutter)] pb-4">{title}</div>
@@ -51,8 +51,9 @@ export default async function ContractorInCategoryPage({ params, searchParams }:
       ) : (
         <AuditCarousel
           unit="audit"
+          fit
           initial={start}
-          labels={rows.map((r) => `${dateLabel(r.audit.date)} · ${quarterLabel(r.audit.quarter)}`)}
+          labels={rows.map((r) => dateLabel(r.audit.date))}
           title={title}
           slides={rows.map(({ audit, previous }, k) => (
             <ItemsSlide

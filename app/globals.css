@@ -71,7 +71,8 @@
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --dur: 1500ms;
   --topbar: 56px;
-  --gutter: clamp(20px, 2.6vw, 52px);
+  /* Equal outer margins; on wide screens the content keeps a 1760px column centred (the frame grows, never the gaps). */
+  --gutter: max(clamp(20px, 2.6vw, 52px), calc((100vw - 1760px) / 2));
   --gap-grid: clamp(12px, 1.1vw, 22px);
   --radius-card: 22px;
   --radius-control: 999px;
@@ -197,12 +198,6 @@ body {
   letter-spacing: -0.011em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* A faint ambient wash so the frosted surfaces have something to frost. */
-  background-image:
-    radial-gradient(1100px 520px at 8% -8%, var(--ambient-1), transparent 70%), /* taste-skill-ignore: brief asks for gentle gradients */
-    radial-gradient(900px 480px at 96% -12%, var(--ambient-2), transparent 70%); /* taste-skill-ignore: brief asks for gentle gradients */
-  background-repeat: no-repeat;
-  background-attachment: fixed;
 }
 
 .num {
@@ -324,7 +319,8 @@ html.js [data-countup]:not([data-ready]) {
  * two edges to transparent. The active card carries an accent ring.
  */
 [data-testid="category-deck"] {
-  --cc-w: clamp(260px, 17.5vw, 340px);
+  /* Four cards fill the content column exactly (the fade ends with the fourth): no empty stretch on the right. */
+  --cc-w: max(240px, calc((100vw - 2 * var(--gutter) - 3 * var(--cc-gap)) / 4));
   /* capped by the screen height too (22svh), so a short laptop screen (1280×600) keeps room for the slide below */
   --cc-h: clamp(118px, min(max(150px, 10.2vw), 22svh), 196px);
   --cc-gap: clamp(12px, 1vw, 18px);
