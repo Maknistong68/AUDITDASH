@@ -268,9 +268,15 @@ export interface ContractorCard {
   history: { auditId: string; date: string; total: number }[];
 }
 
+/** Section ratio as the total uses it: A and B points ratio; C = mean of C1 and C2 (the workbook's AVERAGE). */
 const ring = (a: Audit, code: string): number | null => {
-  const s = a.sections.find((x) => x.code === code);
-  return !s || s.possible === 0 ? null : s.scored / s.possible;
+  const r = (c: string) => {
+    const s = a.sections.find((x) => x.code === c);
+    return !s || s.possible === 0 ? null : Math.min(s.scored, s.possible) / s.possible;
+  };
+  if (code !== 'C') return r(code);
+  const cs = [r('C1'), r('C2')].filter((x): x is number => x !== null);
+  return cs.length ? mean(cs) : r('C');
 };
 
 /** One card per contractor with a filtered audit (latest), best first; ties share a rank. */
@@ -755,7 +761,8 @@ export function auditFindings(repo: Repo, audit: Audit): { groups: { category: C
 }
 
 export interface CategoryQuarter {
-  quarter: Quarter;
+  /** A quarter, or 'all' for the every-audit slide that opens the carousel under the 'all' filter. */
+  quarter: Quarter | 'all';
   audits: number;
   gapRate: number | null;
   /** Gap of the chronologically previous quarter that has audits (same regions); null when none. */
@@ -781,7 +788,15 @@ export function categoryQuarters(repo: Repo, filter: Filter, cat: CategoryId): C
     out.push({ quarter, audits: audits.length, gapRate, prevGapRate: prev, contractors, items: byNoted });
     prev = gapRate;
   }
-  return out.reverse();
+  out.reverse();
+  // Under 'all' the first slide is every audit together: the same figure as the dashboard's main problem card.
+  if (filter.quarter === 'all' && out.length > 1) {
+    const audits = select(repo, filter);
+    const { contractors, items } = categoryDetail(repo, filter, cat);
+    const byNoted = [...items].sort((a, b) => b.hits - a.hits || b.impact - a.impact || a.itemCode.localeCompare(b.itemCode, undefined, { numeric: true }));
+    out.unshift({ quarter: 'all', audits: audits.length, gapRate: scoreGap(repo, audits, cat), prevGapRate: null, contractors, items: byNoted });
+  }
+  return out;
 }
 
 /**

@@ -5,7 +5,7 @@ afterEach(() => { delete process.env.DATA_SOURCE; });
 
 test('mock repo loads seed', () => {
   const r = getRepo();
-  expect(r.audits()).toHaveLength(20);
+  expect(r.audits()).toHaveLength(21);
   expect(r.checklist()).toHaveLength(81);
   expect(r.contractors().length).toBeGreaterThan(0);
   expect(r.observations().length).toBeGreaterThan(0);

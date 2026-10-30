@@ -33,17 +33,18 @@ describe('gapContribution', () => {
     expect(new Set(rows.map((r) => r.category)).size).toBe(rows.length);
   });
 
-  test('uses the same (latest) quarter and gapRate as mainProblem / categoryGaps', () => {
-    const m = mainProblem(repo, ALL)!;
-    expect(m.quarter).toBe('Q1-2026');
-    const q1 = categoryGaps(repo, { ...ALL, quarter: 'Q1-2026' });
-    const rows = gapContribution(repo, ALL);
-    for (const r of rows) expect(r.gapRate).toBeCloseTo(q1.find((g) => g.category === r.category)!.gapRate!, 12);
-    expect(rows.find((r) => r.category === m.category)!.gapRate).toBeCloseTo(m.gapRate, 12);
-    expect(rows).toEqual(gapContribution(repo, { ...ALL, quarter: 'Q1-2026' }));
+  test('uses the same scope and gapRate as mainProblem / categoryGaps', () => {
+    for (const f of [ALL, { ...ALL, quarter: 'Q1-2026' } as Filter]) {
+      const m = mainProblem(repo, f)!;
+      expect(m.quarter).toBe(f.quarter);
+      const gaps = categoryGaps(repo, f);
+      const rows = gapContribution(repo, f);
+      for (const r of rows) expect(r.gapRate).toBeCloseTo(gaps.find((g) => g.category === r.category)!.gapRate!, 12);
+      expect(rows.find((r) => r.category === m.category)!.gapRate).toBeCloseTo(m.gapRate, 12);
+    }
   });
 
-  test('hand-computed: one audit, an N/A subsection, an older quarter ignored', () => {
+  test('hand-computed: one audit, an N/A subsection, an older quarter ignored when a quarter is selected', () => {
     const checklist: ChecklistItem[] = [
       { code: 'B1.1', section: 'B', subsection: 'B1', question: 'doc', weight: 2, category: 'documents' },
       { code: 'B6.1', section: 'B', subsection: 'B6', question: 'sub', weight: 1, category: 'subcontractor' },
@@ -66,7 +67,7 @@ describe('gapContribution', () => {
     };
     // Q1: documents gap 1 - 1/4 = 0.75, weight share 2/3 -> 0.5; subcontractor gap 1, share 1/3 -> 1/3.
     // Lost total 5/6 -> documents 0.6, subcontractor 0.4.
-    const rows = gapContribution(tiny, ALL);
+    const rows = gapContribution(tiny, { ...ALL, quarter: 'Q1-2026' });
     expect(rows.map((r) => r.category)).toEqual(['documents', 'subcontractor']);
     expect(rows[0].gapRate).toBeCloseTo(0.75, 12);
     expect(rows[0].share).toBeCloseTo(0.6, 12);

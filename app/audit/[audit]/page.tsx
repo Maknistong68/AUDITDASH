@@ -105,7 +105,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
         <BentoCard i={0} testid="report-score" className={`tone-${bandTone(band)} gap-[clamp(12px,2svh,20px)] p-[clamp(16px,2.2svh,28px)] min-[1100px]:col-span-12 min-[1500px]:col-span-4`}>
           <div className="grid flex-1 content-between gap-[clamp(12px,2svh,20px)] min-[1100px]:max-[1499px]:grid-cols-2 min-[1100px]:max-[1499px]:items-end min-[1100px]:max-[1499px]:gap-x-[clamp(40px,5vw,80px)]">
             <div className="flex flex-col gap-[clamp(12px,2svh,20px)]">
-              <TileLabel>Official score</TileLabel>
+              <TileLabel>Score</TileLabel>
               <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
                 <p className="figure text-[clamp(64px,11svh,112px)]" data-testid="report-total">
                   {pct(audit.totalScore)}
@@ -117,8 +117,16 @@ export default async function AuditReportPage({ params, searchParams }: { params
                 </div>
               </div>
               <ScoreBar value={audit.totalScore} delay={0.15} />
-              {/* The total is the workbook's own figure; it need not equal the section ratios beside it. */}
-              <p className="text-[13px] text-muted" data-testid="report-total-note">Official total from the audit workbook</p>
+              {/* The workbook formula on the workbook's own points; the typed Excel total is shown when it differs. */}
+              <div className="flex flex-col gap-1.5 text-[13px] text-muted" data-testid="report-total-note">
+                <p>Computed from the Excel points: A, B, mean of C1 &amp; C2</p>
+                {audit.issues?.length ? (
+                  <ul data-testid="report-issues" className="flex flex-col gap-1 rounded-[12px] bg-fill-2 px-3 py-2 text-[12.5px]">
+                    {audit.issues.map((x) => <li key={x}>{x}</li>)}
+                  </ul>
+                ) : null}
+                {audit.source && <p className="text-[12px] text-faint">Source: {audit.source}</p>}
+              </div>
             </div>
             <div className="min-[1100px]:max-[1499px]:pb-[2px]">
               <SectionBars rings={sectionRatios(audit)} delay={0.2} />

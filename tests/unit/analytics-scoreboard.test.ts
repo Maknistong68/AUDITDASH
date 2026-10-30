@@ -14,10 +14,11 @@ const NONE: Filter = { quarter: 'all', regions: [] };
 describe('contractorCards', () => {
   test('JV-ECH card', () => {
     const c = contractorCards(repo, ALL).find((x) => x.contractor.id === '4800001131')!;
-    expect(c.total).toBe(0.85);
-    expect(c.previous).toBe(0.74);
+    // Computed from the Excel's own points; the Excel typed 85% and 74%.
+    expect(c.total).toBe(0.7446);
+    expect(c.previous).toBe(0.7604);
     expect(c.rank).toBe(1);
-    expect(c.band).toBe('Good');
+    expect(c.band).toBe('Partially Compliant');
   });
   test('rings in [0,1] or null; sorted desc; ranks valid', () => {
     const cards = contractorCards(repo, ALL);
@@ -36,7 +37,7 @@ describe('contractorCards', () => {
     for (const f of [ALL, { ...ALL, quarter: 'Q1-2026' } as Filter, { ...ALL, quarter: 'Q4-2025' } as Filter]) {
       const cards = contractorCards(repo, f);
       const jv = cards.find((x) => x.contractor.id === '4800001131')!;
-      expect(jv.history.map((h) => h.total)).toEqual([0.74, 0.85]);
+      expect(jv.history.map((h) => h.total)).toEqual([0.7604, 0.7446]);
       for (const c of cards) {
         const all = repo.audits().filter((a) => a.contractorId === c.contractor.id);
         expect(c.history).toHaveLength(all.length);
@@ -60,10 +61,11 @@ describe('bandDistribution', () => {
 });
 
 describe('regionComparison', () => {
-  test('both regions, both quarter keys', () => {
+  test('both regions, every quarter key', () => {
     const r = regionComparison(repo, ALL);
     expect(r.map((x) => x.region)).toEqual(['SR1', 'SR2']);
-    r.forEach((x) => expect(Object.keys(x.byQuarter).sort()).toEqual(['Q1-2026', 'Q4-2025']));
+    r.forEach((x) => expect(Object.keys(x.byQuarter).sort()).toEqual(['Q1-2026', 'Q3-2026', 'Q4-2025']));
+    expect(r[0].byQuarter['Q3-2026']).toBeNull(); // the July audit is SR2's
   });
   test('ignores quarter filter, respects regions', () => {
     expect(regionComparison(repo, { ...ALL, quarter: 'Q4-2025' })).toEqual(regionComparison(repo, ALL));
@@ -80,7 +82,7 @@ describe('compareContractors', () => {
     out.forEach((x) => { expect(x.gaps).toHaveLength(CATEGORIES.length); x.repeats.forEach((r) => expect(r.contractor.id).toBe(x.card.contractor.id)); });
   });
   test('gaps come from the latest audit only (same scope as rings and total)', () => {
-    const id = '4800001131'; // JV-ECH: audited in Q4 2025 and Q1 2026
+    const id = '4800001131'; // JV-ECH: audited in Q4 2025 and Q1 2026 (no Q3 audit)
     expect(filterAudits(repo, { ...ALL, contractorId: id })).toHaveLength(2);
     const [x] = compareContractors(repo, ALL, [id]);
     const latestOnly = categoryGaps(repo, { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: id });
@@ -93,24 +95,31 @@ describe('compareContractors', () => {
     expect(x.gaps.map((g) => g.prevGapRate)).toEqual(q4.map((g) => g.gapRate));
   });
   test('empty -> []', () => expect(compareContractors(repo, NONE, ['4800001131'])).toEqual([]));
-  test('sanity: filterAudits unaffected', () => expect(filterAudits(repo, ALL)).toHaveLength(20));
+  test('sanity: filterAudits unaffected', () => expect(filterAudits(repo, ALL)).toHaveLength(21));
 });
 
 describe('mainProblem', () => {
-  test('filter all -> latest quarter Q1-2026, worst category of that quarter', () => {
+  test('filter all -> every audit, worst category overall, no comparison', () => {
     const m = mainProblem(repo, ALL)!;
-    expect(m.quarter).toBe('Q1-2026');
-    const q1 = categoryGaps(repo, { ...ALL, quarter: 'Q1-2026' });
-    const worst = q1.filter((g) => g.gapRate !== null).sort((a, b) => b.gapRate! - a.gapRate!)[0];
+    expect(m.quarter).toBe('all');
+    const gaps = categoryGaps(repo, ALL);
+    const worst = gaps.filter((g) => g.gapRate !== null).sort((a, b) => b.gapRate! - a.gapRate!)[0];
     expect(m.category).toBe(worst.category);
     expect(m.gapRate).toBeCloseTo(worst.gapRate!, 10);
+    expect(m.prevGapRate).toBeNull();
+    expect(m.items).toEqual(categoryDetail(repo, ALL, m.category).items.slice(0, 3));
+  });
+  test('a quarter -> that quarter against the previous one', () => {
+    const f: Filter = { ...ALL, quarter: 'Q1-2026' };
+    const m = mainProblem(repo, f)!;
+    expect(m.quarter).toBe('Q1-2026');
     const q4 = categoryGaps(repo, { ...ALL, quarter: 'Q4-2025' }).find((g) => g.category === m.category)!;
     expect(m.prevGapRate).toBeCloseTo(q4.gapRate!, 10);
     expect(m.items.length).toBeLessThanOrEqual(3);
-    expect(m.items).toEqual(categoryDetail(repo, { ...ALL, quarter: 'Q1-2026' }, m.category).items.slice(0, 3));
+    expect(m.items).toEqual(categoryDetail(repo, f, m.category).items.slice(0, 3));
   });
   test('driving items are ranked by impact = audits with the finding x mean subsection score lost', () => {
-    const m = mainProblem(repo, ALL)!;
+    const m = mainProblem(repo, { ...ALL, quarter: 'Q1-2026' })!;
     const q1 = repo.audits().filter((a) => a.quarter === 'Q1-2026');
     for (const it of m.items) {
       const item = repo.checklist().find((i) => i.code === it.itemCode)!;
@@ -136,9 +145,10 @@ describe('mainProblem', () => {
 
 describe('one findings rule everywhere (isFinding)', () => {
   test('main problem drivers count audits with the finding: Q1 2026 subcontractor B6.1–B6.3 in 9 of 11 audits', () => {
-    const m = mainProblem(repo, ALL)!;
+    const m = mainProblem(repo, { ...ALL, quarter: 'Q1-2026' })!;
     expect(m.category).toBe('subcontractor');
     expect(m.items.map((i) => [i.itemCode, i.hits])).toEqual([['B6.1', 9], ['B6.2', 9], ['B6.3', 9]]);
+    expect(mainProblem(repo, ALL)!.items.map((i) => [i.itemCode, i.hits])).toEqual([['B6.1', 18], ['B6.4', 17], ['B6.5', 17]]);
     expect(filterAudits(repo, { ...ALL, quarter: 'Q1-2026' })).toHaveLength(11);
   });
   test('category findings, finding rates, item states and findingsByAudit agree', () => {

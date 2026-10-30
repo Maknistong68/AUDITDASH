@@ -18,7 +18,8 @@ describe('auditTypeIds', () => {
   });
   it('pulls in no checklist JSON (client bundles stay small)', () => {
     for (const f of ['lib/auditTypeIds.ts', 'lib/filters.ts', 'lib/scoring.ts']) {
-      expect(readFileSync(f, 'utf8'), f).not.toMatch(/\.json'|from '\.\/auditTypes'/);
+      // meta.json (the quarters present, a few bytes) is the one JSON allowed.
+      expect(readFileSync(f, 'utf8').replace("'../data/seed/meta.json'", ''), f).not.toMatch(/\.json'|from '\.\/auditTypes'/);
     }
   });
 });

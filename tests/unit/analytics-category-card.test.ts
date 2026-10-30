@@ -22,18 +22,28 @@ describe('categoryCard', () => {
     }
     const c = categoryCard(repo, ALL, mainProblem(repo, ALL)!.category)!;
     expect(Math.round(c.gapRate * 100)).toBe(73);
-    expect(c.quarter).toBe('Q1-2026');
+    expect(c.quarter).toBe('all');
   });
 
-  test('any category: latest-quarter gap, previous-quarter gap and top 3 driving items', () => {
-    const q1 = categoryGaps(repo, { ...ALL, quarter: 'Q1-2026' });
+  test('any category: the scope gap, the previous quarter gap (a quarter selected) and top 3 driving items', () => {
+    // Under 'all': every audit, no comparison.
+    for (const g of categoryGaps(repo, ALL).filter((x) => x.gapRate !== null)) {
+      const c = categoryCard(repo, ALL, g.category)!;
+      expect(c.quarter).toBe('all');
+      expect(c.gapRate).toBeCloseTo(g.gapRate!, 12);
+      expect(c.prevGapRate).toBeNull();
+      expect(c.items).toEqual(categoryDetail(repo, ALL, g.category).items.slice(0, 3));
+    }
+    // A quarter: that quarter, against the quarter before it.
+    const Q1: Filter = { ...ALL, quarter: 'Q1-2026' };
+    const q1 = categoryGaps(repo, Q1);
     const q4 = categoryGaps(repo, { ...ALL, quarter: 'Q4-2025' });
     for (const g of q1.filter((x) => x.gapRate !== null)) {
-      const c = categoryCard(repo, ALL, g.category)!;
+      const c = categoryCard(repo, Q1, g.category)!;
       expect(c.quarter).toBe('Q1-2026');
       expect(c.gapRate).toBeCloseTo(g.gapRate!, 12);
       expect(c.prevGapRate).toBeCloseTo(q4.find((x) => x.category === g.category)!.gapRate!, 12);
-      expect(c.items).toEqual(categoryDetail(repo, { ...ALL, quarter: 'Q1-2026' }, g.category).items.slice(0, 3));
+      expect(c.items).toEqual(categoryDetail(repo, Q1, g.category).items.slice(0, 3));
     }
   });
 

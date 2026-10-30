@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import checklistJson from '@/data/seed/checklist.json';
+// The 2025 template's weights: the ABYATONA-1112 answers were scored with them (62.76% in its workbook).
+import checklistJson from './fixtures/checklist-2025.json';
+import auditsJson from '@/data/seed/audits.json';
+import revChecklistJson from '@/data/seed/checklist.json';
 import fixture from './fixtures/abyatona-1112-responses.json';
 import { bandFor, scoreResponses } from '@/lib/scoring';
 import { scoreAppAudit } from '@/lib/appScoring';
@@ -12,6 +15,14 @@ const mk = (code: string, weight: number, section: 'A' | 'B' | 'C' = 'A', subsec
 });
 
 describe('scoreResponses', () => {
+  test('the July 2026 AL FAHD answers (Rev template) give the importer\'s computed total, not the Excel\'s +0.012', () => {
+    const a = (auditsJson as { id: string; totalScore: number; reportedScore?: number; answers?: Record<string, Compliance> }[])
+      .find((x) => x.id === '4800001272-Q3-2026-20260719')!;
+    const r = scoreResponses(revChecklistJson as ChecklistItem[], a.answers!);
+    expect(r.score).toBeCloseTo(a.totalScore, 4);
+    expect(r.score).toBeCloseTo(0.5955, 4);
+    expect(a.reportedScore! - r.score!).toBeGreaterThan(0.02);
+  });
   test('ABYATONA-1112 checklist answers score 62.76%', () => {
     expect(scoreResponses(checklist, fixture as Record<string, Compliance>).score).toBeCloseTo(0.6276068, 6);
   });
@@ -40,9 +51,11 @@ describe('scoreResponses', () => {
 describe('bandFor', () => {
   test('bands', () => {
     expect(bandFor(0.9)).toBe('Excellent');
-    expect(bandFor(0.8999)).toBe('Good');
+    expect(bandFor(0.8949)).toBe('Good');
+    expect(bandFor(0.8999)).toBe('Excellent'); // bands follow the whole % shown: 90%
+    expect(bandFor(0.5955)).toBe('Minimally Compliant'); // shown as 60%
     expect(bandFor(0.6276)).toBe('Minimally Compliant');
-    expect(bandFor(0.59)).toBe('Non-Compliant');
+    expect(bandFor(0.594)).toBe('Non-Compliant');
     expect(bandFor(0.8)).toBe('Good');
     expect(bandFor(0.7)).toBe('Partially Compliant');
     expect(bandFor(0.6)).toBe('Minimally Compliant');
@@ -54,7 +67,8 @@ describe('scoreAppAudit', () => {
   test('H&S fixture mapped answers score 62.76%', () => {
     const answers = Object.fromEntries(Object.entries(fixture as Record<string, string>).map(([k, v]) => [k, map[v]]));
     const r = scoreAppAudit('hs', checklistFor('hs'), answers);
-    expect(r.score).toBeCloseTo(0.6276068, 6);
+    // checklistFor('hs') carries the Rev template's weights (data/seed/checklists/hs.json): same answers, new weights.
+    expect(r.score).toBeCloseTo(scoreResponses(revChecklistJson as ChecklistItem[], fixture as Record<string, Compliance>).score!, 10);
     expect(r.sections.map((s) => s.code)).toEqual(['A', 'B', 'C']);
     expect(r.counts.compliant + r.counts.observation + r.counts.nonCompliant + r.counts.na + r.counts.unanswered).toBe(81);
   });

@@ -26,10 +26,12 @@ const counted = (o: { kind: string }) => o.kind === 'site' || isFinding(naAudit(
 describe('portfolio', () => {
   test('portfolio all', () => {
     const s = portfolioSummary(repo, ALL);
-    expect(s.audits).toBe(20);
-    expect(s.avgScore).toBeGreaterThan(0.6);
-    expect(s.avgScore).toBeLessThan(0.75);
-    expect(s.delta).not.toBeNull();
+    expect(s.audits).toBe(21);
+    expect(s.avgScore).toBeCloseTo(0.6333, 4);
+    expect(s.delta).toBeNull(); // every audit together: no comparison (the score-over-time chart shows the change)
+    // A quarter is compared with the quarter before it: Q1 2026 fell 6 points from Q4 2025 (the typed Excel totals showed +1).
+    const q1 = portfolioSummary(repo, { ...ALL, quarter: 'Q1-2026' });
+    expect(Math.round(q1.delta! * 100)).toBe(-6);
   });
   test('empty filter yields nulls not NaN', () => {
     const s = portfolioSummary(repo, { quarter: 'Q4-2025', regions: [] });
@@ -117,10 +119,10 @@ describe('score-based gap', () => {
 describe('league', () => {
   test('single-audit contractor has previous null', () =>
     expect(league(repo, ALL).find((l) => l.contractor.id === '4200000026')!.previous).toBeNull());
-  test('JV-ECH trend up', () => {
+  test('JV-ECH: computed from its points it slipped (the Excel typed 74% → 85%)', () => {
     const l = league(repo, ALL).find((l) => l.contractor.id === '4800001131')!;
-    expect(l.latest).toBe(0.85);
-    expect(l.previous).toBe(0.74);
+    expect(l.latest).toBe(0.7446);
+    expect(l.previous).toBe(0.7604);
   });
   test('sorted desc', () => {
     const l = league(repo, ALL);

@@ -64,5 +64,5 @@ export function dateLabel(iso: string, withYear = true): string {
   return withYear ? `${s} ${m[1]}` : s;
 }
 
-/** "Q1-2026" -> "Q1 2026". */
-export const quarterLabel = (q: Quarter): string => q.replace('-', ' ');
+/** "Q1-2026" -> "Q1 2026"; 'all' -> "All audits". */
+export const quarterLabel = (q: Quarter | 'all'): string => (q === 'all' ? 'All audits' : q.replace('-', ' '));
