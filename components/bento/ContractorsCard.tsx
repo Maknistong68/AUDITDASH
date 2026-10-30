@@ -128,7 +128,7 @@ function Row({
       data-score={total}
       onMouseEnter={(e) => onHover(contractor.id, e.currentTarget)}
       onFocus={(e) => onHover(contractor.id, e.currentTarget)}
-      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.4em_minmax(0,1.5fr)_minmax(0,1fr)_3em_56px_clamp(18px,2.7svh,24px)] items-center gap-x-[clamp(8px,0.9vw,16px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
+      className={`tone-${tone} group relative grid min-h-0 grid-cols-[1.2em_minmax(7.5rem,13.5rem)_minmax(0,1fr)_2.9em_56px_clamp(18px,2.7svh,24px)] items-center gap-x-[clamp(6px,0.6vw,12px)] rounded-[14px] px-[clamp(8px,0.8vw,14px)] transition-colors duration-200 hover:bg-fill-2 ${
         selected ? 'bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_14%,transparent)]' : ''
       }`}
     >
@@ -139,7 +139,7 @@ function Row({
         </span>
         <span className="hidden shrink-0 text-[11px] text-faint min-[1500px]:inline">{contractor.subregion}</span>
       </span>
-      <span className="relative h-[clamp(5px,0.75svh,8px)] rounded-full bg-fill-2" aria-hidden>
+      <span className="relative h-[clamp(8px,1.15svh,13px)] rounded-full bg-fill-2" aria-hidden>
         {BAND_TICKS.map((t) => (
           <span key={t} className="absolute inset-y-0 w-[2px] -translate-x-1/2 bg-surface" style={{ left: `${t * 100}%` }} />
         ))}

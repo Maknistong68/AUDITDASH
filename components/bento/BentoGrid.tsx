@@ -63,14 +63,15 @@ export function TileLabel({ children, tone, className = '' }: { children: React.
 
 /**
  * Bento layout. ≥1200px: the left half is split in the middle: contractors ranked (top) and the score over time (bottom);
- * the right half is a 6-column grid: L main problem (6) / M portfolio score (3) + M repeats (3) / wide positives (6).
+ * the right half is a 6-column grid: L main problem (6) / M portfolio score (3) + M repeats (3) / S regions (2) +
+ * S audits conducted (2) + S positives (2).
  * Narrower: everything stacks and the page scrolls.
  */
 export function BentoGrid({ left, right }: { left: React.ReactNode; right: React.ReactNode }) {
   return (
     <div className="grid min-h-0 flex-1 grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:grid-cols-[minmax(0,1.12fr)_minmax(0,1fr)]">
       <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[1200px]:grid-rows-[minmax(0,1.08fr)_minmax(0,0.92fr)]">{left}</div>
-      <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[640px]:grid-cols-6 min-[1200px]:grid-rows-[minmax(0,1.5fr)_minmax(0,1fr)_auto]">
+      <div className="grid min-h-0 grid-cols-1 gap-[var(--gap-grid)] min-[640px]:grid-cols-6 min-[1200px]:grid-rows-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.82fr)]">
         {right}
       </div>
     </div>

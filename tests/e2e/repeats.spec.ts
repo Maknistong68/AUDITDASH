@@ -50,7 +50,7 @@ async function noPageScroll(page: Page) {
 }
 
 test('the dashboard Repeat findings card opens /repeats with a 1.5 s shared hand-off; the header shows the same count', async ({ page }) => {
-  expect(TOTAL).toBe('267');
+  expect(TOTAL).toBe('228');
   expect(TOTAL).toBe(String(repeatFindings(getRepo(), ALL).length));
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');

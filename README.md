@@ -4,7 +4,7 @@ A dashboard for directors that turns contractor HSE (health, safety and environm
 
 ## Screens
 
-- **Overview** (`/`): contractors ranked, score over time (line chart by month), main problem, portfolio, repeat findings, positives. Hover any card for a second layer of detail.
+- **Dashboard** (`/`): contractors ranked, score by quarter (one line per contractor, portfolio in bold), main problem, portfolio, repeat findings, sub-regions, audits conducted, positives. Hover any card for a second layer of detail.
 - **Log** (`/log`): every observation and every audit, with search and filters (contractor, category, kind, quarter, region).
 - **New audit** (`/audits/new`): upload the completed Excel checklist (read in the browser, pictures never imported, observations categorised automatically) or fill the checklist in; live score with the Excel formula.
 - Drill-downs: category (where score is lost), contractor, question, observation, audit report, repeat findings, positives.
@@ -34,7 +34,6 @@ pip install -r requirements-dev.txt
 python3 -I scripts/import_excel.py \
   --results data/source/HS_AUDIT_FINDINGS.xlsx \
   --checklist data/source/AL_FAHD_1272_checklist.xlsx \
-  --audit data/source/AL_FAHD_1272_checklist.xlsx \
   --previous data/seed/observations.json \
   --out data/seed
 ```

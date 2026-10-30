@@ -33,11 +33,6 @@ export function ObservationList({ rows, terms, questions, linkQuery, resetKey, o
 
   return (
     <section data-testid="log-observations" aria-label="Observations" className="card overflow-hidden py-1.5">
-      {rows.length > 0 && (
-        <div className={`hidden ${GRID} gap-x-4 border-b border-hairline px-[clamp(14px,1.3vw,24px)] pb-2 pt-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-faint min-[1000px]:grid`} aria-hidden>
-          <span>Contractor · date</span><span>Kind</span><span>Question</span><span>Note</span><span />
-        </div>
-      )}
       {rows.length === 0 ? (
         <LogEmpty onClear={onClear} />
       ) : (
@@ -70,8 +65,7 @@ export function ObservationList({ rows, terms, questions, linkQuery, resetKey, o
                     <div className="col-span-2 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-[13px] min-[1000px]:col-span-1 min-[1000px]:flex-col min-[1000px]:items-start">
                       {obs.category ? <CategoryTag id={obs.category} className="font-semibold" /> : <span className="text-faint">General</span>}
                       {obs.label && (
-                        <span className="min-w-0 truncate text-muted min-[1000px]:w-full" title={obs.itemCode ? `${obs.itemCode} · ${questions[obs.itemCode] ?? obs.label}` : undefined}>
-                          <span className="num mr-1 rounded-[5px] bg-fill px-1 py-[1px] text-[11px] font-semibold"><Highlight text={obs.itemCode ?? ''} terms={terms} /></span>
+                        <span className="min-w-0 truncate text-muted min-[1000px]:w-full" title={obs.itemCode ? questions[obs.itemCode] ?? obs.label : undefined}>
                           <Highlight text={obs.label} terms={terms} />
                         </span>
                       )}

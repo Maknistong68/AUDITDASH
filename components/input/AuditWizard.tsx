@@ -1,6 +1,6 @@
 'use client';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import contractorsSeed from '@/data/seed/contractors.json';
 import { checklistFor, sectionsFor } from '@/lib/auditTypes';
@@ -227,14 +227,14 @@ export function AuditWizard({ initialType }: { initialType: AuditType }) {
             </AnimatePresence>
             {!flash && (
               <p className="hidden min-w-0 truncate text-[13px] text-faint min-[600px]:block">
-                {dirty ? 'Unsaved changes' : draft.status === 'submitted' ? 'Submitted · saved in this browser' : 'Saved in this browser'}
+                {dirty ? 'Unsaved changes' : draft.status === 'submitted' ? 'Submitted' : 'Saved'}
               </p>
             )}
             {last ? (
               <Button kind="plain" onClick={() => persist('draft')} testid="wizard-save">Save draft</Button>
             ) : (
               <Button kind="primary" onClick={() => go(step + 1)} testid="wizard-next">
-                {STEPS[step + 1].short} <ArrowRight size={16} strokeWidth={2.4} aria-hidden />
+                {STEPS[step + 1].short}
               </Button>
             )}
           </div>

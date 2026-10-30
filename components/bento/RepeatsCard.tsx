@@ -1,6 +1,5 @@
 'use client';
 import { motion, useReducedMotion } from 'framer-motion';
-import { Repeat2 } from 'lucide-react';
 import { calm, STAGGER } from '@/lib/motion';
 import { CountUp } from '@/components/motion/CountUp';
 import { HandoffLink } from '@/components/motion/HandoffLink';
@@ -38,7 +37,6 @@ export function RepeatsCard({ repeats, top, byContractor, href }: {
       />
       <CardChevron />
       <TileLabel tone="var(--tone)">
-        <Repeat2 size={16} strokeWidth={2.4} aria-hidden />
         Repeat findings
       </TileLabel>
       <div className="flex min-w-0 items-end gap-3">

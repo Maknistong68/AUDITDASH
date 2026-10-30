@@ -26,8 +26,8 @@ const counted = (o: { kind: string }) => o.kind === 'site' || isFinding(naAudit(
 describe('portfolio', () => {
   test('portfolio all', () => {
     const s = portfolioSummary(repo, ALL);
-    expect(s.audits).toBe(21);
-    expect(s.avgScore).toBeCloseTo(0.6333, 4);
+    expect(s.audits).toBe(20);
+    expect(s.avgScore).toBeCloseTo(0.6352, 4);
     expect(s.delta).toBeNull(); // every audit together: no comparison (the score-over-time chart shows the change)
     // A quarter is compared with the quarter before it: Q1 2026 fell 6 points from Q4 2025 (the typed Excel totals showed +1).
     const q1 = portfolioSummary(repo, { ...ALL, quarter: 'Q1-2026' });

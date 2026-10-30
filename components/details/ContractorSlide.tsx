@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, ChevronRight, Repeat2, ThumbsUp } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { BentoCard, TileLabel } from '@/components/bento/BentoGrid';
 import { ScoreBar } from '@/components/bento/parts';
 import { SectionBars } from '@/components/charts/SectionBars';
@@ -76,7 +76,6 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <span className="inline-flex items-center gap-1.5 text-[14px] text-muted" data-testid="positives">
-            <ThumbsUp size={15} strokeWidth={2.4} className="text-[var(--good-dot)]" aria-hidden />
             <span className="num font-semibold text-ink">{d.positives}</span> positive {d.positives === 1 ? 'note' : 'notes'}
           </span>
           <Link
@@ -84,7 +83,7 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
             href={href(`/audit/${audit.id}`, d.query)}
             className="inline-flex h-9 items-center gap-1.5 rounded-full bg-ink px-4 text-[14px] font-semibold text-ground transition-transform active:scale-[0.97]"
           >
-            Full report <ArrowRight size={15} strokeWidth={2.4} aria-hidden />
+            Full report
           </Link>
         </div>
       </BentoCard>
@@ -165,7 +164,6 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
           </ol>
         ) : (
           <div data-testid="top-repeats-empty" className="flex min-h-[clamp(120px,20svh,220px)] flex-auto flex-col items-center justify-center gap-1.5 rounded-[14px] bg-fill-2 px-6 text-center">
-            <Repeat2 size={22} strokeWidth={2} className="text-faint" aria-hidden />
             <p className="text-[clamp(15px,1.8svh,18px)] font-semibold">No earlier audit to compare</p>
             <p className="text-[14px] text-muted">Repeats show from this contractor&rsquo;s second audit.</p>
           </div>

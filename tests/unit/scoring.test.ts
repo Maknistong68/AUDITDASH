@@ -1,7 +1,6 @@
 import { describe, expect, test } from 'vitest';
 // The 2025 template's weights: the ABYATONA-1112 answers were scored with them (62.76% in its workbook).
 import checklistJson from './fixtures/checklist-2025.json';
-import auditsJson from '@/data/seed/audits.json';
 import revChecklistJson from '@/data/seed/checklist.json';
 import fixture from './fixtures/abyatona-1112-responses.json';
 import { bandFor, scoreResponses } from '@/lib/scoring';
@@ -15,14 +14,6 @@ const mk = (code: string, weight: number, section: 'A' | 'B' | 'C' = 'A', subsec
 });
 
 describe('scoreResponses', () => {
-  test('the July 2026 AL FAHD answers (Rev template) give the importer\'s computed total, not the Excel\'s +0.012', () => {
-    const a = (auditsJson as { id: string; totalScore: number; reportedScore?: number; answers?: Record<string, Compliance> }[])
-      .find((x) => x.id === '4800001272-Q3-2026-20260719')!;
-    const r = scoreResponses(revChecklistJson as ChecklistItem[], a.answers!);
-    expect(r.score).toBeCloseTo(a.totalScore, 4);
-    expect(r.score).toBeCloseTo(0.5955, 4);
-    expect(a.reportedScore! - r.score!).toBeGreaterThan(0.02);
-  });
   test('ABYATONA-1112 checklist answers score 62.76%', () => {
     expect(scoreResponses(checklist, fixture as Record<string, Compliance>).score).toBeCloseTo(0.6276068, 6);
   });

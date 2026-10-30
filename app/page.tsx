@@ -2,11 +2,14 @@ import { getRepo } from '@/lib/data/repo';
 import { href, toSearchParams, type SP } from '@/lib/details';
 import { filterToQuery, parseFilter } from '@/lib/filters';
 import {
-  bandDistribution, categoryCards, compareContractors, contractorCards, excelCheck, filterAudits, followUps, monthlyScores,
+  bandDistribution, categoryCards, compareContractors, contractorCards, excelCheck, filterAudits, followUps, quarterLines,
   portfolioSummary, positiveSummary, positivesByContractor, repeatMatrix,
 } from '@/lib/analytics';
 import { REGIONS } from '@/lib/filters';
 import { TrendCard } from '@/components/bento/TrendCard';
+import { RegionsCard } from '@/components/bento/RegionsCard';
+import { AuditsCard } from '@/components/bento/AuditsCard';
+import { QUARTERS } from '@/lib/filters';
 import { MAX_COMPARE } from '@/lib/compare';
 import { TopBar } from '@/components/shell/TopBar';
 import { EmptyState } from '@/components/shell/EmptyState';
@@ -73,7 +76,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
               left={
                 <>
                   <ContractorsCard cards={cards} compare={compare} />
-                  <TrendCard points={monthlyScores(repo, filter)} />
+                  <TrendCard {...quarterLines(repo, filter)} />
                 </>
               }
               right={
@@ -100,6 +103,28 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
                     top={(matrix?.questions ?? []).slice(0, 3).map((q) => ({ key: q.itemCode, label: q.label, times: q.total }))}
                     byContractor={(matrix?.contractors ?? []).map((c) => ({ name: c.name, total: c.total }))}
                     href={href('/repeats', query)}
+                  />
+                  <RegionsCard
+                    rows={REGIONS.filter((r) => filter.regions.includes(r)).map((r) => {
+                      const f = { ...filter, regions: [r] };
+                      const audits = filterAudits(repo, f);
+                      return {
+                        region: r,
+                        score: portfolioSummary(repo, f).avgScore,
+                        audits: audits.length,
+                        contractors: new Set(audits.map((a) => a.contractorId)).size,
+                        byQuarter: QUARTERS.map((q) => ({ label: q.replace('-', ' ').slice(0, 2), score: portfolioSummary(repo, { ...f, quarter: q }).avgScore })),
+                      };
+                    })}
+                    href={href('/log', `${query}&view=audits`)}
+                  />
+                  <AuditsCard
+                    total={summary.audits}
+                    byQuarter={QUARTERS.map((q) => ({ label: q.replace('-', ' '), count: filterAudits(repo, { ...filter, quarter: q }).length })).filter((q) => filter.quarter === 'all' || q.label === filter.quarter.replace('-', ' '))}
+                    contractors={cards.length}
+                    first={filterAudits(repo, filter)[0]?.date ?? null}
+                    last={filterAudits(repo, filter).at(-1)?.date ?? null}
+                    href={href('/log', `${query}&view=audits`)}
                   />
                   <PositivesCard
                     summary={positiveSummary(repo, filter)}

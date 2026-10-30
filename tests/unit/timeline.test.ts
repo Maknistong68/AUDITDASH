@@ -10,9 +10,9 @@ const repo = getRepo();
 describe('timelineRows', () => {
   const rows = timelineRows(filterAudits(repo, ALL), repo.contractors());
 
-  test('filter all: 12 contractors, 21 audits, worst latest score first', () => {
+  test('filter all: 12 contractors, 20 audits, worst latest score first', () => {
     expect(rows).toHaveLength(12);
-    expect(rows.reduce((s, r) => s + r.audits.length, 0)).toBe(21);
+    expect(rows.reduce((s, r) => s + r.audits.length, 0)).toBe(20);
     const latest = rows.map((r) => r.latest);
     expect(latest).toEqual([...latest].sort((a, b) => a - b));
     expect(rows.at(-1)!.name).toBe('JV-ECH (Port T1)');
@@ -27,7 +27,7 @@ describe('timelineRows', () => {
     const sibs = rows.find((r) => r.name === 'SIBS')!;
     expect(sibs.audits).toHaveLength(3);
     expect(sibs.trends).toEqual(['up', 'up']);
-    expect(rows.find((r) => r.name === 'Al Fahd (Coast Guard)')!.trends).toEqual(['down', 'up']); // 74 → 59 → 60
+    expect(rows.find((r) => r.name === 'Al Fahd (Coast Guard)')!.trends).toEqual(['down']); // 74 → 59
   });
 
   test('the latest band matches the dashboard band counts', () => {

@@ -101,7 +101,6 @@ export function LogView({ data, contractors, initial }: { data: LogData; contrac
       >
         <div className="min-w-0">
           <h1 className="text-[28px] font-semibold leading-[1.05] tracking-[-0.035em] min-[900px]:text-[clamp(28px,4svh,36px)]">Log</h1>
-          <p className="mt-1 text-[clamp(13px,1.6svh,15px)] text-muted">Every observation and audit, searchable</p>
         </div>
         <ViewSwitch view={state.view} counts={{ observations: data.observations.length, audits: data.audits.length }} onChange={(v) => update({ view: v })} />
       </motion.header>

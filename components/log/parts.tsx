@@ -1,5 +1,5 @@
 'use client';
-import { ArrowRight, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
 import { categoryById } from '@/lib/categories';
 import { KIND_LABEL, highlight, type LogKind } from '@/lib/log';
@@ -61,7 +61,6 @@ export function OpenHint({ className = '' }: { className?: string }) {
       className={`inline-flex items-center gap-1 whitespace-nowrap text-[13px] font-semibold text-[var(--accent)] transition-[opacity,transform] duration-[450ms] ease-[cubic-bezier(0.16,1,0.3,1)] [@media(hover:hover)]:-translate-x-1 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:translate-x-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:translate-x-0 [@media(hover:hover)]:group-focus-within:opacity-100 ${className}`}
     >
       Open
-      <ArrowRight size={14} strokeWidth={2.4} />
     </span>
   );
 }

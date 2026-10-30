@@ -41,15 +41,16 @@ test('the dashboard has one Portfolio card and no band or region card', async ({
   for (const id of ['kpi-bands', 'region-compare', 'region-row']) await expect(page.getByTestId(id)).toHaveCount(0);
   await expect(page.getByRole('heading', { name: /Contractors by band|Region/ })).toHaveCount(0);
   // contractors, score over time, score, repeats, positives (the main problem is the dark hero tile)
-  await expect(page.getByTestId('hero').locator('section.card')).toHaveCount(5);
+  // + sub-regions, audits conducted
+  await expect(page.getByTestId('hero').locator('section.card')).toHaveCount(7);
 });
 
 test('the Portfolio card shows the honest average, its band and the contractors per band', async ({ page }) => {
   await page.goto('/');
   const card = page.getByTestId('kpi-score');
   await expect(card.getByText('Minimal', { exact: true })).toBeVisible();
-  await expect(card.locator('p[aria-label="63 percent"]')).toHaveCount(1); // 21 audits, computed from their points
-  await expect(card.getByTestId('band-bar')).toHaveAttribute('aria-label', '4 Partially Compliant, 3 Minimally Compliant, 5 Non-Compliant');
+  await expect(card.locator('p[aria-label="64 percent"]')).toHaveCount(1); // 20 audits, computed from their points
+  await expect(card.getByTestId('band-bar')).toHaveAttribute('aria-label', '4 Partially Compliant, 2 Minimally Compliant, 6 Non-Compliant');
   await expect(card.getByTestId('trend-chart')).toHaveCount(0); // the trend lives in the Score over time card
 });
 
@@ -119,7 +120,8 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1366, height: 657 }, { 
       await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
     }
     await expect(page.getByTestId('contractor-row').last()).toBeInViewport({ ratio: 1 });
-    await expect(page.getByTestId('score-line')).toBeInViewport({ ratio: 1 });
+    await expect(page.getByTestId('quarter-lines')).toBeInViewport({ ratio: 1 });
+    for (const id of ['kpi-regions', 'kpi-audits']) await expect(page.getByTestId(id)).toBeInViewport({ ratio: 1 });
     await ctx.close();
   });
 }

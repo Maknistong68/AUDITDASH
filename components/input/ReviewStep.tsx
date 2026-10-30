@@ -1,6 +1,6 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowDown, CheckCircle2, Download, HardHat, Plus, Send, Sparkles, Trash2 } from 'lucide-react';
+import { ArrowDown, Plus, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CodeChip } from '@/components/details/parts';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
@@ -158,9 +158,7 @@ export function ReviewStep({ draft, items, score, contractor, actions, onSave, o
           <AnimatePresence mode="wait" initial={false}>
             {submitted ? (
               <motion.div key="done" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0, transition: calm(0, 0.9) }} exit={{ opacity: 0, transition: QUICK }} className="flex flex-col gap-2" data-testid="submitted">
-                <CheckCircle2 size={28} className="text-[var(--good-dot)]" aria-hidden />
                 <p className="text-[17px] font-semibold">Submitted</p>
-                <p className="text-[13px] text-muted">Saved in this browser. Download it to add it to the master data.</p>
               </motion.div>
             ) : (
               <motion.div key="todo" initial={{ opacity: 0 }} animate={{ opacity: 1, transition: QUICK }} exit={{ opacity: 0, transition: QUICK }} className="flex flex-col gap-2">
@@ -179,27 +177,22 @@ export function ReviewStep({ draft, items, score, contractor, actions, onSave, o
           </AnimatePresence>
           <div className="mt-auto flex flex-col gap-2">
             {!submitted && (
-              <Button kind="primary" onClick={onSubmit} disabled={missing.length > 0} testid="submit-audit" title={missing.join(' · ')}>
-                <Send size={15} strokeWidth={2.4} aria-hidden /> Submit audit
+              <Button kind="primary" onClick={onSubmit} disabled={missing.length > 0} testid="submit-audit" title={missing.join(' · ')}> Submit audit
               </Button>
             )}
             <Button kind="plain" onClick={onSave} testid="save-draft">{submitted ? 'Save changes' : 'Save draft'}</Button>
-            <Button kind="ghost" onClick={onDownload} disabled={!draft.details.contractorId || !draft.details.date} testid="download-json">
-              <Download size={15} strokeWidth={2.4} aria-hidden /> Download JSON
+            <Button kind="ghost" onClick={onDownload} disabled={!draft.details.contractorId || !draft.details.date} testid="download-json"> Download JSON
             </Button>
             {submitted && <Button kind="ghost" onClick={onNew} testid="new-audit-again"><Plus size={15} strokeWidth={2.6} aria-hidden /> Another audit</Button>}
           </div>
-          <p className="text-[12px] text-faint">The Excel workbook stays the master record.</p>
         </motion.section>
       </div>
     </div>
   );
 }
 
-const KIND_ICON = { finding: null, site: HardHat, positive: Sparkles } as const;
 
 function NoteCard({ note, i, question, actions }: { note: DraftNote; i: number; question?: string; actions: WizardActions }) {
-  const KIcon = KIND_ICON[note.kind];
   return (
     <motion.li
       layout="position"
@@ -223,7 +216,6 @@ function NoteCard({ note, i, question, actions }: { note: DraftNote; i: number; 
           ))}
         </div>
         {note.code && <CodeChip code={note.code} />}
-        {KIcon && note.kind === 'positive' && <KIcon size={15} className="text-[var(--good-dot)]" aria-hidden />}
         <span className="ml-auto flex items-center gap-1">
           {note.kind !== 'positive' && note.category && (
             <CategorySelect value={note.category} auto={note.auto} label="Category" onChange={(c: CategoryId) => actions.updateNote(note.id, { category: c })} />

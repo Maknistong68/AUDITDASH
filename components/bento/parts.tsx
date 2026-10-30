@@ -6,6 +6,8 @@ import { EASE, DUR } from '@/lib/motion';
 export const whole = (n: number) => String(Math.round(n));
 export const PAD = 'px-[clamp(16px,1.5vw,28px)] py-[clamp(12px,1.8svh,24px)]';
 export const BIG = 'figure text-[clamp(44px,7.4svh,88px)]';
+/** The small bottom-row tiles' figure. */
+export const MID = 'figure text-[clamp(32px,5.6svh,64px)]';
 
 /** Signed whole-point change; colour says good/bad (invert for metrics where falling is good). */
 export function Signed({ d, unit = true, invert = false }: { d: number; unit?: boolean; invert?: boolean }) {

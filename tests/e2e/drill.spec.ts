@@ -81,13 +81,13 @@ test('a contractor audited once has no audit arrows', async ({ page }) => {
 
 test('category carousel is by quarter, latest first, with quarter arrows', async ({ page }) => {
   await page.goto('/category/subcontractor');
-  // Under "All": every audit first (the dashboard card's figure), then Q3 2026, Q1 2026, Q4 2025
-  await expect(page.getByTestId('slide')).toHaveCount(4);
+  // Under "All": every audit first (the dashboard card's figure), then Q1 2026, Q4 2025
+  await expect(page.getByTestId('slide')).toHaveCount(3);
   await expect(active(page).getByTestId('slide-header')).toContainText('All audits');
   await ready(page);
   await page.getByRole('button', { name: 'Previous quarter' }).click();
   await expect(page).toHaveURL(/s=1/);
-  await expect(active(page).getByTestId('slide-header')).toContainText('Q3 2026');
+  await expect(active(page).getByTestId('slide-header')).toContainText('Q1 2026');
   const href = await active(page).getByTestId('contractor-row').first().getAttribute('href');
   expect(href).toMatch(/q=all&r=SR1%2CSR2/);
 });
@@ -171,18 +171,20 @@ test('category rows on a contractor slide open that audit in the category', asyn
   expect(href).toMatch(/^\/category\/[a-z]+\/4800001131\?q=all&r=SR1%2CSR2&s=1$/);
 });
 
-test('item states follow the findings rule (Noted / No finding / N/A) with a score-based section gap, never pass/fail', async ({ page }) => {
+test('item states follow the findings rule (Noted / Clear / N/A), no percentages, never pass/fail', async ({ page }) => {
   await page.goto('/category/subcontractor/4800001131');
   await ready(page);
   const rows = active(page).getByTestId('item-row');
   expect(await rows.count()).toBeGreaterThan(0);
   for (const s of await rows.evaluateAll((els) => els.map((e) => e.getAttribute('data-state')))) expect(['noted', 'none', 'na']).toContain(s);
-  await expect(rows.first().getByTestId('section-gap')).toBeVisible();
+  await expect(rows.first().getByTestId('section-gap')).toHaveCount(0);
   await expect(page.getByTestId('details')).not.toContainText(/fail/i);
   const pills = await rows.locator('[data-state]').evaluateAll((els) => [...new Set(els.map((e) => e.textContent))]);
-  for (const p of pills) expect(['Noted', 'No finding', 'N/A']).toContain(p);
+  for (const p of pills) expect(['Noted', 'Clear', 'N/A']).toContain(p);
   await page.goto('/category/subcontractor/4800001131/B6.1');
-  await expect(page.getByTestId('item-summary')).toContainText('Noted in');
+  await expect(page.getByTestId('item-summary')).toContainText('Noted');
+  await expect(page.getByTestId('item-dots').locator('li')).toHaveCount(2);
+  await expect(page.getByTestId('item-timeline')).not.toContainText(/Inspection|Q[1-4] 20\d\d|%/);
   await expect(page.getByTestId('details')).not.toContainText(/failed/i);
 });
 

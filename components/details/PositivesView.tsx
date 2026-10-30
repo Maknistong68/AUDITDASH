@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import { ThumbsUp } from 'lucide-react';
 import { HandoffLanding } from '@/components/motion/HandoffLink';
 import { POSITIVES_CARD, POSITIVES_FIGURE } from '@/lib/handoff';
 
@@ -52,7 +51,6 @@ function Header({ summary }: { summary: Summary }) {
     >
       <div className="flex flex-col gap-1">
         <h1 className="flex items-center gap-1.5 text-[clamp(13px,1.5svh,16px)] font-semibold tracking-[-0.01em]" style={{ color: 'var(--tone)' }}>
-          <ThumbsUp size={15} strokeWidth={2.4} aria-hidden />
           Positive observations
         </h1>
         <div className="flex items-end gap-3">
@@ -132,7 +130,6 @@ function Notes({ notes }: { notes: PositiveNote[] }) {
               data-testid="positives-note"
               className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2.5 rounded-[8px] px-1.5 py-[clamp(6px,1svh,10px)] transition-colors hover:bg-fill-2"
             >
-              <ThumbsUp size={14} strokeWidth={2.4} className="mt-[3px] text-[var(--tone-dot)]" aria-hidden />
               <span className="flex min-w-0 flex-col gap-1">
                 <span className="text-[clamp(13px,1.6svh,14.5px)] leading-snug">{n.text}</span>
                 <span className="flex flex-wrap items-center gap-x-2 text-[12px] leading-none text-muted">

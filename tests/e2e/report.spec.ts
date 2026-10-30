@@ -98,12 +98,12 @@ test('print media hides the top bar and chrome and shows both tabs', async ({ pa
   expect(bg).toBe('rgb(255, 255, 255)');
 });
 
-test('the report total says how it is computed, and shows the Excel data check', async ({ page }) => {
+test('the report shows the typed Excel total quietly when it differs, with no notes or codes', async ({ page }) => {
   await page.goto(REPORT);
   const note = page.getByTestId('report-total-note');
-  await expect(note).toContainText('Computed from the Excel points: A, B, mean of C1 & C2');
-  await expect(page.getByTestId('report-issues')).toHaveText('Excel total 71% differs from 74% computed from its own points');
-  await expect(note).toContainText('Source: HS_AUDIT_FINDINGS.xlsx');
+  await expect(note).toHaveText('Excel 71%');
+  await expect(note).toHaveAttribute('title', 'Excel total 71% differs from 74% computed from its own points');
+  await expect(page.getByTestId('report-sections')).not.toContainText(/\b[ABC]\d*\b|\d+ \/ \d+/);
   await expect(page.getByRole('tab', { name: /^Observations/ })).toBeVisible();
   await expect(page.getByText(/Negative observations/)).toHaveCount(0);
 });

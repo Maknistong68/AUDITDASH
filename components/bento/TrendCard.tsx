@@ -1,32 +1,34 @@
 'use client';
-import { ScoreLine } from '@/components/charts/ScoreLine';
-import type { MonthPoint } from '@/lib/analytics';
+import { QuarterLines } from '@/components/charts/QuarterLines';
+import type { QuarterLine } from '@/lib/analytics';
+import { deltaPoints } from '@/lib/format';
+import type { Quarter } from '@/lib/types';
 import { BentoCard, TileLabel } from './BentoGrid';
-import { PAD, Signed } from './parts';
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-const label = (m: string) => `${MONTHS[Number(m.slice(5, 7)) - 1]} ${m.slice(0, 4)}`;
+import { PAD } from './parts';
 
 /**
- * The lower half of the dashboard's left column: the portfolio score month by month (average honest score of the
- * month's audits), first month to latest, with the change between them. Hover the chart for a month's audits.
+ * The lower half of the dashboard's left column: every contractor's score from one quarter to the next, with the
+ * portfolio average as the bold line. The header counts who improved and who declined.
  */
-export function TrendCard({ points }: { points: MonthPoint[] }) {
-  const first = points[0];
-  const last = points.at(-1);
-  const d = first && last && points.length > 1 ? Math.round(last.avg * 100) - Math.round(first.avg * 100) : null;
+export function TrendCard({ quarters, portfolio, lines }: { quarters: Quarter[]; portfolio: (number | null)[]; lines: QuarterLine[] }) {
+  const moves = lines.flatMap((l) => {
+    const xs = l.values.filter((v): v is number => v !== null);
+    return xs.length > 1 ? [deltaPoints(xs[xs.length - 1], xs[xs.length - 2])!] : [];
+  });
+  const up = moves.filter((d) => d > 0).length;
+  const down = moves.filter((d) => d < 0).length;
   return (
     <BentoCard i={1} testid="score-trend" className={`${PAD} gap-[clamp(4px,1svh,12px)]`}>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <TileLabel className="!text-ink">Score over time</TileLabel>
-        {first && last && (
-          <p className="flex items-baseline gap-2 text-[13px] text-muted">
-            <span className="num">{label(first.month)} – {label(last.month)}</span>
-            {d !== null && <Signed d={d} />}
+        <TileLabel className="!text-ink">Score by quarter</TileLabel>
+        {moves.length > 0 && (
+          <p className="flex items-baseline gap-3 text-[13px]" data-testid="quarter-moves">
+            <span><span className="num font-semibold" style={{ color: 'var(--up)' }}>{up}</span> <span className="text-muted">up</span></span>
+            <span><span className="num font-semibold" style={{ color: 'var(--down)' }}>{down}</span> <span className="text-muted">down</span></span>
           </p>
         )}
       </div>
-      {points.length ? <ScoreLine points={points} /> : <p className="text-[14px] text-muted">No audits in this filter</p>}
+      {quarters.length ? <QuarterLines quarters={quarters} portfolio={portfolio} lines={lines} /> : <p className="text-[14px] text-muted">No audits</p>}
     </BentoCard>
   );
 }

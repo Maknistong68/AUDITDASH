@@ -5,12 +5,11 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { calm } from '@/lib/motion';
 
 const ITEMS = [
-  { href: '/', label: 'Overview', match: (p: string) => p === '/' },
   { href: '/log', label: 'Log', match: (p: string) => p.startsWith('/log') },
 ] as const;
 
 /**
- * The app's two places: Overview (the dashboard: analysis) and Log (every audit and observation: search). + New audit
+ * The Log link (every audit and observation: search). The wordmark is the way home to the dashboard; + New audit
  * (input) sits on the right of the bar. Quarter and regions travel with the link.
  */
 export function MainNav() {

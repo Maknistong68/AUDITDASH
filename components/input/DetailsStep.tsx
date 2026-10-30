@@ -1,6 +1,5 @@
 'use client';
 import { motion } from 'framer-motion';
-import { AlertTriangle, FileSpreadsheet, ImageOff } from 'lucide-react';
 import { AUDIT_TYPES } from '@/lib/auditTypeIds';
 import type { AuditDraft } from '@/lib/input/model';
 import type { LiveScore } from '@/lib/input/score';
@@ -26,7 +25,6 @@ export function DetailsStep({ draft, contractors, actions, score }: { draft: Aud
       {draft.source === 'excel' && (
         <motion.section {...RISE} transition={calm(STAGGER)} className="card flex flex-col gap-4 p-5" data-testid="import-summary" aria-label="Read from the workbook">
           <p className="flex min-w-0 items-center gap-2 text-[14px] font-semibold">
-            <FileSpreadsheet size={16} className="shrink-0 text-[var(--good-dot)]" aria-hidden />
             <span className="truncate">{draft.fileName}</span>
           </p>
           <dl className="grid grid-cols-2 gap-3 min-[600px]:grid-cols-4">
@@ -42,12 +40,10 @@ export function DetailsStep({ draft, contractors, actions, score }: { draft: Aud
               </div>
             ))}
           </dl>
-          <p className="inline-flex items-center gap-1.5 text-[12px] text-faint"><ImageOff size={13} aria-hidden /> Photos and evidence stay in the Excel.</p>
           {draft.warnings.length > 0 && (
             <ul className="flex flex-col gap-1.5" data-testid="import-warnings">
               {draft.warnings.map((w) => (
-                <li key={w} className="tone-partial flex items-start gap-2 rounded-xl bg-[var(--tone-bg)] px-3 py-2 text-[13px] text-[var(--tone)]">
-                  <AlertTriangle size={14} className="mt-[2px] shrink-0" aria-hidden /> {w}
+                <li key={w} className="tone-partial flex items-start gap-2 rounded-xl bg-[var(--tone-bg)] px-3 py-2 text-[13px] text-[var(--tone)]"> {w}
                 </li>
               ))}
             </ul>

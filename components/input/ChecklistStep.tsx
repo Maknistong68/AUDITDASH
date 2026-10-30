@@ -1,6 +1,6 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { MessageSquarePlus, Search, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { CodeChip } from '@/components/details/parts';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
@@ -121,7 +121,6 @@ export function ChecklistStep({ draft, items, sections, actions, score }: {
               })}
             </div>
             <label className="relative ml-auto flex min-w-0 flex-1 items-center min-[700px]:max-w-[320px]">
-              <Search size={15} className="pointer-events-none absolute left-3 text-faint" aria-hidden />
               <input
                 type="search"
                 value={query}
@@ -129,7 +128,7 @@ export function ChecklistStep({ draft, items, sections, actions, score }: {
                 placeholder="Search questions"
                 aria-label="Search questions"
                 data-testid="checklist-search"
-                className="h-10 w-full rounded-full bg-fill-2 pl-9 pr-9 text-[14px] outline-none transition-shadow placeholder:text-faint focus:shadow-[0_0_0_2px_var(--accent)]"
+                className="h-10 w-full rounded-full bg-fill-2 pl-4 pr-9 text-[14px] outline-none transition-shadow placeholder:text-faint focus:shadow-[0_0_0_2px_var(--accent)]"
               />
               {query && (
                 <button type="button" onClick={() => setQuery('')} className="absolute right-2 grid size-6 place-items-center rounded-full text-muted hover:bg-fill" aria-label="Clear search">
@@ -206,8 +205,7 @@ function Question({ item, hs, value, note, open, onOpen, actions }: {
                 </span>
               )}
               {!showNote && (
-                <button type="button" onClick={onOpen} className="inline-flex items-center gap-1 rounded-md font-semibold text-[var(--accent)] hover:underline" data-testid="add-note">
-                  <MessageSquarePlus size={12} strokeWidth={2.4} aria-hidden /> Note
+                <button type="button" onClick={onOpen} className="inline-flex items-center gap-1 rounded-md font-semibold text-[var(--accent)] hover:underline" data-testid="add-note"> Note
                 </button>
               )}
             </p>

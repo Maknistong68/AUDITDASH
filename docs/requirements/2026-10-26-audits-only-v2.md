@@ -138,3 +138,16 @@ Do not simply add more cards; improve hierarchy and workflow; no unnecessary emp
   the Overview, its audit list is the Log, bands are on the Portfolio card).
 - Under the "All" quarter filter headline figures use every audit (a quarter with one audit never decides the headline);
   a selected quarter is compared with the quarter before it.
+
+## 23. Owner feedback 2026-10-30 (second round)
+- **Only two quarters** (Q4 2025, Q1 2026) are in the findings workbook: the AL FAHD checklist workbook is the template
+  (questions, weights), not an audit. The July 2026 audit is not imported (supersedes that line of §22).
+- The month line chart said nothing with two quarters: replaced by **score by quarter** (one line per contractor, the
+  portfolio average bold, hover a line for its name and scores).
+- Contractors card: the bar takes the free space; tighter spacing.
+- **No decorative mini icons** (categories are marked by a colour dot); no explanatory notes, footers or subtitles,
+  especially on the Log, the reports and the audit input.
+- **Too many numbers and letters for an auditor**: question pages show date, Noted / Clear and the note; one dot per
+  audit; no codes, quarters, inspection numbers or section percentages there. Reports drop codes and point fractions.
+- Header: the **Overview button is removed** (the wordmark goes home).
+- Bottom row: three equal cards: **Sub-regions** (SR1 vs SR2), **Audits conducted** (total, by quarter), **Positives**.

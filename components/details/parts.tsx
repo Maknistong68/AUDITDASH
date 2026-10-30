@@ -37,8 +37,8 @@ export function AuditDelta({ audit, previous }: { audit: Audit; previous: Audit 
 }
 
 const STATE: Record<ItemState, { label: string; cls: string }> = {
-  noted: { label: 'Noted', cls: 'bg-fill text-ink' },
-  none: { label: 'No finding', cls: 'bg-fill-2 text-muted' },
+  noted: { label: 'Noted', cls: 'bg-[color-mix(in_srgb,var(--gap)_16%,transparent)] text-[var(--gap)]' },
+  none: { label: 'Clear', cls: 'bg-[color-mix(in_srgb,var(--good-dot)_14%,transparent)] text-[var(--good)]' },
   na: { label: 'N/A', cls: 'bg-fill-2 text-faint' },
 };
 

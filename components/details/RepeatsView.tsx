@@ -1,6 +1,5 @@
 'use client';
 import Link from 'next/link';
-import { Repeat2 } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { RepeatRule, RepeatStats } from '@/components/bento/RepeatsCard';
 import { HandoffLanding } from '@/components/motion/HandoffLink';
@@ -56,7 +55,6 @@ function Header({ count, stats }: { count: number | null; stats: { questions: nu
     >
       <div className="flex flex-col gap-1">
         <h1 className="flex items-center gap-1.5 text-[clamp(13px,1.5svh,16px)] font-semibold tracking-[-0.01em]" style={{ color: 'var(--tone)' }}>
-          <Repeat2 size={16} strokeWidth={2.4} aria-hidden />
           Repeat findings
         </h1>
         <div data-testid="repeats-total" className="flex items-baseline gap-2.5">

@@ -21,10 +21,9 @@ const ABYATONA_Q4 = '4800001112-Q4-2025-20251015';
 const NBC_Q1 = '4200000026-Q1-2026-20260208';
 
 describe('followUps: each visit (a quarter\'s audits) paired with the same contractor\'s visit before it', () => {
-  test('8 pairs over all quarters (SIBS\'s two Q4 audits are one visit); the later visit sets the quarter', () => {
-    expect(followUps(repo, ALL)).toHaveLength(8);
+  test('7 pairs over all quarters (SIBS\'s two Q4 audits are one visit); the later visit sets the quarter', () => {
+    expect(followUps(repo, ALL)).toHaveLength(7);
     expect(followUps(repo, { ...ALL, quarter: 'Q1-2026' })).toHaveLength(7);
-    expect(followUps(repo, { ...ALL, quarter: 'Q3-2026' })).toHaveLength(1); // Al Fahd (Coast Guard) Q1 → Q3
     expect(followUps(repo, { ...ALL, quarter: 'Q4-2025' })).toEqual([]);
     const sibs = followUps(repo, ALL).filter((p) => p.contractor.id === SIBS);
     expect(sibs.map((p) => [p.prevVisit.audits.map((a) => a.date), p.nextVisit.audits.map((a) => a.date)])).toEqual([[['2025-11-12', '2025-11-19'], ['2026-02-01']]]);
@@ -41,7 +40,7 @@ describe('followUps: each visit (a quarter\'s audits) paired with the same contr
   });
   test('regions respected; empty filter and other audit types have none', () => {
     expect(followUps(repo, { ...ALL, regions: ['SR1'] })).toHaveLength(4);
-    expect(followUps(repo, { ...ALL, regions: ['SR2'] })).toHaveLength(4);
+    expect(followUps(repo, { ...ALL, regions: ['SR2'] })).toHaveLength(3);
     expect(followUps(repo, NONE)).toEqual([]);
     expect(followUps(repo, { ...ALL, type: 'security' })).toEqual([]);
   });
@@ -49,12 +48,11 @@ describe('followUps: each visit (a quarter\'s audits) paired with the same contr
 
 describe('repeatFindings: the same question noted again at the next audit', () => {
   test('seed totals per filter', () => {
-    expect(repeatFindings(repo, ALL)).toHaveLength(267);
+    expect(repeatFindings(repo, ALL)).toHaveLength(228);
     expect(repeatFindings(repo, { ...ALL, quarter: 'Q1-2026' })).toHaveLength(228);
-    expect(repeatFindings(repo, { ...ALL, quarter: 'Q3-2026' })).toHaveLength(39);
     expect(repeatFindings(repo, { ...ALL, quarter: 'Q4-2025' })).toHaveLength(0);
     expect(repeatFindings(repo, { ...ALL, regions: ['SR1'] })).toHaveLength(154);
-    expect(repeatFindings(repo, { ...ALL, regions: ['SR2'] })).toHaveLength(113);
+    expect(repeatFindings(repo, { ...ALL, regions: ['SR2'] })).toHaveLength(74);
     expect(repeatFindings(repo, NONE)).toEqual([]);
   });
   test('every row is noted in both audits of its pair; every such question is a row', () => {
@@ -175,7 +173,7 @@ describe('isFinding: the interim finding rule (auditor note, no COMPLIANT / N/A 
   });
   test('findingsByAudit: distinct codes per audit, all findings', () => {
     const rows = findingsByAudit(repo, ALL);
-    expect(rows).toHaveLength(21);
+    expect(rows).toHaveLength(20);
     for (const r of rows) {
       expect(new Set(r.itemCodes).size).toBe(r.itemCodes.length);
       expect(new Set(r.itemCodes)).toEqual(noted(r.audit.id));
@@ -194,14 +192,13 @@ describe('repeatMatrix: questions × contractors, times repeated', () => {
     expect(sum(m.contractors.map((c) => c.total))).toBe(repeatFindings(repo, ALL).length);
     expect(m.contractors).toHaveLength(repeatContractors(repo, ALL).length);
   });
-  test('SIBS (two visits): max times repeated is 1, 66 repeats; Al Fahd (Coast Guard) has three audits, so up to 2', () => {
+  test('SIBS (two visits): max times repeated is 1, 66 repeats; every other contractor unchanged', () => {
     expect(Math.max(...Object.values(m.cells[SIBS]))).toBe(1);
     expect(m.contractors.find((c) => c.id === SIBS)!.total).toBe(66);
-    expect(Math.max(...Object.values(m.cells['4800001272']))).toBe(2);
-    expect(Object.entries(m.cells).filter(([id]) => id !== '4800001272').every(([, row]) => Object.values(row).every((n) => n === 1))).toBe(true);
+    expect(Object.entries(m.cells).every(([, row]) => Object.values(row).every((n) => n === 1))).toBe(true);
     const others = Object.fromEntries(m.contractors.filter((c) => c.id !== SIBS).map((c) => [c.name, c.total]));
     expect(others).toEqual({
-      'Abyatona (Box Culvert H55)': 39, 'Abyatona (Zone F Culvert)': 32, 'Al Fahd (Coast Guard)': 70,
+      'Abyatona (Box Culvert H55)': 39, 'Abyatona (Zone F Culvert)': 32, 'Al Fahd (Coast Guard)': 31,
       'JV-ECH (Port T1)': 22, 'Sarco Disa (Port T2)': 21, PPCO: 17,
     });
     expect(m.questions).toHaveLength(75);

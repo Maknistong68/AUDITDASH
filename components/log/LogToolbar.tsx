@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'framer-motion';
-import { ArrowDownWideNarrow, ArrowUpNarrowWide, ChevronDown, Search, X } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import type { RefObject } from 'react';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
 import { CATEGORIES } from '@/lib/categories';
@@ -46,8 +46,7 @@ export function LogToolbar({ state, update, clear, contractors, kindCounts, catC
       className="card flex flex-col gap-3 px-[clamp(12px,1.3vw,22px)] py-[clamp(12px,1.6svh,18px)]"
     >
       <div className="flex flex-wrap items-center gap-2.5">
-        <label className="group/search relative flex h-11 min-w-0 flex-[1_1_320px] items-center rounded-full bg-fill-2 pl-10 pr-2 transition-shadow focus-within:shadow-[0_0_0_2px_var(--accent)]">
-          <Search size={17} strokeWidth={2.2} className="pointer-events-none absolute left-3.5 text-muted" aria-hidden />
+        <label className="group/search relative flex h-11 min-w-0 flex-[1_1_320px] items-center rounded-full bg-fill-2 pl-4 pr-2 transition-shadow focus-within:shadow-[0_0_0_2px_var(--accent)]">
           <span className="sr-only">Search</span>
           <input
             ref={searchRef}
@@ -114,7 +113,6 @@ export function LogToolbar({ state, update, clear, contractors, kindCounts, catC
             className={`${PILL} bg-fill-2 text-ink hover:bg-fill`}
             aria-label={`Sorted ${state.sort === 'newest' ? 'newest' : 'oldest'} first. Change sort`}
           >
-            {state.sort === 'newest' ? <ArrowDownWideNarrow size={15} aria-hidden /> : <ArrowUpNarrowWide size={15} aria-hidden />}
             {state.sort === 'newest' ? 'Newest' : 'Oldest'}
           </button>
         </div>

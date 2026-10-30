@@ -14,7 +14,7 @@ import { ScoreBar } from '@/components/bento/parts';
 import { SectionBars } from '@/components/charts/SectionBars';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
 import { DetailFrame } from '@/components/details/DetailFrame';
-import { AuditDelta, CodeChip } from '@/components/details/parts';
+import { AuditDelta } from '@/components/details/parts';
 import { CategoryGroup, Entry } from '@/components/report/ObservationList';
 import { PrintButton } from '@/components/report/PrintButton';
 
@@ -32,8 +32,6 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return { title: audit && contractor ? `${contractor.name} · ${dateLabel(audit.date)} audit` : 'Not found' };
 }
 
-/** "4.5" / "6": official section points as recorded (half points kept). */
-const points = (n: number) => String(Math.round(n * 10) / 10);
 
 /**
  * The full audit report: header facts, the official score with its sections, and every observation, filterable by
@@ -89,9 +87,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
           <p className="mt-1.5 flex flex-wrap gap-x-2 text-[clamp(13px,1.6svh,15px)] text-muted" data-testid="report-facts">
             <span className="font-semibold text-ink">{dateLabel(audit.date)}</span>
             <span aria-hidden>·</span><span>{quarterLabel(audit.quarter)}</span>
-            <span aria-hidden>·</span><span>Inspection {audit.inspectionNo}</span>
             <span aria-hidden>·</span><span>{contractor.subregion}</span>
-            <span aria-hidden>·</span><span>Contract {contractor.contractNo}</span>
           </p>
           <dl className="mt-0.5 flex flex-wrap gap-x-5 gap-y-0.5 text-[clamp(13px,1.6svh,15px)]">
             <div className="flex min-w-0 gap-2"><dt className="text-muted">Project</dt><dd className="min-w-0 break-words">{audit.location}</dd></div>
@@ -117,16 +113,12 @@ export default async function AuditReportPage({ params, searchParams }: { params
                 </div>
               </div>
               <ScoreBar value={audit.totalScore} delay={0.15} />
-              {/* The workbook formula on the workbook's own points; the typed Excel total is shown when it differs. */}
-              <div className="flex flex-col gap-1.5 text-[13px] text-muted" data-testid="report-total-note">
-                <p>Computed from the Excel points: A, B, mean of C1 &amp; C2</p>
-                {audit.issues?.length ? (
-                  <ul data-testid="report-issues" className="flex flex-col gap-1 rounded-[12px] bg-fill-2 px-3 py-2 text-[12.5px]">
-                    {audit.issues.map((x) => <li key={x}>{x}</li>)}
-                  </ul>
-                ) : null}
-                {audit.source && <p className="text-[12px] text-faint">Source: {audit.source}</p>}
-              </div>
+              {/* Computed from the Excel points; the typed Excel total, when it differs, is shown as a quiet figure. */}
+              {typeof audit.reportedScore === 'number' && pct(audit.reportedScore) !== pct(audit.totalScore) && (
+                <p className="text-[13px] text-faint" data-testid="report-total-note" title={audit.issues?.join(' · ')}>
+                  Excel <span className="num">{pct(audit.reportedScore)}%</span>
+                </p>
+              )}
             </div>
             <div className="min-[1100px]:max-[1499px]:pb-[2px]">
               <SectionBars rings={sectionRatios(audit)} delay={0.2} />
@@ -136,7 +128,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
 
         <BentoCard i={1} testid="report-sections" className="gap-2 px-[clamp(10px,1vw,18px)] py-[clamp(14px,2svh,24px)] min-[1100px]:col-span-12 min-[1500px]:col-span-8">
           <TileLabel className="px-[clamp(6px,0.6vw,10px)]">
-            Score by section <span className="font-normal">· scored of possible points</span>
+            Sections
           </TileLabel>
           <ul className="grid grid-cols-1 gap-x-[clamp(16px,2vw,40px)] min-[1100px]:grid-flow-col min-[1100px]:grid-cols-2 min-[1100px]:grid-rows-8">
             {report.sections.map((s) => (
@@ -144,17 +136,13 @@ export default async function AuditReportPage({ params, searchParams }: { params
                 key={s.code}
                 data-testid="section-row"
                 data-code={s.code}
-                className="grid grid-cols-[3em_minmax(0,1fr)_4.8em_2.6em] items-center min-[640px]:grid-cols-[3.2em_minmax(0,1fr)_minmax(48px,0.6fr)_5.2em_2.6em] gap-2.5 rounded-[10px] px-[clamp(6px,0.6vw,10px)] py-[clamp(4px,0.75svh,8px)]"
+                className="grid grid-cols-[minmax(0,1fr)_3em] items-center min-[640px]:grid-cols-[minmax(0,1fr)_minmax(48px,0.8fr)_3em] gap-2.5 rounded-[10px] px-[clamp(6px,0.6vw,10px)] py-[clamp(4px,0.75svh,8px)]"
               >
-                <CodeChip code={s.code} />
-                <span className="truncate text-[14px]" title={s.label}>{s.label}</span>
+                <span className="truncate text-[14px]">{s.label}</span>
                 <span className="relative hidden h-[7px] overflow-hidden rounded-full bg-fill-2 min-[640px]:block" aria-hidden>
                   {s.ratio !== null && (
                     <span className="absolute inset-y-0 left-0 rounded-full bg-[var(--bar)]" style={{ width: `${Math.min(1, Math.max(0, s.ratio)) * 100}%` }} />
                   )}
-                </span>
-                <span className="num text-right text-[13px] text-muted">
-                  {s.possible > 0 ? <>{points(s.scored)} / {points(s.possible)}</> : '0 / 0'}
                 </span>
                 <span className="num text-right text-[14px] font-semibold">
                   {s.ratio === null ? <span className="font-normal text-faint">N/A</span> : <>{pct(s.ratio)}<span className="text-[0.75em] text-muted">%</span></>}

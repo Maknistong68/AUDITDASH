@@ -265,16 +265,16 @@ test('the dashboard Main problem card: every audit, drivers as bars, all categor
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
   const mp = page.getByTestId('main-problem');
-  await expect(mp.getByTestId('main-problem-gap')).toHaveText('73%');
+  await expect(mp.getByTestId('main-problem-gap')).toHaveText('74%');
   // Under "All": every audit (21), no comparison; drivers are "audits with the finding / audits"; the hover layer ranks
   // every category (owner direction 2026-10-30).
   await expect.poll(() => mp.innerText()).toBe(
-    'Main problem · All audits\n\nSubcontractor Control\n\n73%\n\nscore lost\n\nDriven by\n\n' +
-      'Subcontractor screening & evaluation\n18/21\nSubcontractor supervision arrangements\n17/21\nSubcontractor performance tracking\n17/21\n\n' +
-      'Score lost · all categories\n\nSubcontractors\n73%\nMonitoring\n44%\nLeadership\n44%\nCompetence\n34%\nSite\n29%\n' +
-      'Documents\n29%\nEmergency\n29%\nHealth\n24%',
+    'Main problem · All audits\n\nSubcontractor Control\n\n74%\n\nscore lost\n\nDriven by\n\n' +
+      'Subcontractor screening & evaluation\n17/20\nSubcontractor supervision arrangements\n16/20\nSubcontractor performance tracking\n16/20\n\n' +
+      'Score lost · all categories\n\nSubcontractors\n74%\nMonitoring\n44%\nLeadership\n44%\nCompetence\n35%\nSite\n30%\n' +
+      'Documents\n28%\nEmergency\n28%\nHealth\n24%',
   );
-  await expect(mp.getByRole('link')).toHaveAttribute('aria-label', 'Main problem All audits: Subcontractor Control, 73% score lost. Open details');
+  await expect(mp.getByRole('link')).toHaveAttribute('aria-label', 'Main problem All audits: Subcontractor Control, 74% score lost. Open details');
   await expect(mp.getByRole('heading', { level: 2 })).toHaveText('Subcontractor Control');
   await expect(mp.getByRole('heading', { level: 2 })).toHaveAttribute('id', 'mp-title');
   await expect(mp).not.toContainText('#');

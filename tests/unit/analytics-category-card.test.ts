@@ -15,13 +15,13 @@ const FILTERS: Filter[] = [
 ];
 
 describe('categoryCard', () => {
-  test('the main problem category gives exactly the dashboard card (73% on the full filter)', () => {
+  test('the main problem category gives exactly the dashboard card (74% on the full filter)', () => {
     for (const f of FILTERS) {
       const m = mainProblem(repo, f)!;
       expect(categoryCard(repo, f, m.category)).toEqual(m);
     }
     const c = categoryCard(repo, ALL, mainProblem(repo, ALL)!.category)!;
-    expect(Math.round(c.gapRate * 100)).toBe(73);
+    expect(Math.round(c.gapRate * 100)).toBe(74);
     expect(c.quarter).toBe('all');
   });
 

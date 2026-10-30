@@ -1,6 +1,6 @@
 'use client';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight, FileSpreadsheet, ImageOff, Loader2, PencilLine, RotateCcw, Trash2, UploadCloud } from 'lucide-react';
+import { Loader2, RotateCcw, Trash2 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { AUDIT_TYPES } from '@/lib/auditTypeIds';
 import { checklistFor, sectionsFor } from '@/lib/auditTypes';
@@ -80,7 +80,7 @@ export function StartStep({
       {current && (
         <motion.div {...RISE} transition={calm(STAGGER)} className="card flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <p className="text-[15px]"><span className="font-semibold">An audit is open.</span> <span className="text-muted">Choosing again below replaces it.</span></p>
-          <Button kind="primary" onClick={onContinue} testid="continue-open">Continue <ArrowRight size={16} strokeWidth={2.4} aria-hidden /></Button>
+          <Button kind="primary" onClick={onContinue} testid="continue-open">Continue</Button>
         </motion.div>
       )}
 
@@ -101,19 +101,13 @@ export function StartStep({
           >
             <span aria-hidden className="pointer-events-none absolute inset-3 rounded-[16px] border-2 border-dashed transition-colors duration-500" style={{ borderColor: over ? 'var(--accent)' : 'var(--hairline)' }} />
             <span className="relative grid size-14 place-items-center rounded-2xl bg-[color-mix(in_srgb,var(--accent)_14%,transparent)] text-[var(--accent)]">
-              {busy ? <Loader2 size={26} className="motion-safe:animate-spin" aria-hidden /> : <UploadCloud size={26} strokeWidth={2} aria-hidden />}
+              {busy ? <Loader2 size={26} className="motion-safe:animate-spin" aria-hidden /> : <span className="text-[22px] font-semibold leading-none">xlsx</span>}
             </span>
             <div className="relative flex flex-col gap-2">
               <h2 className="text-[clamp(21px,2.6svh,26px)] font-semibold tracking-[-0.025em]">Upload the Excel checklist</h2>
               <p className="text-[15px] text-muted">
                 {hs ? <>Drop the completed <span className="font-semibold text-ink">.xlsx</span> here or click to choose.</> : 'Excel import is for Health & Safety checklists.'}
               </p>
-              {hs && (
-                <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-faint">
-                  <span className="inline-flex items-center gap-1"><FileSpreadsheet size={13} aria-hidden /> Read in this browser</span>
-                  <span className="inline-flex items-center gap-1"><ImageOff size={13} aria-hidden /> Photos are never imported</span>
-                </p>
-              )}
             </div>
             <input
               ref={input}
@@ -136,7 +130,6 @@ export function StartStep({
             className="card lift group flex h-full min-h-[clamp(220px,34svh,340px)] w-full flex-col justify-between gap-6 p-[clamp(20px,2.4vw,36px)] text-left"
           >
             <span className="grid size-14 place-items-center rounded-2xl bg-fill-2 text-ink">
-              <PencilLine size={24} strokeWidth={2} aria-hidden />
             </span>
             <div className="flex flex-col gap-2">
               <h2 className="text-[clamp(21px,2.6svh,26px)] font-semibold tracking-[-0.025em]">Fill in the checklist here</h2>
@@ -144,7 +137,7 @@ export function StartStep({
                 {checklistFor(type).length} questions · {AUDIT_TYPES.find((t) => t.id === type)!.label}
               </p>
               <span className="inline-flex items-center gap-1 text-[14px] font-semibold text-[var(--accent)]">
-                Start <ArrowRight size={15} strokeWidth={2.4} className="transition-transform duration-300 group-hover:translate-x-0.5" aria-hidden />
+                Start
               </span>
             </div>
           </button>
@@ -166,10 +159,6 @@ export function StartStep({
         )}
       </AnimatePresence>
 
-      <motion.p {...RISE} transition={calm(STAGGER * 4)} className="text-center text-[13px] text-faint">
-        The Excel workbook stays the master record. This page keeps audits in this browser only; download one to add it to the master data.
-      </motion.p>
-
       <SavedList saved={saved} contractors={contractors} onResume={onResume} onDelete={onDelete} />
     </div>
   );
@@ -183,7 +172,7 @@ function SavedList({ saved, contractors, onResume, onDelete }: {
   const name = (id: string | null) => contractors.find((c) => c.id === id)?.name ?? 'Contractor not set';
   return (
     <motion.section {...RISE} transition={calm(STAGGER * 5)} aria-labelledby="saved-h" data-testid="saved-list" className="flex flex-col gap-3">
-      <h2 id="saved-h" className="text-[15px] font-semibold text-muted">Saved in this browser</h2>
+      <h2 id="saved-h" className="text-[15px] font-semibold text-muted">Saved</h2>
       <ul className="grid grid-cols-1 gap-[var(--gap-grid)] min-[760px]:grid-cols-2 min-[1200px]:grid-cols-3">
         <AnimatePresence initial={false}>
           {saved.map((d) => {

@@ -18,7 +18,7 @@ CHECKLIST = ROOT / "data/source/AL_FAHD_1272_checklist.xlsx"
 @pytest.fixture(scope="session")
 def seed_dir(tmp_path_factory):
     out = tmp_path_factory.mktemp("seed")
-    import_excel.main(["--results", str(RESULTS), "--checklist", str(CHECKLIST), "--audit", str(CHECKLIST),
+    import_excel.main(["--results", str(RESULTS), "--checklist", str(CHECKLIST),
                        "--previous", str(ROOT / "data/seed/observations.json"), "--out", str(out)])
     return out
 
@@ -39,7 +39,7 @@ def seed_text(seed_dir):
     return "".join(p.read_text() for p in sorted(seed_dir.glob("*.json")))
 
 
-def test_twenty_one_audits_twelve_contractors(seed): assert len(seed.audits) == 21 and len(seed.contractors) == 12
+def test_twenty_audits_twelve_contractors(seed): assert len(seed.audits) == 20 and len(seed.contractors) == 12
 # Every audit's "TOTAL FINAL SCORE" cell, read straight from the workbook (checked cell by cell, not via the parser).
 EXCEL_TOTALS = {
     '4800001134-Q4-2025-20251022': 0.67, '4800000901-Q4-2025-20251020': 0.68, '4800000838-Q4-2025-20251112': 0.62,
@@ -49,11 +49,10 @@ EXCEL_TOTALS = {
     '4200000026-Q1-2026-20260208': 0.60, '4800001322-Q1-2026-20260118': 0.76, '4800001440-Q1-2026-20260302': 0.60,
     '4800000838-Q1-2026-20260201': 0.72, '4800000892-Q1-2026-20260315': 0.62, '4800001272-Q1-2026-20260223': 0.65,
     '4800001131-Q1-2026-20260301': 0.85, '4800000876-Q1-2026-20260215': 0.66,
-    '4800001272-Q3-2026-20260719': 0.6204731670445957,  # the checklist workbook's cached total (template adds +0.012)
 }
 def test_reported_totals_match_excel(seed):
     t = {a['id']: a['reportedScore'] for a in seed.audits}
-    assert len(EXCEL_TOTALS) == 21 and set(t) == set(EXCEL_TOTALS)
+    assert len(EXCEL_TOTALS) == 20 and set(t) == set(EXCEL_TOTALS)
     for audit_id, expected in EXCEL_TOTALS.items():
         assert abs(t[audit_id] - expected) < 1e-9, audit_id
 def test_total_is_the_formula_on_the_points(seed):
@@ -68,12 +67,14 @@ def test_capped_and_copied_blocks_flagged(seed):
     by = {a['id']: a for a in seed.audits}
     assert any('21.5 points scored of 21' in i for i in by['4800001131-Q1-2026-20260301']['issues'])
     assert any('identical' in i for i in by['4800001322-Q4-2025-20251013']['issues'])
-def test_july_audit_from_part1(seed):
-    a = next(a for a in seed.audits if a['id'] == '4800001272-Q3-2026-20260719')
-    assert len(a['answers']) == 81 and a['totalScore'] == 0.5955
+def test_checklist_audit_from_part1():
+    # A completed checklist workbook imports as one audit (`--audit`), scored from its Part 1 answers.
+    import json as _json
+    checklist = import_excel.parse_checklist(CHECKLIST)
+    c, a, obs = import_excel.parse_checklist_audit(CHECKLIST, checklist)
+    assert a['id'] == '4800001272-Q3-2026-20260719' and len(a['answers']) == 81 and a['totalScore'] == 0.5955
     s = {x['code']: x for x in a['sections']}
     assert (s['A']['possible'], s['A']['scored']) == (49, 23) and (s['B8']['possible'], s['B8']['scored']) == (4, 2)
-    obs = [o for o in seed.observations if o['auditId'] == a['id']]
     assert len(obs) == 84 and sum(o['kind'] == 'positive' for o in obs) == 5 and sum(o['kind'] == 'site' for o in obs) == 11
 def test_no_photos(seed): assert all('hasPhoto' not in o for o in seed.observations)
 def test_sibs_has_three_audits(seed): assert sum(a['contractorId']=='4800000838' for a in seed.audits) == 3

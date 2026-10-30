@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
 import { getRepo } from '@/lib/data/repo';
 import { isNaObservation, subsectionOf } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
@@ -69,7 +68,7 @@ export default async function ObservationPage({ params, searchParams }: { params
             href={href(`/audit/${audit.id}`, query)}
             className="mt-auto inline-flex h-10 w-fit items-center gap-1.5 rounded-full bg-ink px-5 text-[14px] font-semibold text-ground transition-transform active:scale-[0.97]"
           >
-            Full report <ArrowRight size={15} strokeWidth={2.4} aria-hidden />
+            Full report
           </Link>
         </BentoCard>
 

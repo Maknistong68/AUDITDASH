@@ -1,11 +1,9 @@
 {
   "quarters": [
     "Q4-2025",
-    "Q1-2026",
-    "Q3-2026"
+    "Q1-2026"
   ],
   "source": [
-    "HS_AUDIT_FINDINGS.xlsx",
-    "AL_FAHD_1272_checklist.xlsx"
+    "HS_AUDIT_FINDINGS.xlsx"
   ]
 }

@@ -1,4 +1,3 @@
-import { ThumbsUp } from 'lucide-react';
 import { CATEGORY_ICONS } from '@/components/charts/categoryIcons';
 import { CodeChip } from '@/components/details/parts';
 import type { Category, Observation } from '@/lib/types';
@@ -17,7 +16,7 @@ export function Entry({ o, question }: { o: Observation; question?: string }) {
     >
       <span className="flex flex-col items-stretch gap-1 pt-[2px]">
         {o.kind === 'positive' ? (
-          <ThumbsUp size={15} strokeWidth={2.4} className="mx-auto mt-[2px] text-[var(--good-dot)]" aria-label="Positive observation" />
+          <span className="rounded-md bg-[var(--good-bg)] px-1.5 py-[1px] text-center text-[12px] font-semibold text-[var(--good)]" aria-label="Positive observation">Good</span>
         ) : (
           <>
             {o.itemCode && (

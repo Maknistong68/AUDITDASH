@@ -5,7 +5,7 @@ import { HandoffLink } from '@/components/motion/HandoffLink';
 import { int } from '@/lib/format';
 import { POSITIVES_CARD, POSITIVES_FIGURE } from '@/lib/handoff';
 import { BentoCard, TileLabel } from './BentoGrid';
-import { BIG, CardChevron, PAD } from './parts';
+import { CardChevron, MID, PAD } from './parts';
 import { EASE, DUR } from '@/lib/motion';
 
 /**
@@ -21,21 +21,21 @@ export function PositivesCard({ summary, leaders, href }: {
   href: string;
 }) {
   const reduce = useReducedMotion();
-  const { total, audits, auditsWith, contractors, contractorsWith } = summary;
+  const { total, audits, auditsWith } = summary;
   return (
-    <BentoCard i={5} testid="kpi-positives" handoff={POSITIVES_CARD} className={`tone-good ${PAD} lift reveal-host group justify-between gap-1 min-[640px]:col-span-6`}>
+    <BentoCard i={7} testid="kpi-positives" handoff={POSITIVES_CARD} className={`tone-good ${PAD} lift reveal-host group justify-between gap-2 min-[640px]:col-span-2`}>
       <HandoffLink
         href={href}
         aria-label={`Positive observations: ${total}, in ${auditsWith} of ${audits} audits. Open details`}
         className="absolute inset-0 z-[1] rounded-[var(--radius-card)]"
       />
-      <CardChevron />
-      <TileLabel tone="var(--tone)" className="pr-8">Positive observations</TileLabel>
-      <div className="flex flex-col gap-1 min-[640px]:flex-row min-[640px]:items-end min-[640px]:gap-[clamp(16px,2vw,40px)]">
-      <p data-testid="positives-count" data-handoff={POSITIVES_FIGURE} className={`${BIG} shrink-0`}>
+      <CardChevron small />
+      <TileLabel tone="var(--tone)" className="pr-5">Positives</TileLabel>
+      <div className="flex min-h-0 flex-1 flex-col justify-end gap-1.5">
+      <p data-testid="positives-count" data-handoff={POSITIVES_FIGURE} className={`${MID} shrink-0`}>
         <CountUp value={total} format={int} delay={0.36} />
       </p>
-      <div className="swap min-w-0 flex-1 min-[640px]:pb-[clamp(6px,1.2svh,14px)]">
+      <div className="swap min-w-0">
       <div className="swap-a flex min-w-0 flex-col justify-end gap-1.5">
         <span
           role="img"
@@ -52,16 +52,14 @@ export function PositivesCard({ summary, leaders, href }: {
           />
         </span>
         <p data-testid="positives-coverage" className="text-[12px] leading-tight text-muted">
-          <span className="whitespace-nowrap"><span className="num font-semibold text-ink">{auditsWith}</span> of {audits} audits</span> ·{' '}
-          <span className="whitespace-nowrap"><span className="num font-semibold text-ink">{contractorsWith}</span> of {contractors} contractors</span>
+          <span className="whitespace-nowrap"><span className="num font-semibold text-ink">{auditsWith}</span>/{audits} audits</span>
         </p>
       </div>
-      <ol data-testid="positives-leaders" aria-hidden className="swap-b flex min-w-0 flex-wrap items-end gap-x-5 gap-y-1 text-[12.5px]">
-        {leaders.slice(0, 3).map((l, k) => (
-          <li key={l.name} className="flex min-w-0 items-baseline gap-1.5">
-            <span className="num text-faint">{k + 1}</span>
+      <ol data-testid="positives-leaders" aria-hidden className="swap-b flex min-w-0 flex-col justify-end gap-0.5 text-[12.5px]">
+        {leaders.slice(0, 2).map((l) => (
+          <li key={l.name} className="flex min-w-0 items-baseline justify-between gap-2">
             <span className="truncate font-semibold">{l.name}</span>
-            <span className="num text-muted">{l.count} · {l.perAudit.toFixed(1)}/audit</span>
+            <span className="num shrink-0 text-muted">{l.count}</span>
           </li>
         ))}
       </ol>

@@ -64,8 +64,7 @@ describe('regionComparison', () => {
   test('both regions, every quarter key', () => {
     const r = regionComparison(repo, ALL);
     expect(r.map((x) => x.region)).toEqual(['SR1', 'SR2']);
-    r.forEach((x) => expect(Object.keys(x.byQuarter).sort()).toEqual(['Q1-2026', 'Q3-2026', 'Q4-2025']));
-    expect(r[0].byQuarter['Q3-2026']).toBeNull(); // the July audit is SR2's
+    r.forEach((x) => expect(Object.keys(x.byQuarter).sort()).toEqual(['Q1-2026', 'Q4-2025']));
   });
   test('ignores quarter filter, respects regions', () => {
     expect(regionComparison(repo, { ...ALL, quarter: 'Q4-2025' })).toEqual(regionComparison(repo, ALL));
@@ -82,7 +81,7 @@ describe('compareContractors', () => {
     out.forEach((x) => { expect(x.gaps).toHaveLength(CATEGORIES.length); x.repeats.forEach((r) => expect(r.contractor.id).toBe(x.card.contractor.id)); });
   });
   test('gaps come from the latest audit only (same scope as rings and total)', () => {
-    const id = '4800001131'; // JV-ECH: audited in Q4 2025 and Q1 2026 (no Q3 audit)
+    const id = '4800001131'; // JV-ECH: audited in Q4 2025 and Q1 2026
     expect(filterAudits(repo, { ...ALL, contractorId: id })).toHaveLength(2);
     const [x] = compareContractors(repo, ALL, [id]);
     const latestOnly = categoryGaps(repo, { quarter: 'Q1-2026', regions: ['SR1', 'SR2'], contractorId: id });
@@ -95,7 +94,7 @@ describe('compareContractors', () => {
     expect(x.gaps.map((g) => g.prevGapRate)).toEqual(q4.map((g) => g.gapRate));
   });
   test('empty -> []', () => expect(compareContractors(repo, NONE, ['4800001131'])).toEqual([]));
-  test('sanity: filterAudits unaffected', () => expect(filterAudits(repo, ALL)).toHaveLength(21));
+  test('sanity: filterAudits unaffected', () => expect(filterAudits(repo, ALL)).toHaveLength(20));
 });
 
 describe('mainProblem', () => {
@@ -148,7 +147,7 @@ describe('one findings rule everywhere (isFinding)', () => {
     const m = mainProblem(repo, { ...ALL, quarter: 'Q1-2026' })!;
     expect(m.category).toBe('subcontractor');
     expect(m.items.map((i) => [i.itemCode, i.hits])).toEqual([['B6.1', 9], ['B6.2', 9], ['B6.3', 9]]);
-    expect(mainProblem(repo, ALL)!.items.map((i) => [i.itemCode, i.hits])).toEqual([['B6.1', 18], ['B6.4', 17], ['B6.5', 17]]);
+    expect(mainProblem(repo, ALL)!.items.map((i) => [i.itemCode, i.hits])).toEqual([['B6.1', 17], ['B6.4', 16], ['B6.5', 16]]);
     expect(filterAudits(repo, { ...ALL, quarter: 'Q1-2026' })).toHaveLength(11);
   });
   test('category findings, finding rates, item states and findingsByAudit agree', () => {

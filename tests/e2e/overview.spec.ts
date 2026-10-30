@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-/** Owner direction 2026-10-30: split the biggest card, a line chart, hover reveals, one place per thing. */
+/** Owner direction 2026-10-30: split the biggest card, score by quarter, hover reveals, three small bottom cards. */
 
 test('the left half is split: contractors ranked on top, score over time below', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -13,28 +13,27 @@ test('the left half is split: contractors ranked on top, score over time below',
   await expect(page.getByTestId('contractor-row')).toHaveCount(12);
 });
 
-test('the line chart has one point per month with audits; hover shows that month\'s audits', async ({ page }) => {
+test('score by quarter: one line per contractor, the portfolio in bold; hover names a line', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  const chart = page.getByTestId('score-line');
-  // Oct, Nov, Dec 2025; Jan, Feb, Mar, Jul 2026
-  await expect(chart.getByTestId('score-line-point')).toHaveCount(7);
-  expect(await chart.getByTestId('score-line-point').evaluateAll((els) => els.map((e) => e.getAttribute('data-value')))).toEqual(
-    ['66', '69', '65', '69', '60', '58', '60'],
-  );
-  const box = (await chart.boundingBox())!;
-  await page.mouse.move(box.x + box.width - 4, box.y + box.height / 2);
-  const tip = page.getByTestId('score-line-tip');
-  await expect(tip).toBeVisible();
-  await expect(tip).toContainText('Jul 2026');
-  await expect(tip).toContainText('1 audit');
-  await expect(tip).toContainText('Al Fahd (Coast Guard)');
+  const chart = page.getByTestId('quarter-lines');
+  await expect(chart.getByTestId('quarter-line')).toHaveCount(12);
+  await expect(chart).toContainText('Q4 2025');
+  await expect(chart).toContainText('Q1 2026');
+  await expect(chart).not.toContainText('Q3');
+  await expect(chart.getByTestId('quarter-portfolio')).toContainText('67%');
+  await expect(chart.getByTestId('quarter-portfolio')).toContainText('61%');
+  await expect(page.getByTestId('quarter-moves')).toHaveText('2 up4 down');
 });
 
 test('headline figures use the honest score computed from the Excel points', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByTestId('kpi-score')).toContainText('63');
-  await expect(page.getByTestId('kpi-score')).toContainText('21 audits');
+  await expect(page.getByTestId('kpi-score')).toContainText('64');
+  await expect(page.getByTestId('kpi-score')).toContainText('20 audits');
+  await expect(page.getByTestId('audits-count')).toHaveText('20');
+  await expect(page.getByTestId('audits-by-quarter')).toContainText('9 Q4 2025');
+  await expect(page.getByTestId('audits-by-quarter')).toContainText('11 Q1 2026');
+  await expect(page.getByTestId('region-col')).toHaveCount(2);
   await expect(page.getByTestId('contractor-row').first()).toContainText('JV-ECH');
   await expect(page.getByTestId('contractor-row').first()).toContainText('74');
   await expect(page.getByTestId('main-problem')).toContainText('Subcontractor Control');
@@ -63,10 +62,10 @@ test('hovering a card reveals its second layer', async ({ page }) => {
   await expect(page.getByTestId('contractor-peek')).toContainText('Management');
 });
 
-test('navigation: Overview and Log; the old portfolio page redirects to the Log', async ({ page }) => {
+test('navigation: no Overview button, a Log link; the old portfolio page redirects to the Log', async ({ page }) => {
   await page.goto('/?q=Q1-2026&r=SR1%2CSR2');
   const nav = page.getByTestId('main-nav');
-  await expect(nav.getByRole('link', { name: 'Overview' })).toHaveAttribute('aria-current', 'page');
+  await expect(nav.getByRole('link', { name: 'Overview' })).toHaveCount(0);
   await nav.getByRole('link', { name: 'Log' }).click();
   await expect(page).toHaveURL(/\/log\?.*q=Q1-2026/);
   await page.goto('/audits?q=all&r=SR1%2CSR2');
@@ -83,7 +82,7 @@ test('reduced motion: everything is in place at once', async ({ browser }) => {
   const ctx = await browser.newContext({ reducedMotion: 'reduce', viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
   await page.goto('/');
-  await expect(page.getByTestId('score-line-point')).toHaveCount(7);
+  await expect(page.getByTestId('quarter-line')).toHaveCount(12);
   const o = await page.getByTestId('contractors').evaluate((e) => getComputedStyle(e).opacity);
   expect(Number(o)).toBe(1);
   await ctx.close();

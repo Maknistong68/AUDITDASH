@@ -882,30 +882,25 @@ export function auditReport(repo: Repo, audit: Audit): AuditReport {
 
 // ---------------------------------------------------------------- dashboard trend and insights
 
-export interface MonthPoint {
-  /** "2026-03" */
-  month: string;
-  /** Average honest score of the month's audits. */
-  avg: number;
-  audits: { auditId: string; contractor: string; score: number }[];
+export interface QuarterLine {
+  id: string;
+  name: string;
+  /** Average score of the contractor's audits in each quarter (QUARTERS order); null = not audited that quarter. */
+  values: (number | null)[];
 }
 
 /**
- * The portfolio score over time: one point per calendar month with audits (filter respected, quarter included), the
- * average of that month's audit scores, oldest first. Months without audits are absent (the chart shows the gap).
+ * Score by quarter: one line per contractor (its quarter's audits averaged, so SIBS's two Q4 audits are one point) and
+ * the portfolio average per quarter. Regions respected; the quarter filter is ignored (the chart is the comparison).
  */
-export function monthlyScores(repo: Repo, filter: Filter): MonthPoint[] {
-  const name = new Map(repo.contractors().map((c) => [c.id, c.name]));
-  const byMonth = new Map<string, MonthPoint['audits']>();
-  for (const a of select(repo, filter)) {
-    const m = a.date.slice(0, 7);
-    const list = byMonth.get(m) ?? [];
-    list.push({ auditId: a.id, contractor: name.get(a.contractorId) ?? a.contractorId, score: a.totalScore });
-    byMonth.set(m, list);
-  }
-  return [...byMonth.entries()]
-    .sort(([x], [y]) => x.localeCompare(y))
-    .map(([month, audits]) => ({ month, avg: mean(audits.map((a) => a.score))!, audits: audits.sort((p, q) => q.score - p.score) }));
+export function quarterLines(repo: Repo, filter: Filter): { quarters: Quarter[]; portfolio: (number | null)[]; lines: QuarterLine[] } {
+  const all = { ...filter, quarter: 'all' as const };
+  const quarters = QUARTER_ORDER.filter((q) => select(repo, filter, q).length);
+  const lines = repo.contractors().flatMap((c) => {
+    const values = quarters.map((q) => avg(select(repo, { ...all, contractorId: c.id }, q)));
+    return values.some((v) => v !== null) ? [{ id: c.id, name: c.name, values }] : [];
+  });
+  return { quarters, portfolio: quarters.map((q) => avg(select(repo, filter, q))), lines };
 }
 
 /** How many audits' typed Excel total differs from the score computed from their own points (whole %), and by how much on average. */
