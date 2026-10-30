@@ -1,24 +1,31 @@
 import type { Metadata } from 'next';
+import { AuditWizard } from '@/components/input/AuditWizard';
+import { Breadcrumb } from '@/components/shell/Breadcrumb';
 import { TopBar } from '@/components/shell/TopBar';
-import { auditTypeInfo, isAuditType } from '@/lib/auditTypeIds';
+import { isAuditType } from '@/lib/auditTypeIds';
 import { toSearchParams, type SP } from '@/lib/details';
-import { parseFilter } from '@/lib/filters';
+import { filterToQuery, parseFilter } from '@/lib/filters';
 
 export const metadata: Metadata = { title: 'New audit' };
 
-/** Placeholder until the audit wizard lands (Task 13). `?type=` preselects the type and keeps its tab active. */
+/**
+ * Enter an audit: upload the completed Excel checklist (read in the browser, photos never imported) or fill it in,
+ * check the details and answers, categorise the observations, review the honest score, save / submit / download.
+ * `?type=` preselects the audit type and keeps its tab active.
+ */
 export default async function NewAuditPage({ searchParams }: { searchParams: Promise<SP> }) {
   const params = toSearchParams(await searchParams);
   const type = params.get('type');
   const filter = parseFilter(params);
   if (isAuditType(type) && type !== 'hs') filter.type = type;
-  const info = auditTypeInfo(filter.type);
   return (
     <>
       <TopBar filter={filter} detail />
-      <main data-testid="new-audit-page" className="flex min-h-[calc(100svh-var(--topbar))] flex-col items-center justify-center gap-3 px-[var(--gutter)] text-center">
-        <p className="text-[15px] font-semibold text-muted">{info.label}</p>
-        <h1 className="text-[clamp(28px,4svh,40px)] font-semibold tracking-[-0.03em]">New audit — coming in this release</h1>
+      <main data-testid="new-audit-page" className="flex min-h-[calc(100svh-var(--topbar))] flex-col pt-[clamp(8px,1.4svh,18px)]">
+        <div className="px-[var(--gutter)] pb-[clamp(6px,1svh,12px)]">
+          <Breadcrumb items={[{ label: 'Overview', href: `/?${filterToQuery(filter)}` }, { label: 'New audit' }]} />
+        </div>
+        <AuditWizard initialType={isAuditType(type) ? type : 'hs'} />
       </main>
     </>
   );
