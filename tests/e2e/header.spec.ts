@@ -104,17 +104,6 @@ test('dark is the one theme: no switch, a stored light choice is ignored', async
   await expect(q.getByRole('button', { name: /theme/i })).toHaveCount(0);
   await light.close();
 });
-  const p = await fresh.newPage();
-  await p.goto('/');
-  await expect(p.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await fresh.close();
-  const light = await browser.newContext();
-  await light.addInitScript(() => { try { localStorage.setItem('theme', 'light'); } catch { /* private mode */ } });
-  const q = await light.newPage();
-  await q.goto('/');
-  await expect(q.locator('html')).toHaveAttribute('data-theme', 'light');
-  await light.close();
-});
 
 for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) {
   test(`header sits on one row at ${vp.width}`, async ({ page }) => {
