@@ -2,6 +2,7 @@ import { scoreAppAudit } from '@/lib/appScoring';
 import { bandFor, scoreResponses } from '@/lib/scoring';
 import type { AppAnswer, Audit, AuditType, Band, ChecklistItem, Compliance, Observation, SectionScore, TypeSection, TypedChecklistItem } from '@/lib/types';
 import type { AuditDraft } from './model';
+import { subregionFor } from './contractors';
 
 const VALUE: Record<Exclude<Compliance, 'na'>, number> = { full: 1, partial: 0.5, no: 0 };
 
@@ -140,6 +141,7 @@ export function toSeedRows(d: AuditDraft, items: TypedChecklistItem[], sections:
     id,
     ...(d.type === 'hs' ? {} : { type: d.type }),
     contractorId,
+    subregion: subregionFor(d.details.location, d.details.contractorId) ?? 'SR1',
     quarter: quarterOf(date),
     date,
     location: d.details.location,

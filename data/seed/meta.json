@@ -3,6 +3,10 @@
     "Q4-2025",
     "Q1-2026"
   ],
+  "regions": [
+    "SR1",
+    "SR2"
+  ],
   "source": [
     "HS_AUDIT_FINDINGS.xlsx"
   ]

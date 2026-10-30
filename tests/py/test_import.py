@@ -249,3 +249,55 @@ def test_observations_carry_marker(seed):
     assert nbc["B2.2"] == nbc["B3.1"] == nbc["C2.16"] == "compliant"
     assert nbc["B6.1"] == "na"
     assert nbc["A1"] is None
+
+
+# --------------------------------------------------------------------------- contractor register, sub-region per audit
+
+def test_audit_subregion_is_its_sheet(seed):
+    wb = import_excel._load(RESULTS)
+    by_sheet = {}
+    for ws in wb.worksheets:
+        q, sr = import_excel._sheet_meta(ws.title)
+        by_sheet.setdefault(q, set()).add(sr)
+    assert all(a["subregion"] in by_sheet[a["quarter"]] for a in seed.audits)
+    jv = [a for a in seed.audits if a["contractorId"] == "4800001131"]
+    assert {a["subregion"] for a in jv} == {"SR2"}
+
+
+def test_contractors_carry_status_aliases_and_latest_subregion(seed):
+    for c in seed.contractors:
+        assert c["active"] is True and c["aliases"]
+        last = max((a for a in seed.audits if a["contractorId"] == c["id"]), key=lambda a: a["date"])
+        assert c["subregion"] == last["subregion"]
+
+
+def _register(tmp_path, rows):
+    p = tmp_path / "contractors.csv"
+    p.write_text("contract_no,name,status,project_names\n" + "\n".join(rows) + "\n", encoding="utf-8")
+    return p
+
+
+def test_register_rows(tmp_path):
+    from contractors import load_register
+    rows = load_register(_register(tmp_path, ["1,One,active,ONE-1 | One Co", "2,Two,inactive,", "3,Three,,THREE"]))
+    assert [(r["contractNo"], r["status"], r["aliases"]) for r in rows] == [
+        ("1", "active", ["ONE-1", "One Co"]), ("2", "inactive", []), ("3", "active", ["THREE"])]
+
+
+@pytest.mark.parametrize("bad, msg", [
+    (["1,One,paused,"], "status"),
+    (["1,One,active,", "1,Again,active,"], "twice"),
+    (["1,One,active,X", "2,Two,active,X"], "already belongs"),
+    ([",NoNumber,active,"], "required"),
+])
+def test_register_rejects_bad_rows(tmp_path, bad, msg):
+    from contractors import load_register
+    with pytest.raises(ValueError, match=msg):
+        load_register(_register(tmp_path, bad))
+
+
+def test_unknown_project_says_where_to_add_it():
+    from contractors import contractor_for
+    with pytest.raises(ValueError, match="contractors.csv"):
+        contractor_for("A brand new contractor")
+    assert contractor_for("Renamed project 4800001440")["contractNo"] == "4800001440"

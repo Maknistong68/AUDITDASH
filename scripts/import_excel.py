@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))  # `python -I` drops th
 
 import openpyxl  # noqa: E402
 
-from contractors import CONTRACTS, contractor_for  # noqa: E402
+from contractors import contractor_for, register  # noqa: E402
 from site_keywords import CODE_CATEGORY, category_for  # noqa: E402
 
 BLOCK_WIDTH = 10
@@ -419,7 +419,7 @@ def parse_results(path, checklist=(), checklist_path=None, tally=None):
     for ws in wb.worksheets:
         if not re.search(r"SUBREGION", ws.title, re.I):
             continue
-        quarter, _sheet_sr = _sheet_meta(ws.title)
+        quarter, sheet_sr = _sheet_meta(ws.title)
         rows = [list(r) for r in ws.iter_rows(values_only=True)]
         starts = [c for c, v in enumerate(rows[0]) if isinstance(v, str) and "Project" in v]
         for start in starts:
@@ -440,6 +440,7 @@ def parse_results(path, checklist=(), checklist_path=None, tally=None):
             audits.append({
                 "id": audit_id,
                 "contractorId": info["contractNo"],
+                "subregion": sheet_sr,  # where the contractor was that quarter: the sheet it is filed under
                 "quarter": quarter,
                 "date": when.isoformat(),
                 "location": " ".join(str(location).split()),
@@ -451,12 +452,19 @@ def parse_results(path, checklist=(), checklist_path=None, tally=None):
                 "issues": issues,
                 "sections": sections,
             })
-            contractors.setdefault(info["contractNo"], {
-                "id": info["contractNo"], "name": info["name"],
-                "contractNo": info["contractNo"], "subregion": info["subregion"]})
             observations.extend(_parse_observations(rows, start, audit_id, questions, findings, tally))
-    order = {no: i for i, no in enumerate(CONTRACTS)}
-    return (sorted(contractors.values(), key=lambda c: order[c["id"]]), audits, observations)
+    return contractor_rows(audits), audits, observations
+
+
+def contractor_rows(audits):
+    """Every register contractor, in register order: its status, its project names, and its current sub-region (that of
+    its latest audit; null before its first audit). Each audit keeps the sub-region of its own sheet."""
+    latest = {}
+    for a in sorted(audits, key=lambda a: (a["date"], a["id"])):
+        latest[a["contractorId"]] = a["subregion"]
+    return [{"id": r["contractNo"], "name": r["name"], "contractNo": r["contractNo"],
+             "subregion": latest.get(r["contractNo"]), "active": r["status"] == "active", "aliases": r["aliases"]}
+            for r in register()]
 
 
 # --------------------------------------------------------------------------- honest score
@@ -565,11 +573,14 @@ def parse_checklist_audit(path, checklist):
     sections = sections_from_answers(checklist, answers, labels)
     score, issues = true_score(sections, reported)
     observations = _parse_observations(rows, 1, audit_id)
+    location = " ".join(str(_label_value(rows, "Location:")).split())
+    m = re.search(r"sub\s*-?\s*region\s*(\d+)", location, re.I)
     return (
-        {"id": info["contractNo"], "name": info["name"], "contractNo": info["contractNo"], "subregion": info["subregion"]},
+        {"id": info["contractNo"], "name": info["name"], "contractNo": info["contractNo"]},
         {
             "id": audit_id,
             "contractorId": info["contractNo"],
+            "subregion": f"SR{m.group(1)}" if m else None,
             "quarter": quarter,
             "date": when.isoformat(),
             "location": " ".join(str(_label_value(rows, "Location:")).split()),
@@ -618,11 +629,15 @@ def main(argv=None):
         c, a, obs = parse_checklist_audit(path, checklist)
         if any(x["id"] == a["id"] for x in audits):
             raise ValueError(f"Audit {a['id']} is already in the results workbook")
-        if all(x["id"] != c["id"] for x in contractors):
-            contractors.append(c)
+        if a["subregion"] is None:  # location names no sub-region: where the contractor was last
+            before = [x for x in audits if x["contractorId"] == a["contractorId"] and x["date"] < a["date"]]
+            a["subregion"] = max(before, key=lambda x: x["date"])["subregion"] if before else None
+        if a["subregion"] is None:
+            raise ValueError(f"Audit {a['id']}: no sub-region in its location and no earlier audit to take it from")
         audits.append(a)
         observations.extend(obs)
     audits.sort(key=lambda a: (a["date"], a["id"]))
+    contractors = contractor_rows(audits)
     flag_duplicates(audits)
     if args.previous and Path(args.previous).exists():
         keep_codes(observations, json.loads(Path(args.previous).read_text(encoding="utf-8")))
@@ -632,7 +647,8 @@ def main(argv=None):
                        ("audits", audits), ("observations", observations)):
         (out / f"{name}.json").write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     quarters = sorted({a["quarter"] for a in audits}, key=lambda q: (q[3:], q[:2]))
-    meta = {"quarters": quarters, "source": [Path(args.results).name, *(Path(p).name for p in args.audit)]}
+    regions = sorted({a["subregion"] for a in audits}, key=lambda r: int(r[2:]))
+    meta = {"quarters": quarters, "regions": regions, "source": [Path(args.results).name, *(Path(p).name for p in args.audit)]}
     (out / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
     (out / "checklists").mkdir(exist_ok=True)
     (out / "checklists" / "hs.json").write_text(

@@ -3,22 +3,20 @@ import type { Repo } from './data/repo';
 import type { Audit, Band, CategoryId, ChecklistItem, Contractor, Filter, Observation, Quarter, Subregion } from './types';
 import { CATEGORIES } from './categories';
 import { itemLabel } from './itemLabels';
-import { QUARTERS } from './filters';
+import { QUARTERS, REGIONS } from './filters';
 
 const QUARTER_ORDER: Quarter[] = QUARTERS;
 const mean = (xs: number[]): number | null => (xs.length ? xs.reduce((s, x) => s + x, 0) / xs.length : null);
 const byDate = (a: Audit, b: Audit) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id);
 
-/** Audits matching quarter (unless overridden), regions (via contractor subregion) and optional contractorId. */
+/** Audits matching quarter (unless overridden), regions (each audit's own sub-region) and optional contractorId. */
 function select(repo: Repo, filter: Filter, quarter: Filter['quarter'] = filter.quarter): Audit[] {
   if (filter.type && filter.type !== 'hs') return []; // seed audits are all H&S; other types have none yet
-  const region = new Map(repo.contractors().map((c) => [c.id, c.subregion]));
   return repo
     .audits()
     .filter((a) => {
       if (quarter !== 'all' && a.quarter !== quarter) return false;
-      const r = region.get(a.contractorId);
-      if (!r || !filter.regions.includes(r)) return false;
+      if (!filter.regions.includes(a.subregion)) return false;
       return !filter.contractorId || a.contractorId === filter.contractorId;
     })
     .sort(byDate);
@@ -180,6 +178,7 @@ export function league(repo: Repo, filter: Filter): { contractor: Contractor; la
   const pool = select(repo, filter, 'all');
   const rows: { contractor: Contractor; latest: number; previous: number | null }[] = [];
   for (const contractor of repo.contractors()) {
+    if (!contractor.active) continue; // inactive (register): off the ranking; its audits stay in every history
     const mine = audits.filter((a) => a.contractorId === contractor.id);
     if (!mine.length) continue;
     const latestAudit = mine[mine.length - 1];
@@ -597,7 +596,7 @@ export function positiveNotes(repo: Repo, filter: Filter): {
 
 /** Average totalScore per region and quarter; ignores filter.quarter, respects regions and contractorId. */
 export function regionComparison(repo: Repo, filter: Filter): { region: Subregion; byQuarter: Record<Quarter, number | null> }[] {
-  return (['SR1', 'SR2'] as Subregion[])
+  return REGIONS
     .filter((r) => filter.regions.includes(r))
     .map((region) => ({
       region,
@@ -910,4 +909,22 @@ export function excelCheck(repo: Repo, filter: Filter): { audits: number; differ
     .filter((a) => typeof a.reportedScore === 'number' && Math.round(a.reportedScore * 100) !== Math.round(a.totalScore * 100))
     .map((a) => a.reportedScore! - a.totalScore);
   return { audits: audits.length, differs: gaps.length, meanGap: mean(gaps) };
+}
+
+/**
+ * Where a contractor was audited, quarter by quarter (each audit's own sub-region), oldest first; a quarter with audits
+ * in two sub-regions lists both. "SR1 → SR2" reads off it.
+ */
+export function regionHistory(repo: Repo, contractorId: string): { quarter: Quarter; regions: Subregion[] }[] {
+  const by = new Map<Quarter, Set<Subregion>>();
+  for (const a of repo.audits().filter((x) => x.contractorId === contractorId).sort(byDate)) {
+    by.set(a.quarter, (by.get(a.quarter) ?? new Set()).add(a.subregion));
+  }
+  return QUARTER_ORDER.filter((q) => by.has(q)).map((q) => ({ quarter: q, regions: [...by.get(q)!].sort() }));
+}
+
+/** "SR1" or "SR1 → SR2": the distinct sub-regions in the order the contractor moved through them. */
+export function regionPath(repo: Repo, contractorId: string): string {
+  const seq = regionHistory(repo, contractorId).flatMap((h) => h.regions);
+  return seq.filter((r, i) => r !== seq[i - 1]).join(' → ');
 }

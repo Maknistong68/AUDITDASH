@@ -3,72 +3,123 @@
     "id": "4800001134",
     "name": "Abyatona (Box Culvert H55)",
     "contractNo": "4800001134",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "4800001134-ABYATONA"
+    ]
   },
   {
     "id": "4800001112",
     "name": "Abyatona (Zone F Culvert)",
     "contractNo": "4800001112",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "4800001112-ABYATONA"
+    ]
   },
   {
     "id": "4800000901",
     "name": "Al-Biriki",
     "contractNo": "4800000901",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "480000901-AL-BIRIKI"
+    ]
   },
   {
     "id": "4800000838",
     "name": "SIBS",
     "contractNo": "4800000838",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "SIBS 838",
+      "SIBS - 4800000838",
+      "800000838-SIBS"
+    ]
   },
   {
     "id": "4800001322",
     "name": "PPCO",
     "contractNo": "4800001322",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "4800001322-PPCO"
+    ]
   },
   {
     "id": "4800000882",
     "name": "Al Fahd (SBC Expansion)",
     "contractNo": "4800000882",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "4800000882-AL FAHD"
+    ]
   },
   {
     "id": "4200000026",
     "name": "NBC",
     "contractNo": "4200000026",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "4200000026 - NBC"
+    ]
   },
   {
     "id": "4800001440",
     "name": "RPCO",
     "contractNo": "4800001440",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "4800001440-RPCO"
+    ]
   },
   {
     "id": "4800000892",
     "name": "TDP",
     "contractNo": "4800000892",
-    "subregion": "SR1"
+    "subregion": "SR1",
+    "active": true,
+    "aliases": [
+      "4800000892-TDP"
+    ]
   },
   {
     "id": "4800001272",
     "name": "Al Fahd (Coast Guard)",
     "contractNo": "4800001272",
-    "subregion": "SR2"
+    "subregion": "SR2",
+    "active": true,
+    "aliases": [
+      "AL FAHD-4800001272"
+    ]
   },
   {
     "id": "4800001131",
     "name": "JV-ECH (Port T1)",
     "contractNo": "4800001131",
-    "subregion": "SR2"
+    "subregion": "SR2",
+    "active": true,
+    "aliases": [
+      "JV-ECH-T1-4800001131"
+    ]
   },
   {
     "id": "4800000876",
     "name": "Sarco Disa (Port T2)",
     "contractNo": "4800000876",
-    "subregion": "SR2"
+    "subregion": "SR2",
+    "active": true,
+    "aliases": [
+      "Design and Build for OXAGON Terminal 2 (T2) Dredging and Quay Walls-D&B",
+      "Sarco Disa - 4800000876"
+    ]
   }
 ]

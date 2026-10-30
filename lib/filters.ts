@@ -4,7 +4,8 @@ import type { Filter, Quarter, Subregion } from './types';
 
 /** Quarters that have audits in the Excel, oldest first (written by scripts/import_excel.py). */
 export const QUARTERS = meta.quarters as Quarter[];
-export const REGIONS: Subregion[] = ['SR1', 'SR2'];
+/** Sub-regions that have audits in the Excel (its sheet names), in order. */
+export const REGIONS = meta.regions as Subregion[];
 
 /** Parse `q`, `r` and `t` (audit type; absent/invalid -> hs, represented by an absent `type`) URL params. Absent/invalid q -> 'all'; absent/all-invalid r -> both; `r=` -> none. */
 export function parseFilter(sp: URLSearchParams): Filter {

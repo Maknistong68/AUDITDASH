@@ -81,7 +81,7 @@ export function buildLog(repo: Repo): LogData {
       const c = contractors.get(a.contractorId)!;
       const findings = auditFindings(repo, a).groups.reduce((s, g) => s + g.observations.length, 0);
       return {
-        id: a.id, date: a.date, quarter: a.quarter, contractorId: c.id, contractor: c.name, region: c.subregion,
+        id: a.id, date: a.date, quarter: a.quarter, contractorId: c.id, contractor: c.name, region: a.subregion,
         inspectionNo: a.inspectionNo, location: a.location, auditors: a.auditors, score: a.totalScore,
         reported: a.reportedScore ?? null, findings, positives: positives.get(a.id) ?? 0, issues: a.issues ?? [],
       };

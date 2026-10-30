@@ -51,7 +51,7 @@ describe('gapContribution', () => {
       { code: 'B9.1', section: 'B', subsection: 'B9', question: 'site', weight: 1, category: 'site' },
     ];
     const audit = (id: string, quarter: Audit['quarter'], b1: number): Audit => ({
-      id, contractorId: 'c1', quarter, date: quarter === 'Q1-2026' ? '2026-02-01' : '2025-11-01', location: '', inspectionNo: '',
+      id, contractorId: 'c1', subregion: 'SR1', quarter, date: quarter === 'Q1-2026' ? '2026-02-01' : '2025-11-01', location: '', inspectionNo: '',
       auditors: [], totalScore: 0.5,
       sections: [
         { code: 'B1', label: 'B1', possible: 4, scored: b1 },
@@ -61,7 +61,7 @@ describe('gapContribution', () => {
     });
     const tiny: Repo = {
       checklist: () => checklist,
-      contractors: () => [{ id: 'c1', name: 'C1', contractNo: '1', subregion: 'SR1' }],
+      contractors: () => [{ id: 'c1', name: 'C1', contractNo: '1', subregion: 'SR1', active: true, aliases: [] }],
       audits: () => [audit('old', 'Q4-2025', 4), audit('new', 'Q1-2026', 1)],
       observations: () => [],
     };

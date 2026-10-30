@@ -6,6 +6,7 @@ import { calm } from '@/lib/motion';
 
 const ITEMS = [
   { href: '/log', label: 'Log', match: (p: string) => p.startsWith('/log') },
+  { href: '/contractors', label: 'Contractors', match: (p: string) => p.startsWith('/contractors') },
 ] as const;
 
 /**

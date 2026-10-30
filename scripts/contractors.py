@@ -1,56 +1,66 @@
-"""Contractor alias table: every raw `Project` string seen in the results workbook."""
+"""The contractor register: data/contractors.csv (opens in Excel).
 
+One row per contractor (work order): contract_no, name, status (active / inactive), project_names (every
+"Project:" string the workbooks use for it, separated by " | "). Add a contractor by adding a row; deactivate
+one by setting status to inactive (its audits stay in the history). The sub-region is not here: it belongs to
+each audit and is read from its sheet name ("Q1 2026 SUBREGION2"), so a contractor moved between sub-regions
+follows the workbook quarter by quarter.
+"""
+
+import csv
 import re
+from pathlib import Path
 
-# contractNo -> (name, subregion)
-CONTRACTS = {
-    "4800001134": ("Abyatona (Box Culvert H55)", "SR1"),
-    "4800001112": ("Abyatona (Zone F Culvert)", "SR1"),
-    "4800000901": ("Al-Biriki", "SR1"),
-    "4800000838": ("SIBS", "SR1"),
-    "4800001322": ("PPCO", "SR1"),
-    "4800000882": ("Al Fahd (SBC Expansion)", "SR1"),
-    "4200000026": ("NBC", "SR1"),
-    "4800001440": ("RPCO", "SR1"),
-    "4800000892": ("TDP", "SR1"),
-    "4800001272": ("Al Fahd (Coast Guard)", "SR2"),
-    "4800001131": ("JV-ECH (Port T1)", "SR2"),
-    "4800000876": ("Sarco Disa (Port T2)", "SR2"),
-}
-
-_ALIASES = {
-    "4800001134": ["4800001134-ABYATONA"],
-    "4800001112": ["4800001112-ABYATONA"],
-    "4800000901": ["480000901-AL-BIRIKI"],
-    "4800000838": ["SIBS 838", "SIBS - 4800000838", "800000838-SIBS"],
-    "4800001322": ["4800001322-PPCO"],
-    "4800000882": ["4800000882-AL FAHD"],
-    "4200000026": ["4200000026 - NBC"],
-    "4800001440": ["4800001440-RPCO"],
-    "4800000892": ["4800000892-TDP"],
-    "4800001272": ["AL FAHD-4800001272"],
-    "4800001131": ["JV-ECH-T1-4800001131"],
-    "4800000876": [
-        "Design and Build for OXAGON Terminal 2 (T2) Dredging and Quay Walls-D&B",
-        "Sarco Disa - 4800000876",
-    ],
-}
+REGISTER = Path(__file__).resolve().parents[1] / "data" / "contractors.csv"
+STATUSES = {"active", "inactive"}
 
 
 def _norm(raw: str) -> str:
     return re.sub(r"\s+", " ", str(raw)).strip()
 
 
-# raw project string -> {contractNo, name, subregion}
-CONTRACTORS = {
-    _norm(alias): {"contractNo": no, "name": CONTRACTS[no][0], "subregion": CONTRACTS[no][1]}
-    for no, aliases in _ALIASES.items()
-    for alias in aliases
-}
+def load_register(path=REGISTER):
+    """[{contractNo, name, status, aliases}] in register order. Raises on a bad row (so a typo never imports)."""
+    rows, seen_no, seen_alias = [], set(), {}
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        for n, r in enumerate(csv.DictReader(f), 2):
+            no = _norm(r.get("contract_no", ""))
+            name = _norm(r.get("name", ""))
+            status = _norm(r.get("status", "")).lower() or "active"
+            aliases = [_norm(a) for a in (r.get("project_names") or "").split("|") if _norm(a)]
+            if not no or not name:
+                raise ValueError(f"{path.name} row {n}: contract_no and name are required")
+            if status not in STATUSES:
+                raise ValueError(f"{path.name} row {n}: status must be active or inactive, not {status!r}")
+            if no in seen_no:
+                raise ValueError(f"{path.name} row {n}: contract {no} is listed twice")
+            for a in aliases:
+                if a in seen_alias:
+                    raise ValueError(f"{path.name} row {n}: project name {a!r} already belongs to {seen_alias[a]}")
+                seen_alias[a] = no
+            seen_no.add(no)
+            rows.append({"contractNo": no, "name": name, "status": status, "aliases": aliases})
+    return rows
+
+
+_ROWS = load_register()
+# contractNo -> name (register order: the order contractors are listed in)
+CONTRACTS = {r["contractNo"]: r["name"] for r in _ROWS}
+_BY_NO = {r["contractNo"]: r for r in _ROWS}
+_BY_ALIAS = {a: r for r in _ROWS for a in r["aliases"]}
 
 
 def contractor_for(raw: str) -> dict:
+    """{contractNo, name, status} for a raw "Project:" string: an exact project name, else the contract number in it."""
     key = _norm(raw)
-    if key not in CONTRACTORS:
-        raise ValueError(f"Unknown project string: {raw!r}")
-    return CONTRACTORS[key]
+    hit = _BY_ALIAS.get(key)
+    if hit is None:
+        nos = [no for no in _BY_NO if no in re.sub(r"\D", " ", key).split()]
+        hit = _BY_NO[nos[0]] if len(nos) == 1 else None
+    if hit is None:
+        raise ValueError(f"Unknown project {raw!r}: add it to {REGISTER.name} (a new row, or its project_names)")
+    return {"contractNo": hit["contractNo"], "name": hit["name"], "status": hit["status"]}
+
+
+def register():
+    return [dict(r) for r in _ROWS]

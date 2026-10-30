@@ -2,6 +2,7 @@
   {
     "id": "4800001322-Q4-2025-20251013",
     "contractorId": "4800001322",
+    "subregion": "SR1",
     "quarter": "Q4-2025",
     "date": "2025-10-13",
     "location": "Sub-Region 1_(Pipe Line Project)",
@@ -125,6 +126,7 @@
   {
     "id": "4800001112-Q4-2025-20251015",
     "contractorId": "4800001112",
+    "subregion": "SR1",
     "quarter": "Q4-2025",
     "date": "2025-10-15",
     "location": "Zone-F, Village Culvert Utility",
@@ -247,6 +249,7 @@
   {
     "id": "4800000901-Q4-2025-20251020",
     "contractorId": "4800000901",
+    "subregion": "SR1",
     "quarter": "Q4-2025",
     "date": "2025-10-20",
     "location": "Sub-Region 1_Dynamic Compaction, Phase 2",
@@ -369,6 +372,7 @@
   {
     "id": "4800001134-Q4-2025-20251022",
     "contractorId": "4800001134",
+    "subregion": "SR1",
     "quarter": "Q4-2025",
     "date": "2025-10-22",
     "location": "Construction & Extension of Box Culvert under H55",
@@ -491,6 +495,7 @@
   {
     "id": "4800001272-Q4-2025-20251029",
     "contractorId": "4800001272",
+    "subregion": "SR2",
     "quarter": "Q4-2025",
     "date": "2025-10-29",
     "location": "Sub Region 2 - Coast Guard Facilities Infrastructure and Building Work",
@@ -613,6 +618,7 @@
   {
     "id": "4800001131-Q4-2025-20251103",
     "contractorId": "4800001131",
+    "subregion": "SR2",
     "quarter": "Q4-2025",
     "date": "2025-11-03",
     "location": "Sub Region 2 - Port T1 Infrastructure and Buildings Work",
@@ -735,6 +741,7 @@
   {
     "id": "4800000838-Q4-2025-20251112",
     "contractorId": "4800000838",
+    "subregion": "SR1",
     "quarter": "Q4-2025",
     "date": "2025-11-12",
     "location": "South Business Community High Density Expansion",
@@ -858,6 +865,7 @@
   {
     "id": "4800000838-Q4-2025-20251119",
     "contractorId": "4800000838",
+    "subregion": "SR1",
     "quarter": "Q4-2025",
     "date": "2025-11-19",
     "location": "South Business Community",
@@ -980,6 +988,7 @@
   {
     "id": "4800000876-Q4-2025-20251201",
     "contractorId": "4800000876",
+    "subregion": "SR2",
     "quarter": "Q4-2025",
     "date": "2025-12-01",
     "location": "Sub Region 2 - Port",
@@ -1102,6 +1111,7 @@
   {
     "id": "4800001322-Q1-2026-20260118",
     "contractorId": "4800001322",
+    "subregion": "SR1",
     "quarter": "Q1-2026",
     "date": "2026-01-18",
     "location": "Supply & Installation of 1200 Water Pipeline - Water Supply to NGHP",
@@ -1225,6 +1235,7 @@
   {
     "id": "4800000882-Q1-2026-20260125",
     "contractorId": "4800000882",
+    "subregion": "SR1",
     "quarter": "Q1-2026",
     "date": "2026-01-25",
     "location": "South Business Community High Density Expansion",
@@ -1348,6 +1359,7 @@
   {
     "id": "4800000838-Q1-2026-20260201",
     "contractorId": "4800000838",
+    "subregion": "SR1",
     "quarter": "Q1-2026",
     "date": "2026-02-01",
     "location": "Oxagon South Business Community Expansion",
@@ -1469,6 +1481,7 @@
   {
     "id": "4200000026-Q1-2026-20260208",
     "contractorId": "4200000026",
+    "subregion": "SR1",
     "quarter": "Q1-2026",
     "date": "2026-02-08",
     "location": "WADI Jubbah Permanent Channel Phase-1",
@@ -1591,6 +1604,7 @@
   {
     "id": "4800000876-Q1-2026-20260215",
     "contractorId": "4800000876",
+    "subregion": "SR2",
     "quarter": "Q1-2026",
     "date": "2026-02-15",
     "location": "Sub Region 2 - Port Design and Build for OXAGON Terminal 2 (T2) Dredging and Quay Walls-D&B",
@@ -1714,6 +1728,7 @@
   {
     "id": "4800001272-Q1-2026-20260223",
     "contractorId": "4800001272",
+    "subregion": "SR2",
     "quarter": "Q1-2026",
     "date": "2026-02-23",
     "location": "Sub Region 2 - Coast Guard Facilities Infrastructure",
@@ -1837,6 +1852,7 @@
   {
     "id": "4800001131-Q1-2026-20260301",
     "contractorId": "4800001131",
+    "subregion": "SR2",
     "quarter": "Q1-2026",
     "date": "2026-03-01",
     "location": "Sub Region 2 - Port T1 Infrastructure and Buildings Work",
@@ -1961,6 +1977,7 @@
   {
     "id": "4800001440-Q1-2026-20260302",
     "contractorId": "4800001440",
+    "subregion": "SR1",
     "quarter": "Q1-2026",
     "date": "2026-03-02",
     "location": "Southern Plots Road Network Package 1",
@@ -2084,6 +2101,7 @@
   {
     "id": "4800001112-Q1-2026-20260308",
     "contractorId": "4800001112",
+    "subregion": "SR1",
     "quarter": "Q1-2026",
     "date": "2026-03-08",
     "location": "Zone-F, Village Culvert Utility",
@@ -2207,6 +2225,7 @@
   {
     "id": "4800001134-Q1-2026-20260310",
     "contractorId": "4800001134",
+    "subregion": "SR1",
     "quarter": "Q1-2026",
     "date": "2026-03-10",
     "location": "Construction & Extension of Box Culvert",
@@ -2329,6 +2348,7 @@
   {
     "id": "4800000892-Q1-2026-20260315",
     "contractorId": "4800000892",
+    "subregion": "SR1",
     "quarter": "Q1-2026",
     "date": "2026-03-15",
     "location": "Highway 55 Upgrade - Cut & Cover Tunnel Earthworks",

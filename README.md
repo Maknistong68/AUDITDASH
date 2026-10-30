@@ -25,6 +25,19 @@ npm run dev
 
 Then open http://localhost:3000.
 
+## Contractors and sub-regions
+
+- **Sub-region belongs to each audit**, read from the sheet it is filed under in the findings workbook
+  (`Q1 2026 SUBREGION2`). When a contractor is moved, file its next audit under the new sub-region's sheet: earlier
+  audits keep their sub-region, the dashboard follows quarter by quarter, and a new sub-region (SR3, …) appears by itself.
+- **The register is `data/contractors.csv`** (opens in Excel): `contract_no, name, status, project_names`.
+  - Add a contractor: add a row. `project_names` lists the "Project:" strings the workbooks use, separated by ` | `
+    (a project string that contains the contract number is also recognised).
+  - Deactivate a contractor: set `status` to `inactive`. It leaves the ranking; its audits stay in every history and total.
+  - Rename: change `name`. The contract number is the key.
+- Run the import again after a change. `/contractors` shows every contractor's status and sub-region per quarter
+  (a move is highlighted).
+
 ## Regenerating mock data
 
 Place the workbooks in `data/source/` (git-ignored), then:

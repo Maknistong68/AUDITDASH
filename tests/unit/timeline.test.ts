@@ -38,8 +38,8 @@ describe('timelineRows', () => {
 
   test('ties break by name; unknown contractors and non-finite scores are left out', () => {
     const cs: Contractor[] = [
-      { id: 'b', name: 'Beta', contractNo: '', subregion: 'SR1' },
-      { id: 'a', name: 'Alpha', contractNo: '', subregion: 'SR2' },
+      { id: 'b', name: 'Beta', contractNo: '', subregion: 'SR1', active: true, aliases: [] },
+      { id: 'a', name: 'Alpha', contractNo: '', subregion: 'SR2', active: true, aliases: [] },
     ];
     const out = timelineRows(
       [

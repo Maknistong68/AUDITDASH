@@ -87,7 +87,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
           <p className="mt-1.5 flex flex-wrap gap-x-2 text-[clamp(13px,1.6svh,15px)] text-muted" data-testid="report-facts">
             <span className="font-semibold text-ink">{dateLabel(audit.date)}</span>
             <span aria-hidden>·</span><span>{quarterLabel(audit.quarter)}</span>
-            <span aria-hidden>·</span><span>{contractor.subregion}</span>
+            <span aria-hidden>·</span><span>{audit.subregion}</span>
           </p>
           <dl className="mt-0.5 flex flex-wrap gap-x-5 gap-y-0.5 text-[clamp(13px,1.6svh,15px)]">
             <div className="flex min-w-0 gap-2"><dt className="text-muted">Project</dt><dd className="min-w-0 break-words">{audit.location}</dd></div>

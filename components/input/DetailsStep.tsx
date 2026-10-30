@@ -65,9 +65,10 @@ export function DetailsStep({ draft, contractors, actions, score }: { draft: Aud
             style={unmatched ? { boxShadow: '0 0 0 2px var(--minimal-dot)' } : undefined}
           >
             <option value="">Choose a contractor…</option>
-            {(['SR1', 'SR2'] as const).map((r) => (
-              <optgroup key={r} label={r === 'SR1' ? 'Sub Region 1' : 'Sub Region 2'}>
-                {contractors.filter((c) => c.subregion === r).map((c) => (
+            {/* Active contractors of the register, grouped by where they were last audited (new ones last). */}
+            {[...new Set(contractors.filter((c) => c.active).map((c) => c.subregion ?? 'New'))].sort().map((r) => (
+              <optgroup key={r} label={r === 'New' ? 'Not audited yet' : `Sub Region ${r.slice(2)}`}>
+                {contractors.filter((c) => c.active && (c.subregion ?? 'New') === r).map((c) => (
                   <option key={c.id} value={c.id}>{c.name} · {c.contractNo}</option>
                 ))}
               </optgroup>

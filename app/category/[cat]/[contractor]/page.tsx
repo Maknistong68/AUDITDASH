@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getRepo } from '@/lib/data/repo';
-import { auditCompliance, auditItemStates, contractorAudits } from '@/lib/analytics';
+import { auditCompliance, auditItemStates, contractorAudits, regionPath } from '@/lib/analytics';
 import { categoryById } from '@/lib/categories';
 import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
@@ -36,7 +36,7 @@ export default async function ContractorInCategoryPage({ params, searchParams }:
   });
   const start = initialSlide(s, rows.map((r) => r.audit.quarter), filter.quarter);
   const title = (
-    <PageTitle meta={<span className="inline-flex flex-wrap items-center gap-2"><CategoryChip id={cat} /> <span>{contractor.subregion} · {rows.length} {rows.length === 1 ? 'audit' : 'audits'}</span></span>}>
+    <PageTitle meta={<span className="inline-flex flex-wrap items-center gap-2"><CategoryChip id={cat} /> <span>{regionPath(repo, contractor.id)} · {rows.length} {rows.length === 1 ? 'audit' : 'audits'}</span></span>}>
       {contractor.name}
     </PageTitle>
   );

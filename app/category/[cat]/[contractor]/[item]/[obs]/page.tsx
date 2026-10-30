@@ -98,7 +98,7 @@ export default async function ObservationPage({ params, searchParams }: { params
               <dt className="text-muted">Contractor</dt>
               <dd className="font-semibold">{contractor.name}</dd>
               <dt className="text-muted">Region</dt>
-              <dd>{contractor.subregion}</dd>
+              <dd>{audit.subregion}</dd>
               <dt className="text-muted">Location</dt>
               <dd className="break-words">{audit.location}</dd>
               <dt className="text-muted">Auditors</dt>

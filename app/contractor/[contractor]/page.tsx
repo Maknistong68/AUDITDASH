@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getRepo } from '@/lib/data/repo';
-import { auditFindings, auditGaps, contractorAudits, contractorRepeats, sectionRatios } from '@/lib/analytics';
+import { auditFindings, auditGaps, contractorAudits, contractorRepeats, sectionRatios, regionPath } from '@/lib/analytics';
 import { initialSlide } from '@/lib/carousel';
 import { detailContext, href, type SP } from '@/lib/details';
 import { dateLabel, quarterLabel } from '@/lib/format';
@@ -59,7 +59,7 @@ export default async function ContractorPage({ params, searchParams }: { params:
       <HandoffLanding />
       {rows.length === 0 ? (
         <>
-          <div className="px-[var(--gutter)] pb-4"><PageTitle meta={`${contractor.subregion} · Contract ${contractor.contractNo}`}>{name}</PageTitle></div>
+          <div className="px-[var(--gutter)] pb-4"><PageTitle meta={`${regionPath(repo, contractor.id) || '—'}${contractor.active ? '' : ' · Inactive'}`}>{name}</PageTitle></div>
           <DetailEmpty
             title={`No audits in ${filter.regions.join(' + ') || 'the selected regions'}`}
             action={<Link href={href(`/contractor/${id}`, 'q=all&r=SR1%2CSR2')} className="inline-flex h-10 items-center rounded-full bg-ink px-5 text-[14px] font-semibold text-ground">Show all regions</Link>}
@@ -74,7 +74,7 @@ export default async function ContractorPage({ params, searchParams }: { params:
           slides={slides}
           trend={[...rows].reverse().map(({ audit }) => ({ auditId: audit.id, date: audit.date, label: dateLabel(audit.date), score: audit.totalScore }))}
           title={
-            <PageTitle meta={`${contractor.subregion} · Contract ${contractor.contractNo} · ${rows.length} ${rows.length === 1 ? 'audit' : 'audits'}`}>
+            <PageTitle meta={`${regionPath(repo, contractor.id)}${contractor.active ? '' : ' · Inactive'} · ${rows.length} ${rows.length === 1 ? 'audit' : 'audits'}`}>
               {name}
             </PageTitle>
           }
