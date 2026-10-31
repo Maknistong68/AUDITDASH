@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { getRepo } from '@/lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { auditReport, isNaObservation } from '@/lib/analytics';
 
-const repo = getRepo();
+const repo = mockRepo;
 const audit = (id: string) => repo.audits().find((a) => a.id === id)!;
 
 describe('auditReport', () => {

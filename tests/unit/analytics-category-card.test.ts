@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo } from '@/lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { categoryCard, categoryCards, categoryDetail, categoryGaps, mainProblem } from '@/lib/analytics';
 import { CATEGORIES } from '@/lib/categories';
 import type { Filter } from '@/lib/types';
 
-const repo = getRepo();
+const repo = mockRepo;
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const FILTERS: Filter[] = [
   ALL,

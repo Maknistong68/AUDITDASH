@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { bandDistribution, filterAudits } from '../../lib/analytics';
 import { BAND_SLUGS, monthTicks, parseBand, rowsInBand, splitName, timeDomain, timelineRows, trend, xOf } from '../../lib/timeline';
 import type { Band, Contractor } from '../../lib/types';
 
 const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
-const repo = getRepo();
+const repo = mockRepo;
 
 describe('timelineRows', () => {
   const rows = timelineRows(filterAudits(repo, ALL), repo.contractors());

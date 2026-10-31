@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { deltaPoints } from '../../lib/format';
 import { expectNothingClipped } from './clip';
 
@@ -7,7 +7,7 @@ import { expectNothingClipped } from './clip';
  * Owner direction §21/§22 "only what the Excel can tell us": no keyword-inferred high-risk work, one Portfolio score card
  * (bands on it, the trend in the Score over time card), and small up/down charts in place of "+1 / −2" text.
  */
-const repo = getRepo();
+const repo = mockRepo;
 const NAME = new Map(repo.contractors().map((c) => [c.name, c.id]));
 /** Every audit score of a contractor in date order (both regions, all quarters), as whole %. */
 const scores = (id: string) =>

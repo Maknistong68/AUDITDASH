@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo, type Repo } from '@/lib/data/repo';
+import { type Repo } from '@/lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import {
   compareContractors, visitsOf, contractorCards, findingsByAudit, followUps, isFinding, repeatContractors, repeatFindings, repeatMatrix,
   repeatQuestions, subsectionOf,
@@ -7,7 +8,7 @@ import {
 import fixture from './fixtures/abyatona-1112-responses.json';
 import type { Filter } from '@/lib/types';
 
-const repo = getRepo();
+const repo = mockRepo;
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const NONE: Filter = { quarter: 'all', regions: [] };
 const SIBS = '4800000838'; // audited 2025-11-12 and 2025-11-19 (both Q4) and 2026-02-01

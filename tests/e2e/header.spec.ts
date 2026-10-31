@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 
 const TABS = ['H&S', 'Security', 'Environmental', 'Welfare', 'CRC'];
-const auditId = getRepo().audits()[0].id;
+const auditId = mockRepo.audits()[0].id;
 const tabs = (page: Page) => page.getByTestId('type-tabs');
 const hydrated = (page: Page) => expect(page.getByTestId('contractors')).toHaveAttribute('data-hydrated', '');
 

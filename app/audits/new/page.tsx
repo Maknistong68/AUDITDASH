@@ -5,6 +5,7 @@ import { TopBar } from '@/components/shell/TopBar';
 import { isAuditType } from '@/lib/auditTypeIds';
 import { toSearchParams, type SP } from '@/lib/details';
 import { filterToQuery, parseFilter } from '@/lib/filters';
+import { supabaseOn } from '@/lib/supabase/env';
 
 export const metadata: Metadata = { title: 'New audit' };
 
@@ -25,7 +26,7 @@ export default async function NewAuditPage({ searchParams }: { searchParams: Pro
         <div className="px-[var(--gutter)] pb-[clamp(6px,1svh,12px)]">
           <Breadcrumb items={[{ label: 'Overview', href: `/?${filterToQuery(filter)}` }, { label: 'New audit' }]} />
         </div>
-        <AuditWizard initialType={isAuditType(type) ? type : 'hs'} />
+        <AuditWizard initialType={isAuditType(type) ? type : 'hs'} online={supabaseOn()} />
       </main>
     </>
   );

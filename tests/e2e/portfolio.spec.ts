@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { expectNothingClipped } from './clip';
 import { positiveSummary, repeatFindings, repeatMatrix } from '../../lib/analytics';
 import type { Filter } from '../../lib/types';
@@ -81,7 +81,7 @@ test('the positives tile opens /positives with the filter', async ({ page }) => 
 });
 
 test('repeats card: total repeats and the three most repeated questions (no caption, no codes)', async ({ page }) => {
-  const repo = getRepo();
+  const repo = mockRepo;
   const count = (f: Filter) => repeatFindings(repo, f).length;
   const m = repeatMatrix(repo, ALL);
   expect(count(ALL)).toBe(228);
@@ -109,14 +109,14 @@ test('repeats card: total repeats and the three most repeated questions (no capt
 });
 
 test('positives card: total, coverage of audits and contractors', async ({ page }) => {
-  const s = positiveSummary(getRepo(), ALL);
+  const s = positiveSummary(mockRepo, ALL);
   expect(s.total).toBe(138);
   await page.goto('/');
   const card = page.getByTestId('kpi-positives');
   await expect(card.getByTestId('positives-count')).toHaveText('138');
   await expect(card.getByTestId('positives-coverage')).toHaveText(`${s.auditsWith}/${s.audits} audits`);
   await page.goto('/?q=Q4-2025&r=SR1,SR2');
-  await expect(card.getByTestId('positives-count')).toHaveText(String(positiveSummary(getRepo(), { ...ALL, quarter: 'Q4-2025' }).total));
+  await expect(card.getByTestId('positives-count')).toHaveText(String(positiveSummary(mockRepo, { ...ALL, quarter: 'Q4-2025' }).total));
 });
 
 test('main problem reads "score lost" beside the %', async ({ page }) => {

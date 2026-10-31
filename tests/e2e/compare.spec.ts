@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { CATEGORIES } from '../../lib/categories';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { compareContractors, repeatMatrix } from '../../lib/analytics';
 
 const compare = (name: string) => ({ name: `Compare ${name}`, exact: true });
@@ -63,8 +63,8 @@ test('the compare tray shows plain labels, no checklist codes', async ({ page })
   expect(await tray.textContent()).not.toMatch(/\b[ABC]\d+(\.\d+)?\b/);
   // the same repeats as the heat map: one follow-up each, so the latest audit's repeats are the contractor's column total
   const all = { quarter: 'all' as const, regions: ['SR1' as const, 'SR2' as const] };
-  const m = repeatMatrix(getRepo(), all);
-  const x = compareContractors(getRepo(), all, ['4800001131', '4800001322']);
+  const m = repeatMatrix(mockRepo, all);
+  const x = compareContractors(mockRepo, all, ['4800001131', '4800001322']);
   const counts = await tray.getByTestId('compare-repeat-count').allInnerTexts();
   expect(counts).toEqual(x.map((e) => String(e.repeats.length)));
   expect(counts).toEqual(x.map((e) => String(m.contractors.find((c) => c.id === e.card.contractor.id)!.total)));

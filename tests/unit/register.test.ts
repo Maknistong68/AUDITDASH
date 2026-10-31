@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo, type Repo } from '@/lib/data/repo';
+import { type Repo } from '@/lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { contractorCards, filterAudits, portfolioSummary, quarterLines, regionHistory, regionPath } from '@/lib/analytics';
 import { REGIONS } from '@/lib/filters';
 import { contractorForProject, subregionFor } from '@/lib/input/contractors';
@@ -53,8 +54,10 @@ describe('register status', () => {
   });
 });
 
+const seedRepo = mockRepo;
+
 describe('the seed', () => {
-  const repo = getRepo();
+  const repo = seedRepo;
   test('every audit carries the sub-region of its sheet; regions come from the data', () => {
     expect(REGIONS).toEqual(['SR1', 'SR2']);
     for (const a of repo.audits()) expect(REGIONS).toContain(a.subregion);

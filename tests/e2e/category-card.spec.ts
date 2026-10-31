@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { categoryCards, categoryQuarters } from '../../lib/analytics';
 import { itemLabel } from '../../lib/itemLabels';
 import { cardVoids } from './voids';
@@ -8,7 +8,7 @@ import { CATEGORIES } from '../../lib/categories';
 const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2')[] };
 const Q = 'q=all&r=SR1%2CSR2';
 /** Ranked by the latest quarter's gap, worst first: #1 is the dashboard's main problem. */
-const RANKED = categoryCards(getRepo(), ALL);
+const RANKED = categoryCards(mockRepo, ALL);
 const ORDER = RANKED.map((c) => c.category);
 const nameOf = (id: string) => CATEGORIES.find((c) => c.id === id)!.name;
 
@@ -167,7 +167,7 @@ test('at #1 the active card is anchored left, and the fade makes #2 clearer than
 
 test('clicking card #3 opens its category, keeping the filter, and it becomes active at the left edge', async ({ page }) => {
   const q = 'q=Q1-2026&r=SR1';
-  const order = categoryCards(getRepo(), { quarter: 'Q1-2026', regions: ['SR1'] }).map((c) => c.category);
+  const order = categoryCards(mockRepo, { quarter: 'Q1-2026', regions: ['SR1'] }).map((c) => c.category);
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto(`/category/${order[0]}?${q}`);
   await ready(page);
@@ -318,7 +318,7 @@ for (const vp of [{ width: 1366, height: 768 }, { width: 1920, height: 1080 }]) 
 }
 
 test('the drivers are plain labels with a bar and "N/M", most noted first (bars never grow down the list)', async ({ page }) => {
-  const q = categoryQuarters(getRepo(), ALL, 'subcontractor')[0];
+  const q = categoryQuarters(mockRepo, ALL, 'subcontractor')[0];
   for (let i = 1; i < q.items.length; i++) expect(q.items[i - 1].hits).toBeGreaterThanOrEqual(q.items[i].hits);
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto(`/category/subcontractor?${Q}`);
@@ -335,7 +335,7 @@ test('the drivers are plain labels with a bar and "N/M", most noted first (bars 
 
 test('"+M more" expands a long list in place, scrolling inside its card, never the page', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
-  const q = categoryQuarters(getRepo(), ALL, 'documents')[0];
+  const q = categoryQuarters(mockRepo, ALL, 'documents')[0];
   await page.goto(`/category/documents?${Q}`);
   await quartersReady(page);
   const list = slide(page).getByTestId('driver-list');
@@ -365,7 +365,7 @@ test('"+M more" expands a long list in place, scrolling inside its card, never t
 
 test('a deep link to a driver the card hides opens the list on it', async ({ page }) => {
   await page.setViewportSize({ width: 1366, height: 768 });
-  const q = categoryQuarters(getRepo(), ALL, 'documents')[0];
+  const q = categoryQuarters(mockRepo, ALL, 'documents')[0];
   const code = q.items.at(-1)!.itemCode;
   await page.goto(`/category/documents?${Q}#item-${code}`);
   await quartersReady(page);

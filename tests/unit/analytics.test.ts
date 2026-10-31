@@ -1,12 +1,13 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo, type Repo } from '@/lib/data/repo';
+import { type Repo } from '@/lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import {
   applicableSlots, auditCompliance, categoryDetail, categoryGaps, contractorInCategory, filterAudits, isFinding, itemHistory, league, portfolioSummary,
 } from '@/lib/analytics';
 import { CATEGORIES } from '@/lib/categories';
 import type { Filter } from '@/lib/types';
 
-const repo = getRepo();
+const repo = mockRepo;
 
 // The importer drops "Not Applicable" notes, so the seed no longer has notes on N/A subsections.
 // The analytics guard still matters (data from other sources), so inject one on TDP's N/A B5 subsection.

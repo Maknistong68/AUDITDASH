@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo } from '@/lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { ITEM_LABELS, itemLabel, trimQuestion } from '@/lib/itemLabels';
 
-const checklist = getRepo().checklist();
+const checklist = mockRepo.checklist();
 
 describe('itemLabels', () => {
   test('every H&S checklist code has a hand-written label of at most 40 chars, with no code in it', () => {

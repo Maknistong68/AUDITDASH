@@ -56,6 +56,7 @@ weekly monthly daily quarterly annual yearly major minor violation smoke drill e
 """.split())
 
 _LABEL = re.compile(r"\bPerson [A-Z]+\b")
+_TITLED_LABEL = re.compile(rf"\b{_TITLE}\.?[ \t]*(Person [A-Z]+\b)")
 
 
 def _label(n: int) -> str:
@@ -144,7 +145,7 @@ def pseudonymise(observations, hashes=None):
         if hashes:
             text, n = _hashed_sub(text, hashes, label_for)
             listed_n += n
-        o["text"] = text
+        o["text"] = _TITLED_LABEL.sub(r"\1", text)  # "Mr. sabeer" → listed layer → "Mr. Person B" → "Person B"
     return titled_n, listed_n
 
 

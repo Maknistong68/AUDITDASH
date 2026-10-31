@@ -77,6 +77,21 @@ npx playwright test                # end-to-end (npm run test:e2e)
 
 The pytest importer tests read the source workbooks, so they only run where `data/source/` is populated.
 
+## Sign-in and roles (Supabase)
+
+With `DATA_SOURCE=supabase` every page needs a signed-in user with a role; the data comes from the Supabase tables that
+`scripts/sync_supabase.py` fills from `data/seed`. Without it (local development, tests) the app reads `data/seed` with no sign-in.
+
+- Environment (Vercel): `DATA_SOURCE=supabase`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The app holds no
+  service role key: pages read through the signed-in user's session. Only `scripts/sync_supabase.py` needs `SUPABASE_SERVICE_ROLE_KEY`, on the machine that imports.
+- Schema: `supabase/migrations/` (tables, roles, row-level security, audit trail). Roles: **viewer** (executives, read only),
+  **auditor** (files audits), **lead** (reviews and imports), **admin** (invites and roles). A signed-in user with no role sees nothing.
+- Invite someone: add their email to `public.invites` with a role (admin), then Supabase dashboard → Authentication → Users →
+  *Invite user*. The invite link lands on `/auth/confirm`, which opens `/account` to choose a password. Keep public sign-ups off,
+  "Confirm email" on, and add `https://<your-domain>/auth/confirm` to Authentication → URL configuration → Redirect URLs.
+- Sign in at `/login` with a password or an emailed link; `/account` changes the password; *Sign out* is in the top bar.
+- Audits filed in the wizard go to `public.submissions` for a lead to review (their content cannot be edited after filing).
+
 ## Deploy to Vercel
 
 1. Import the GitHub repo in Vercel.

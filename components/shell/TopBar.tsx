@@ -8,13 +8,17 @@ import { TopBarHeight } from './TopBarHeight';
 import { TypeTabs } from './TypeTabs';
 import { MainNav } from './MainNav';
 import { Suspense } from 'react';
+import { currentUser } from '@/lib/auth';
+import { supabaseOn } from '@/lib/supabase/env';
+import { signOut } from '@/app/login/actions';
 
 /**
  * Frosted sticky bar, one row from 1200px: wordmark + audit-type tabs on the left; quarter, regions,
  * + New Audit and the theme switch on the right. On details pages (`detail`) the wordmark links home
  * and the page's own title takes the h1.
  */
-export function TopBar({ filter, detail = false }: { filter: Filter; detail?: boolean }) {
+export async function TopBar({ filter, detail = false }: { filter: Filter; detail?: boolean }) {
+  const me = supabaseOn() ? await currentUser() : null;
   const word = 'truncate text-[21px] font-semibold leading-none tracking-[-0.025em] whitespace-nowrap';
   return (
     <header data-testid="topbar" className="glass-bar sticky top-0 z-30 flex print:hidden min-h-[var(--topbar)] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-[var(--gutter)] py-2 min-[1200px]:h-[var(--topbar)] min-[1200px]:flex-nowrap min-[1200px]:py-0">
@@ -35,6 +39,13 @@ export function TopBar({ filter, detail = false }: { filter: Filter; detail?: bo
         <FilterBar filter={filter} />
         <NewAuditButton type={filter.type} />
         <ThemeToggle />
+        {me && (
+          <form action={signOut}>
+            <button type="submit" className="h-8 rounded-full px-2.5 text-[13px] font-semibold text-muted transition-colors hover:bg-fill-2 hover:text-ink" data-tip={me.email}>
+              Sign out
+            </button>
+          </form>
+        )}
       </div>
       <TopBarHeight />
     </header>

@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { CATEGORIES } from '../../lib/categories';
 import { repeatQuestions } from '../../lib/analytics';
 import { expectNothingClipped } from './clip';
@@ -9,7 +9,7 @@ import { expectNothingClipped } from './clip';
  * is cut off by an ancestor that hides overflow. Light theme at four sizes, dark at 1366×657; at 1024×768 and 390×844
  * the page may scroll, but nothing may be unreachable.
  */
-const repo = getRepo();
+const repo = mockRepo;
 const contractors = repo.contractors().map((c) => c.id);
 // The deepest one-screen drills: the top repeated question at its first contractor.
 const top = repeatQuestions(repo, { quarter: 'all', regions: ['SR1', 'SR2'] })[0];

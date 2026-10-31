@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { repeatFindings, repeatMatrix } from '../../lib/analytics';
 import { CATEGORIES } from '../../lib/categories';
 import type { Filter } from '../../lib/types';
@@ -7,7 +7,7 @@ import { expectNothingClipped } from './clip';
 
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const Q = 'q=all&r=SR1%2CSR2';
-const M = repeatMatrix(getRepo(), ALL);
+const M = repeatMatrix(mockRepo, ALL);
 const COLS = M.contractors;
 /** Rows as the page shows them: grouped by category (groups in order of their first row), rows keep the matrix order. */
 const GROUPS = [...new Set(M.questions.map((q) => q.category))].map((cat) => ({ cat, rows: M.questions.filter((q) => q.category === cat) }));
@@ -51,7 +51,7 @@ async function noPageScroll(page: Page) {
 
 test('the dashboard Repeat findings card opens /repeats with a 1.5 s shared hand-off; the header shows the same count', async ({ page }) => {
   expect(TOTAL).toBe('228');
-  expect(TOTAL).toBe(String(repeatFindings(getRepo(), ALL).length));
+  expect(TOTAL).toBe(String(repeatFindings(mockRepo, ALL).length));
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/');
   const card = page.getByTestId('kpi-repeats');
@@ -212,7 +212,7 @@ test('/repeats header: "N repeats", questions · contractors; no caption, reach 
 
 test('/repeats Q4 only: no follow-up visit (SIBS\'s two Q4 audits are one visit), calm empty state, no NaN', async ({ page }) => {
   const f: Filter = { ...ALL, quarter: 'Q4-2025' };
-  expect(repeatFindings(getRepo(), f)).toEqual([]);
+  expect(repeatFindings(mockRepo, f)).toEqual([]);
   await page.goto('/repeats?q=Q4-2025&r=SR1%2CSR2');
   await expect(page.getByTestId('repeats-figure')).toHaveText('—');
   await expect(page.getByTestId('empty-state')).toContainText('Needs a follow-up audit');
@@ -222,9 +222,9 @@ test('/repeats Q4 only: no follow-up visit (SIBS\'s two Q4 audits are one visit)
 
 test('/repeats single region: repeats within that region only', async ({ page }) => {
   for (const r of ['SR1', 'SR2'] as const) {
-    const m = repeatMatrix(getRepo(), { quarter: 'all', regions: [r] });
+    const m = repeatMatrix(mockRepo, { quarter: 'all', regions: [r] });
     await page.goto(`/repeats?q=all&r=${r}`);
-    await expect(page.getByTestId('repeats-figure')).toHaveText(String(repeatFindings(getRepo(), { quarter: 'all', regions: [r] }).length));
+    await expect(page.getByTestId('repeats-figure')).toHaveText(String(repeatFindings(mockRepo, { quarter: 'all', regions: [r] }).length));
     await expect(page.getByTestId('heat-col')).toHaveCount(m.contractors.length);
     await expect(page.getByTestId('heat-cell')).toHaveCount(m.contractors.length * m.questions.length);
   }

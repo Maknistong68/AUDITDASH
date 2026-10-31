@@ -16,6 +16,7 @@ import { ReviewStep } from './ReviewStep';
 import { StartStep } from './StartStep';
 import { Stepper, STEPS } from './Stepper';
 import { Button } from './ui';
+import { submitAudit } from '@/app/audits/new/actions';
 
 const CONTRACTORS = contractorsSeed as Contractor[];
 
@@ -46,7 +47,7 @@ function download(name: string, data: unknown) {
  * review. All state is one AuditDraft; scores are recomputed from it on every change. Drafts and submitted audits are
  * kept in this browser only; Download gives the audits.json / observations.json rows for the master data.
  */
-export function AuditWizard({ initialType }: { initialType: AuditType }) {
+export function AuditWizard({ initialType, online = false }: { initialType: AuditType; online?: boolean }) {
   const reduce = useReducedMotion();
   const [draft, setDraft] = useState<AuditDraft>(() => emptyDraft(initialType));
   const [step, setStep] = useState(0);
@@ -144,6 +145,18 @@ export function AuditWizard({ initialType }: { initialType: AuditType }) {
     return next;
   };
 
+  /** Online: the audit goes to the server for a lead to review (and stays saved here); otherwise saved here only. */
+  const submit = async () => {
+    if (!online) { persist('submitted'); return; }
+    const res = await submitAudit({ ...draft, status: 'submitted' });
+    if (res.ok) {
+      persist('submitted');
+      setFlash('Audit filed for review');
+    } else {
+      setFlash(res.error);
+    }
+  };
+
   const exportJson = () => {
     const rows = toSeedRows(draft, items, sections);
     download(`${rows.audits[0].id}.json`, rows);
@@ -195,7 +208,7 @@ export function AuditWizard({ initialType }: { initialType: AuditType }) {
                 contractor={contractor}
                 actions={actions}
                 onSave={() => persist('draft')}
-                onSubmit={() => persist('submitted')}
+                onSubmit={() => void submit()}
                 onDownload={exportJson}
                 onNew={reset}
                 onGo={go}

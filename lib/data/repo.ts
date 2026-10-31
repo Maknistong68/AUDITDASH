@@ -1,4 +1,6 @@
 import type { Audit, ChecklistItem, Contractor, Observation } from '../types';
+import { requireRole } from '../auth';
+import { supabaseOn } from '../supabase/env';
 import { mockRepo } from './mock';
 
 export interface Repo {
@@ -8,10 +10,15 @@ export interface Repo {
   observations(): Observation[];
 }
 
-/** Mock (seed JSON) unless DATA_SOURCE=supabase, which is not implemented in this plan. */
-export function getRepo(): Repo {
-  if (process.env.DATA_SOURCE === 'supabase') {
-    throw new Error('DATA_SOURCE=supabase not implemented yet');
+/**
+ * The data every page reads. Seed JSON (data/seed) unless DATA_SOURCE=supabase, where the caller must be signed in
+ * with a role (viewer or above) and the data comes from the Supabase tables the importer fills.
+ */
+export async function getRepo(): Promise<Repo> {
+  if (supabaseOn()) {
+    await requireRole('viewer');
+    const { supabaseRepo } = await import('./supabase');
+    return supabaseRepo();
   }
   return mockRepo;
 }

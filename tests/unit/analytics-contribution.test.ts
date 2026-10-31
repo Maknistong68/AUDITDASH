@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo, type Repo } from '@/lib/data/repo';
+import { type Repo } from '@/lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { categoryGaps, gapContribution, mainProblem } from '@/lib/analytics';
 import type { Audit, ChecklistItem, Filter } from '@/lib/types';
 
-const repo = getRepo();
+const repo = mockRepo;
 const ALL: Filter = { quarter: 'all', regions: ['SR1', 'SR2'] };
 const NONE: Filter = { quarter: 'all', regions: [] };
 

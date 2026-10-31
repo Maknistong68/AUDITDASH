@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { filterAudits, mainProblem } from '../../lib/analytics';
 import { itemLabel } from '../../lib/itemLabels';
 
@@ -8,7 +8,7 @@ const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2'
 const OLD_FIGURE = (h: number) => Math.min(104, Math.max(52, 0.09 * h));
 
 test('main problem drivers are plain labels with "N/M" audits and a bar, no item codes', async ({ page }) => {
-  const repo = getRepo();
+  const repo = mockRepo;
   const problem = mainProblem(repo, ALL)!;
   const audits = filterAudits(repo, { ...ALL, quarter: problem.quarter }).length;
   await page.goto('/');

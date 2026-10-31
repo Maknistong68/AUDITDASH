@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest';
-import { getRepo } from '@/lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { auditFindings, isFinding } from '@/lib/analytics';
 import {
   DEFAULT_STATE, activeFilters, buildLog, clearedState, filterAuditRows, filterObs, highlight, logStateToQuery, matchesAll,
   obsHref, parseLogState, searchTerms, type LogState,
 } from '@/lib/log';
 
-const repo = getRepo();
+const repo = mockRepo;
 const data = buildLog(repo);
 const state = (s: Partial<LogState> = {}): LogState => ({ ...DEFAULT_STATE, ...s });
 

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 
 const active = (page: Page) => page.locator('[data-testid="slide"][data-active]');
 const ready = (page: Page) => expect(page.getByTestId('carousel')).toHaveAttribute('data-ready', '');
@@ -112,7 +112,7 @@ test('unknown ids and mismatched paths are 404', async ({ page }) => {
 });
 
 test('the longest observation stays inside its card at 1366', async ({ page }) => {
-  const repo = getRepo();
+  const repo = mockRepo;
   const items = new Map(repo.checklist().map((i) => [i.code, i]));
   const longest = repo.observations().filter((o) => o.itemCode).reduce((m, o) => (o.text.length > m.text.length ? o : m));
   const audit = repo.audits().find((a) => a.id === longest.auditId)!;
@@ -234,7 +234,7 @@ test('the Q4 main-problem tile opens its category on Q4 with the same gap and it
 
 test('drill pages show plain labels, never codes: titles, item rows, siblings and every breadcrumb', async ({ page }) => {
   const CODE = /\b[ABC]\d+(\.\d+)?\b/;
-  const repo = getRepo();
+  const repo = mockRepo;
   const items = new Map(repo.checklist().map((i) => [i.code, i]));
   const obs = repo.observations().find((o) => o.itemCode === 'B6.1' && o.kind === 'negative' && repo.audits().find((a) => a.id === o.auditId)?.contractorId === '4800001131')!;
   await page.setViewportSize({ width: 1366, height: 768 });

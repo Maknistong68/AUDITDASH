@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { getRepo } from '../../lib/data/repo';
+import { mockRepo } from '@/lib/data/mock';
 import { contractorAudits, findingsByAudit, repeatMatrix } from '../../lib/analytics';
 import { bandFor } from '../../lib/scoring';
 import { cardVoids } from './voids';
@@ -9,7 +9,7 @@ const ALL = { quarter: 'all' as const, regions: ['SR1', 'SR2'] as ('SR1' | 'SR2'
 const ID = '4800001131'; // JV-ECH: 2 audits
 const SIBS = '4800000838'; // 3 audits
 const NBC = '4200000026'; // 1 audit
-const ROWS = contractorAudits(getRepo(), ALL, ID);
+const ROWS = contractorAudits(mockRepo, ALL, ID);
 const SIZES = [{ width: 1366, height: 657 }, { width: 1366, height: 768 }, { width: 1920, height: 1080 }];
 const CARDS = ['slide-header', 'category-gaps', 'top-repeats'];
 
@@ -18,7 +18,7 @@ const CARDS = ['slide-header', 'category-gaps', 'top-repeats'];
  * repeated first, then the most recent repeat (the later audit of the pair), then repeatMatrix's own question order.
  */
 function expectedTop3(id: string) {
-  const repo = getRepo();
+  const repo = mockRepo;
   const m = repeatMatrix(repo, ALL);
   const row = m.cells[id] ?? {};
   // the latest audit in which the question repeated (a finding there and in the audit before)
@@ -82,7 +82,7 @@ for (const vp of SIZES) {
 
 test('the score chart has one band-coloured point per audit in date order, a green line when the latest rose', async ({ page }) => {
   for (const [id, n] of [[ID, 2], [SIBS, 3], [NBC, 1]] as const) {
-    const audits = getRepo().audits().filter((a) => a.contractorId === id).sort((a, b) => a.date.localeCompare(b.date));
+    const audits = mockRepo.audits().filter((a) => a.contractorId === id).sort((a, b) => a.date.localeCompare(b.date));
     expect(audits).toHaveLength(n);
     await page.goto(`/contractor/${id}?q=Q4-2025`); // the quarter filter does not thin the chart
     await ready(page);
