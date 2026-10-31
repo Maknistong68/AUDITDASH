@@ -48,8 +48,8 @@
   --partial: #3d3d3a;  --partial-bg: #e8e0d2;  --partial-dot: #3d3d3a;
   --minimal: #8a5a14;  --minimal-bg: #f3e3c8;  --minimal-dot: #3d3d3a;
   /* /repeats heat map: one warm red ramp, light to dark; each step >= 3:1 on the cream card */
-  --heat-1: #d98a7a; --heat-2: #c0604f; --heat-3: #9e4434; --heat-4: #6e2a1f;
-  --heat-on-1: #141413; --heat-on-2: #ffffff; --heat-on-3: #ffffff; --heat-on-4: #ffffff;
+  --heat-1: #b0503f; --heat-2: #a24a3a; --heat-3: #7e3528; --heat-4: #56231a;
+  --heat-on-1: #ffffff; --heat-on-2: #ffffff; --heat-on-3: #ffffff; --heat-on-4: #ffffff;
   --non: #b4473a;      --non-bg: #f4dcd6;      --non-dot: #c64545;
   --up: #2f7a43;
   --down: #b4473a;
@@ -122,8 +122,8 @@
   --minimal: #e8a55a;  --minimal-bg: #2e261b; --minimal-dot: #e8e0d2;
   --non: #e0705f;      --non-bg: #2e1d1a;     --non-dot: #d65f4f;
   /* /repeats heat map: one red ramp, dim to bright; the number's ink on each step passes 4.5:1 */
-  --heat-1: #5c2a22; --heat-2: #8a3a2e; --heat-3: #b84c3c; --heat-4: #e0705f;
-  --heat-on-1: #ffffff; --heat-on-2: #ffffff; --heat-on-3: #ffffff; --heat-on-4: #000000;
+  --heat-1: #b0503f; --heat-2: #c9604c; --heat-3: #e07a64; --heat-4: #f2a892;
+  --heat-on-1: #ffffff; --heat-on-2: #141413; --heat-on-3: #141413; --heat-on-4: #141413;
   --up: #6fc784;
   --down: #e0705f;
   --gap: #d65f4f;
