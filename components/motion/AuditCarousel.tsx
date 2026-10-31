@@ -112,7 +112,7 @@ export function AuditCarousel({
   const nav = (
     <div className="flex items-center gap-3">
       {/* The slides by name (dates or quarters), latest first: the current one in ink. */}
-      <div role="group" aria-label={unit === 'audit' ? 'Audits' : 'Quarters'} className="hidden items-center gap-1 rounded-full bg-fill p-[2px] min-[700px]:flex">
+      <div role="group" aria-label={unit === 'audit' ? 'Audits' : 'Quarters'} className="hidden items-center gap-[clamp(12px,1.2vw,20px)] min-[700px]:flex">
         {labels.map((l, i) => (
           <button
             key={l + i}
@@ -120,9 +120,9 @@ export function AuditCarousel({
             onClick={() => go(i)}
             aria-label={l}
             aria-current={i === index ? 'true' : undefined}
-            className={`h-7 whitespace-nowrap rounded-full px-3 text-[13px] transition-colors duration-500 ${i === index ? 'bg-surface font-semibold text-ink dark:bg-[#636366]' : 'text-muted hover:text-ink'}`}
+            className="tab h-8 whitespace-nowrap text-[13px]"
           >
-            {l}
+            <span className="tab-label">{l}</span>
           </button>
         ))}
       </div>
@@ -219,7 +219,7 @@ export function NavButton({ label, hint, disabled, onClick, children }: { label:
       title={hint}
       disabled={disabled}
       onClick={onClick}
-      className="grid size-9 place-items-center rounded-full bg-surface text-ink shadow-[var(--shadow-card)] transition-[transform,opacity,background-color] duration-200 enabled:hover:bg-surface-2 enabled:active:scale-90 disabled:cursor-default disabled:opacity-35"
+      className="grid size-9 place-items-center text-muted transition-[transform,opacity,color] duration-200 enabled:hover:text-ink enabled:active:scale-90 disabled:cursor-default disabled:opacity-30"
     >
       {children}
     </button>

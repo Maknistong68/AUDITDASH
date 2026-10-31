@@ -81,7 +81,7 @@ export default async function ObservationPage({ params, searchParams }: { params
                   {Math.round((sec.scored / sec.possible) * 100)}<span className="text-[18px] text-muted">%</span>
                 </span>
                 <div className="h-2 overflow-hidden rounded-full bg-fill" aria-hidden>
-                  <div className="h-full rounded-full bg-[var(--accent)]" style={{ width: `${(sec.scored / sec.possible) * 100}%` }} />
+                  <div className="h-full rounded-full bg-[var(--bar)]" style={{ width: `${(sec.scored / sec.possible) * 100}%` }} />
                 </div>
               </>
             ) : (

@@ -174,8 +174,8 @@ function Row({
         title={disabled ? 'Up to 3 contractors' : selected ? 'Remove from compare' : 'Add to compare'}
         className={`relative z-[2] grid size-[clamp(18px,2.7svh,24px)] place-items-center rounded-full transition-[background-color,transform,opacity] duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 ${
           selected
-            ? 'bg-[var(--accent)] text-[var(--on-accent)]'
-            : 'bg-fill-2 text-muted shadow-[inset_0_0_0_1.5px_var(--control)] hover:text-ink enabled:hover:bg-fill'
+            ? 'text-[var(--accent)]'
+            : 'text-faint hover:text-ink'
         }`}
       >
         {selected ? <Check size={14} strokeWidth={3} aria-hidden /> : <Plus size={14} strokeWidth={2.6} aria-hidden />}

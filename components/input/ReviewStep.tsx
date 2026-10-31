@@ -137,7 +137,7 @@ export function ReviewStep({ draft, items, score, contractor, actions, onSave, o
                       {Icon && <Icon size={13} strokeWidth={2.4} style={{ color: c.color }} className="shrink-0" aria-hidden />}
                       <span className="truncate">{c.short}</span>
                     </span>
-                    <Bar value={n / maxCat} color={c.color} delay={0.1 + k * 0.06} />
+                    <Bar value={n / maxCat} color="var(--bar)" delay={0.1 + k * 0.06} />
                     <span className="num text-right font-semibold">{n}</span>
                   </li>
                 );

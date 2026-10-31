@@ -3,6 +3,7 @@ import { filterToQuery } from '@/lib/filters';
 import type { Filter } from '@/lib/types';
 import { FilterBar } from './FilterBar';
 import { NewAuditButton } from './NewAuditButton';
+import { ThemeToggle } from './ThemeToggle';
 import { TopBarHeight } from './TopBarHeight';
 import { TypeTabs } from './TypeTabs';
 import { MainNav } from './MainNav';
@@ -33,6 +34,7 @@ export function TopBar({ filter, detail = false }: { filter: Filter; detail?: bo
       <div className="flex flex-wrap items-center gap-x-[clamp(10px,1.1vw,20px)] gap-y-2 min-[1200px]:flex-nowrap">
         <FilterBar filter={filter} />
         <NewAuditButton type={filter.type} />
+        <ThemeToggle />
       </div>
       <TopBarHeight />
     </header>

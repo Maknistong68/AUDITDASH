@@ -71,8 +71,7 @@ export function MainProblemCard({ problem, audits, query, ranking }: {
       <ProblemCardContent problem={problem} audits={audits} label="Main problem" ranking={ranking} />
       <span
         aria-hidden
-        className="absolute right-[clamp(12px,1.6svh,22px)] top-[clamp(12px,1.6svh,22px)] grid size-9 place-items-center rounded-full transition-transform duration-300 group-hover:translate-x-0.5"
-        style={{ background: 'var(--hero-chip)' }}
+        className="absolute right-[clamp(12px,1.6svh,22px)] top-[clamp(12px,1.6svh,22px)] grid size-9 place-items-center text-[var(--hero-muted)] transition-transform duration-300 group-hover:translate-x-0.5"
       >
         <ChevronRight size={18} strokeWidth={2.4} />
       </span>

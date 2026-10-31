@@ -148,7 +148,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
         </BentoCard>
 
         <BentoCard i={2} testid="report-observations" className="gap-[clamp(12px,1.8svh,20px)] px-[clamp(14px,1.4vw,28px)] py-[clamp(16px,2.2svh,28px)] min-[1100px]:col-span-12">
-          <div role="tablist" aria-label="Observations" className="flex w-fit max-w-full flex-wrap items-center gap-[2px] rounded-full bg-fill p-[2px] print:hidden">
+          <div role="tablist" aria-label="Observations" className="flex w-fit max-w-full flex-wrap items-center gap-[clamp(14px,1.4vw,24px)] print:hidden">
             {tabs.map((t) => {
               const on = t.id === tab;
               return (
@@ -161,10 +161,11 @@ export default async function AuditReportPage({ params, searchParams }: { params
                   aria-selected={on}
                   aria-controls={`panel-${t.id}`}
                   data-testid={`tab-${t.id}`}
-                  className={`inline-flex h-8 items-center gap-2 rounded-full px-4 text-[14px] transition-colors ${on ? 'bg-surface font-semibold text-ink shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#636366]' : 'text-muted hover:text-ink'}`}
+                  className="tab inline-flex h-9 items-center text-[14px]"
                 >
-                  {t.label}
-                  <span className={`num text-[13px] ${on ? 'text-muted' : 'text-faint'}`}>{t.n}</span>
+                  <span className="tab-label">
+                    {t.label} <span className="num text-[13px] text-muted">{t.n}</span>
+                  </span>
                 </Link>
               );
             })}
@@ -177,7 +178,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
                   const on = chip.id === cat;
                   const Icon = chip.icon ? CATEGORY_ICONS[chip.icon] : null;
                   const cls = `inline-flex h-8 items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold transition-colors ${
-                    on ? 'bg-ink text-ground' : chip.n ? 'bg-fill-2 text-ink hover:bg-fill' : 'bg-fill-2 text-faint opacity-60'
+                    on ? 'bg-fill text-ink shadow-[inset_0_0_0_1px_var(--accent)]' : chip.n ? 'bg-fill-2 text-ink hover:bg-fill' : 'bg-fill-2 text-faint opacity-60'
                   }`;
                   const body = (
                     <>

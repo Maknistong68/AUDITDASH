@@ -19,7 +19,7 @@ export function Stepper({ step, enabled, onGo }: { step: number; enabled: boolea
         <span aria-hidden className="absolute left-[12.5%] right-[12.5%] top-[15px] h-[2px] rounded-full bg-fill" />
         <motion.span
           aria-hidden
-          className="absolute left-[12.5%] top-[15px] h-[2px] rounded-full bg-[var(--accent)]"
+          className="absolute left-[12.5%] top-[15px] h-px bg-[var(--accent)]"
           initial={false}
           animate={{ width: `${frac * 75}%` }}
           transition={calm()}
