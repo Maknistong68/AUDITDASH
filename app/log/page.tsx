@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: 'Log' };
  * (view, text, filters, sort) lives in the URL so it can be shared. Quarter and regions are the app-wide `q` / `r`.
  */
 export default async function LogPage({ searchParams }: { searchParams: Promise<SP> }) {
-  const repo = getRepo();
+  const repo = await getRepo();
   const state = parseLogState(toSearchParams(await searchParams));
   const filter = { quarter: state.quarter, regions: state.regions };
   const overview = `/?${filterToQuery(filter)}`;

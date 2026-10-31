@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))  # `python -I` drops th
 import openpyxl  # noqa: E402
 
 from contractors import contractor_for, register  # noqa: E402
+from privacy import hidden_text, pseudonymise  # noqa: E402
 from site_keywords import CODE_CATEGORY, category_for  # noqa: E402
 
 BLOCK_WIDTH = 10
@@ -606,7 +607,8 @@ def keep_codes(observations, previous):
     prev = {o["id"]: o for o in previous}
     for o in observations:
         p = prev.get(o["id"])
-        if o["itemCode"] is None and p and p.get("itemCode") and p["text"] == o["text"]:
+        # the previous seed has names hidden (privacy.py); compare like with like
+        if o["itemCode"] is None and p and p.get("itemCode") and p["text"] in (o["text"], hidden_text(o)):
             o["itemCode"] = p["itemCode"]
             o["category"] = p["category"]
 
@@ -641,6 +643,7 @@ def main(argv=None):
     flag_duplicates(audits)
     if args.previous and Path(args.previous).exists():
         keep_codes(observations, json.loads(Path(args.previous).read_text(encoding="utf-8")))
+    hidden = pseudonymise(observations)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for name, data in (("checklist", checklist), ("contractors", contractors),
@@ -663,6 +666,7 @@ def main(argv=None):
     for a in audits:
         for issue in a["issues"]:
             print(f"  ! {a['id']}: {issue}")
+    print(f"  {hidden} names in observations replaced by Person A, B, …")
     print(f"{len(contractors)} contractors, {len(audits)} audits, "
           f"{len(observations)} observations, {len(checklist)} checklist items")
 

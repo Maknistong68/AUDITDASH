@@ -16,7 +16,7 @@ type Params = { contractor: string };
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { contractor: id } = await params;
-  const c = getRepo().contractors().find((x) => x.id === id);
+  const c = (await getRepo()).contractors().find((x) => x.id === id);
   return { title: c ? c.name : 'Not found' };
 }
 
@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
  */
 export default async function ContractorPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
   const { contractor: id } = await params;
-  const repo = getRepo();
+  const repo = await getRepo();
   const contractor = repo.contractors().find((c) => c.id === id);
   if (!contractor) notFound();
   const { filter, query, s } = detailContext(await searchParams);

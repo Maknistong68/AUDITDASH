@@ -16,7 +16,7 @@ type Params = { cat: string; contractor: string };
 /** A contractor within one category: carousel of its audits, each item noted / no note / N/A, with its section gap. */
 export default async function ContractorInCategoryPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
   const p = await params;
-  const repo = getRepo();
+  const repo = await getRepo();
   const cat = findCategory(p.cat);
   const contractor = findContractor(repo, p.contractor);
   if (!cat || !contractor) notFound();

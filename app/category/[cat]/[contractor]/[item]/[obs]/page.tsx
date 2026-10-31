@@ -21,7 +21,7 @@ const ANSWER = { full: 'Full', partial: 'Partial', no: 'No', na: 'N/A' } as cons
 /** The observation in full: the only level with long text. */
 export default async function ObservationPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
   const p = await params;
-  const repo = getRepo();
+  const repo = await getRepo();
   const cat = findCategory(p.cat);
   const contractor = findContractor(repo, p.contractor);
   const item = cat ? findItem(repo, cat, p.item) : null;

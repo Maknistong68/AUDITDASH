@@ -19,15 +19,15 @@ import { PrintButton } from '@/components/report/PrintButton';
 
 type Params = { audit: string };
 
-function findAudit(raw: string) {
-  const repo = getRepo();
+async function findAudit(raw: string) {
+  const repo = await getRepo();
   const audit = repo.audits().find((a) => a.id === safeDecode(raw));
   const contractor = audit ? repo.contractors().find((c) => c.id === audit.contractorId) : undefined;
   return { repo, audit, contractor };
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
-  const { audit, contractor } = findAudit((await params).audit);
+  const { audit, contractor } = await findAudit((await params).audit);
   return { title: audit && contractor ? `${contractor.name} · ${dateLabel(audit.date)} audit` : 'Not found' };
 }
 
@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
  * Printing lays out both tabs in full, one after the other, on white.
  */
 export default async function AuditReportPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
-  const { repo, audit, contractor } = findAudit((await params).audit);
+  const { repo, audit, contractor } = await findAudit((await params).audit);
   if (!audit || !contractor) notFound();
   const sp = await searchParams;
   const { filter, query } = detailContext(sp);

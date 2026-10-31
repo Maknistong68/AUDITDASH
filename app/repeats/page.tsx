@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: 'Repeat findings' };
  * the filter, a calm empty state under the same header.
  */
 export default async function RepeatsPage({ searchParams }: { searchParams: Promise<SP> }) {
-  const repo = getRepo();
+  const repo = await getRepo();
   const { filter, query } = detailContext(await searchParams);
   const overview = `/?${query}`;
   const pairs = followUps(repo, filter);

@@ -27,7 +27,7 @@ const DOT: Record<ItemState, string> = { noted: 'var(--text)', none: 'var(--fain
  */
 export default async function ItemPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
   const p = await params;
-  const repo = getRepo();
+  const repo = await getRepo();
   const cat = findCategory(p.cat);
   const contractor = findContractor(repo, p.contractor);
   const item = cat ? findItem(repo, cat, p.item) : null;

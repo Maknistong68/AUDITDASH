@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 export default async function CategoryPage({ params, searchParams }: { params: Promise<Params>; searchParams: Promise<SP> }) {
   const id = findCategory((await params).cat);
   if (!id) notFound();
-  const repo = getRepo();
+  const repo = await getRepo();
   const { filter, query, s } = detailContext(await searchParams);
   const quarters = categoryQuarters(repo, filter, id);
   const overview = `/?${query}`;

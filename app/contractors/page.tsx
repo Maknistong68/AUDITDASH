@@ -18,7 +18,7 @@ export const metadata: Metadata = { title: 'Contractors' };
  */
 export default async function ContractorsPage({ searchParams }: { searchParams: Promise<SP> }) {
   const { filter, query } = detailContext(await searchParams);
-  const repo = getRepo();
+  const repo = await getRepo();
   const rows = repo.contractors().map((c) => {
     const audits = repo.audits().filter((a) => a.contractorId === c.id).sort((a, b) => a.date.localeCompare(b.date));
     const hist = new Map(regionHistory(repo, c.id).map((h) => [h.quarter, h.regions]));

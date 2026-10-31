@@ -14,7 +14,7 @@ export const metadata: Metadata = { title: 'Positive observations' };
  * (a note opens its audit report on the Positive observations tab). No audits or no positives: a calm empty state.
  */
 export default async function PositivesPage({ searchParams }: { searchParams: Promise<SP> }) {
-  const repo = getRepo();
+  const repo = await getRepo();
   const { filter, query } = detailContext(await searchParams);
   const overview = `/?${query}`;
   const summary = positiveSummary(repo, filter);

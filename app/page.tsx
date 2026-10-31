@@ -24,7 +24,7 @@ import { TypeEmpty } from '@/components/shell/TypeEmpty';
 
 export default async function PortfolioPage({ searchParams }: { searchParams: Promise<SP> }) {
   const filter = parseFilter(toSearchParams(await searchParams));
-  const repo = getRepo();
+  const repo = await getRepo();
   const summary = portfolioSummary(repo, filter);
   const empty = summary.audits === 0;
   // A non-H&S tab has no imported audits; its dashboard fills from audits entered in the app (Task 14).
