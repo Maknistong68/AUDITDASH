@@ -170,3 +170,19 @@ The compliance section is not legal advice: a Saudi-qualified lawyer must confir
 - **Don't** show the per-contractor trend to the client as a trend while it rests on 1–2 audits.
 - **Don't** change the scoring rules silently. Every rule change needs the owner's sign-off and a note in `docs/requirements`.
 - **Don't** pick a cloud region or new vendor before the client confirms the data classification.
+
+## 8. Follow-up audit, same day (UX skill pass + security review of the Supabase branch)
+
+A second pass with the VectorLab `ux-audit` skill (screenshots at 375 and 1280 px in both themes, axe-core, keyboard, reduced motion) and the `security-review` skill on the Supabase branch. Fixed in `main`:
+
+- Keyboard: "Skip to content" link; the upload drop zone shows the house focus ring; the file input has a name; the stepper's names match their text.
+- Contrast: light-theme muted text now ≥ 4.5:1 on the pill tracks; the selected view-toggle and tab counts in dark; the category tile next to the active one. axe is clean on `/`, `/log`, `/contractors`, `/audit/…`, `/audits/new`, `/repeats` in both themes.
+- Reduced motion: every house tween is instant (the Log's 120 row entrances no longer run).
+- Text floor: nothing below 12 px (percent marks, chart axis labels, legend chips, the uppercase labels).
+- Icon buttons: tooltips on hover and keyboard focus (theme switch, resume, delete, remove note, clear search, compare), 44 px tap areas around them.
+- Forms: "Submit audit" is always clickable and takes the auditor to the first missing item; "Start another audit"; a visible "Search" label on the Log from 700 px; the Security/Environmental/Welfare/CRC empty state says what will appear; the checklist's filtered-zero state has a reset.
+- Anti-slop: the frosted bar has a hairline edge and an opaque fallback; light-mode shadows stay under 0.08 alpha.
+- Privacy: the pseudonymiser now hides titled names in any spelling, names listed locally in `data/source/names.txt` (only their SHA-256 is committed), and writes `data/source/privacy-review.txt` for a human check after every import. 37 titled and 24 listed names are hidden in the seed.
+- Supabase schema: a role counts only after the email is confirmed (no pre-sign-up takeover of an invited address, no invite-list oracle); a filed submission's content is immutable and its hash is in the audit trail.
+
+Left as owner decisions (they change the approved design): 32 px filter chips and 41 px list rows against a 44 px tap floor; the 1.5 s motion and 80 ms stagger against the skill's 300 ms / 30 ms tokens; blur on the sticky bar; hover-only "Open" affordance on list rows; the faded category-carousel previews (axe flags their contrast); "New audit" as a noun label; `#1 … score lost` tile names that omit the delta text.

@@ -121,7 +121,7 @@ test('/repeats heat map: every cell is the times repeated (blank at 0); row and 
   // column heads: short name, qualifier on a second line, most repeats first
   const heads = await page.getByTestId('heat-col').evaluateAll((els) => els.map((e) => e.getAttribute('title')));
   expect(heads).toEqual(COLS.map((c) => c.name));
-  await expect(page.getByTestId('heat-col').filter({ hasText: 'Box Culvert H55' }).locator('span')).toHaveText(['Abyatona', 'Box Culvert H55']);
+  await expect(page.getByTestId('heat-col').filter({ hasText: 'Box Culvert H55' }).locator('span:not(.sr-only)')).toHaveText(['Abyatona', 'Box Culvert H55']);
 });
 
 test('/repeats heat map: hover and focus show the cell, a cell drills to the item, a column head to the contractor', async ({ page }) => {
