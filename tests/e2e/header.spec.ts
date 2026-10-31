@@ -95,13 +95,17 @@ test('the name is Audits, with no logo mark', async ({ page }) => {
   await expect(page).toHaveTitle('JV-ECH (Port T1) · Audits');
 });
 
-test('dark is the one theme: no switch, a stored light choice is ignored', async ({ browser }) => {
-  const light = await browser.newContext({ colorScheme: 'light' });
+test('dark is the default theme; a stored light choice wins', async ({ browser }) => {
+  const fresh = await browser.newContext({ colorScheme: 'light' });
+  const p = await fresh.newPage();
+  await p.goto('/');
+  await expect(p.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await fresh.close();
+  const light = await browser.newContext();
   await light.addInitScript(() => { try { localStorage.setItem('theme', 'light'); } catch { /* private mode */ } });
   const q = await light.newPage();
   await q.goto('/');
-  await expect(q.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(q.getByRole('button', { name: /theme/i })).toHaveCount(0);
+  await expect(q.locator('html')).toHaveAttribute('data-theme', 'light');
   await light.close();
 });
 
