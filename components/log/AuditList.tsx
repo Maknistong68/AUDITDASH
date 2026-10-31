@@ -60,7 +60,7 @@ export function AuditList({ rows, terms, linkQuery, resetKey, onClear }: {
                     <span className={`tone-${bandTone(band)} order-1 flex min-w-[6.5rem] flex-col items-end gap-1 min-[1100px]:order-none min-[1100px]:items-stretch`} data-testid="log-audit-score">
                       <span className="flex items-baseline justify-end gap-2 min-[1100px]:justify-between">
                         <span className="num text-[20px] font-semibold leading-none tracking-[-0.02em] min-[1100px]:text-[17px]">
-                          {pct(a.score)}<span className="text-[0.6em] text-muted">%</span>
+                          {pct(a.score)}<span className="text-[max(12px,0.6em)] text-muted">%</span>
                         </span>
                         <span className="text-[12px] font-semibold" style={{ color: 'var(--tone)' }}>{bandShort(band)}</span>
                       </span>
@@ -109,7 +109,7 @@ function DataCheck({ audit }: { audit: LogAudit }) {
     : 'Data check';
   return (
     <span className="group/flag relative inline-flex" data-testid="log-audit-flag">
-      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-fill-2 px-2 py-[2px] text-[11.5px] font-semibold text-muted">
+      <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-fill-2 px-2 py-[2px] text-[12px] font-semibold text-muted">
         {label}
       </span>
       <span

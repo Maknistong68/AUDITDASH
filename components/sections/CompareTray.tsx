@@ -242,7 +242,7 @@ function Header({ entry, onRemove }: { entry: CompareEntry; onRemove: () => void
       <div className="flex items-end gap-3">
         <p className="figure text-[clamp(32px,5svh,52px)]">
           {pct(total)}
-          <span className="ml-0.5 text-[0.5em] tracking-normal text-muted">%</span>
+          <span className="ml-0.5 text-[max(12px,0.5em)] tracking-normal text-muted">%</span>
         </p>
         <div className="flex flex-col items-start gap-1 pb-0.5">
           <span className={`badge tone-${bandTone(band)} px-2 py-[2px] text-[13px]`} title={band}>

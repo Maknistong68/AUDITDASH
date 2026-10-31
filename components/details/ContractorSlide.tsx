@@ -102,7 +102,7 @@ export function ContractorSlide({ d }: { d: ContractorSlideData }) {
                     {Icon && <Icon size={16} strokeWidth={2.2} className="shrink-0 text-muted" aria-hidden />}
                     <span className="min-w-0 flex-1 truncate text-[clamp(14px,1.6svh,18px)] font-semibold">{c.short}</span>
                     <span className="num text-right text-[15px] font-semibold">
-                      {g.gapRate === null ? <span className="font-normal text-faint">N/A</span> : <>{pct(g.gapRate)}<span className="text-[0.75em] text-muted">%</span></>}
+                      {g.gapRate === null ? <span className="font-normal text-faint">N/A</span> : <>{pct(g.gapRate)}<span className="text-[max(12px,0.75em)] text-muted">%</span></>}
                     </span>
                     <ChevronRight size={14} strokeWidth={2.4} className="shrink-0 text-faint transition-transform group-hover:translate-x-0.5" aria-hidden />
                   </span>

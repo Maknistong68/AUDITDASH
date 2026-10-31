@@ -66,7 +66,7 @@ export function ScoreCard({ avgScore, band, audits, delta, bands, insight, href 
                 />
               ))}
             </div>
-            <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] leading-none text-muted">
+            <div className="flex flex-wrap gap-x-3 gap-y-1 text-[12px] leading-none text-muted">
               {shown.map((b) => (
                 <span key={b} className="inline-flex items-center gap-1 whitespace-nowrap">
                   <span className="size-[7px] rounded-full" style={{ background: bandColor(b) }} aria-hidden />
@@ -99,7 +99,7 @@ function Insight({ insight }: { insight: PortfolioInsight }) {
         {regions.map((r) => row(r.region, '', r.score))}
       </ul>
       {excel.audits > 0 && (
-        <p className="rounded-[10px] bg-fill-2 px-2.5 py-1.5 text-[11.5px] leading-snug text-muted">
+        <p className="rounded-[10px] bg-fill-2 px-2.5 py-1.5 text-[12px] leading-snug text-muted">
           <span className="font-semibold text-ink">{excel.differs} of {excel.audits}</span> Excel totals differ from their own points
           {excel.meanGap !== null && excel.differs > 0 && <> (avg {excel.meanGap > 0 ? '+' : '−'}{Math.abs(Math.round(excel.meanGap * 100))} pts)</>}. Shown: computed.
         </p>

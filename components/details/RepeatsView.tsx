@@ -141,7 +141,7 @@ function HeatMap({ groups, cols, total }: { groups: HeatGroup[]; cols: HeatCol[]
           {groups.map((g) => (
             <tbody key={g.id} data-testid="heat-group-body">
               <tr data-testid="heat-group">
-                <th scope="colgroup" colSpan={cols.length + 2} className="heat-group px-2 text-left text-[11.5px] font-semibold text-muted">
+                <th scope="colgroup" colSpan={cols.length + 2} className="heat-group px-2 text-left text-[12px] font-semibold text-muted">
                   <span className="heat-sticky-label">{g.name}</span>
                 </th>
               </tr>

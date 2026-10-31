@@ -61,7 +61,7 @@ function Peek({ card, top, h }: { card: Card; top: number; h: number }) {
     >
       <div className="flex items-baseline justify-between gap-3">
         <span className="min-w-0 truncate text-[14px] font-semibold">{contractor.name}</span>
-        <span className="badge shrink-0 px-2 py-[1px] text-[11.5px]">{bandShort(band)}</span>
+        <span className="badge shrink-0 px-2 py-[1px] text-[12px]">{bandShort(band)}</span>
       </div>
       <p className="mt-0.5 text-[12px] text-muted">
         {contractor.subregion} · {history.length} {history.length === 1 ? 'audit' : 'audits'}
@@ -78,7 +78,7 @@ function Peek({ card, top, h }: { card: Card; top: number; h: number }) {
         {SECTIONS.map(([k, name]) => {
           const v = rings[k];
           return (
-            <li key={k} className="grid grid-cols-[92px_minmax(0,1fr)_26px] items-center gap-2 text-[11.5px]">
+            <li key={k} className="grid grid-cols-[92px_minmax(0,1fr)_26px] items-center gap-2 text-[12px]">
               <span className="text-muted">{name}</span>
               <span className="h-[5px] rounded-full bg-fill-2">
                 {v !== null && <span className="block h-full rounded-full bg-[var(--bar)]" style={{ width: `${v * 100}%` }} />}
@@ -154,7 +154,7 @@ function Row({
       <span className="figure text-right text-[clamp(16px,2.3svh,25px)]">
         <span data-handoff={CONTRACTOR_SCORE}>
           <CountUp value={total * 100} format={whole} delay={delay} />
-          <span className="text-[0.5em] tracking-normal text-muted">%</span>
+          <span className="text-[max(12px,0.5em)] tracking-normal text-muted">%</span>
         </span>
       </span>
       <span className="flex justify-start" title={`Audit scores, oldest first: ${trendLabel(scores)}`}>

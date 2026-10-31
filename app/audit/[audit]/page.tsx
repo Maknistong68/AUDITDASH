@@ -140,7 +140,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
                   )}
                 </span>
                 <span className="num text-right text-[14px] font-semibold">
-                  {s.ratio === null ? <span className="font-normal text-faint">N/A</span> : <>{pct(s.ratio)}<span className="text-[0.75em] text-muted">%</span></>}
+                  {s.ratio === null ? <span className="font-normal text-faint">N/A</span> : <>{pct(s.ratio)}<span className="text-[max(12px,0.75em)] text-muted">%</span></>}
                 </span>
               </li>
             ))}

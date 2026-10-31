@@ -23,7 +23,7 @@ export function ScorePanel({ score, reported, compact = false }: { score: LiveSc
       <div className={`glass flex items-center gap-3 rounded-2xl px-4 py-2.5 ${tone}`} data-testid="score-strip">
         <p className="figure text-[28px]">
           {total === null ? '—' : <CountUp value={total} format={fmtPct} duration={DUR} />}
-          <span className="ml-0.5 text-[0.5em] tracking-normal text-muted">%</span>
+          <span className="ml-0.5 text-[max(12px,0.5em)] tracking-normal text-muted">%</span>
         </p>
         {score.band && <span className="badge px-2 py-[2px] text-[12px]">{bandShort(score.band)}</span>}
         <span className="ml-auto flex items-center gap-3 text-[12px] text-muted">

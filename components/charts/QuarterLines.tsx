@@ -98,7 +98,7 @@ export function QuarterLines({ quarters, portfolio, lines, delay = 0.35 }: {
           {GUIDES.filter((g) => g >= geo.lo && g <= geo.hi).map((g) => (
             <g key={g}>
               <line x1={geo.PAD.l} x2={w - geo.PAD.r} y1={geo.y(g)} y2={geo.y(g)} stroke="var(--hairline)" strokeDasharray="2 4" />
-              <text x={geo.PAD.l - 8} y={geo.y(g)} dy="0.32em" textAnchor="end" className="num fill-[var(--faint)] text-[10.5px]">
+              <text x={geo.PAD.l - 8} y={geo.y(g)} dy="0.32em" textAnchor="end" className="num fill-[var(--faint)] text-[12px]">
                 {Math.round(g * 100)}
               </text>
             </g>

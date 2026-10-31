@@ -61,8 +61,8 @@ function Header({ summary }: { summary: Summary }) {
       </div>
       {audits > 0 ? (
         <div className="flex flex-wrap items-center gap-x-[clamp(24px,4vw,72px)] gap-y-3">
-          {stat(<>{auditsWith} <span className="text-[0.6em] font-normal text-muted">of {audits}</span></>, 'audits', 'positives-audits')}
-          {stat(<>{contractorsWith} <span className="text-[0.6em] font-normal text-muted">of {contractors}</span></>, 'contractors', 'positives-contractors')}
+          {stat(<>{auditsWith} <span className="text-[max(12px,0.6em)] font-normal text-muted">of {audits}</span></>, 'audits', 'positives-audits')}
+          {stat(<>{contractorsWith} <span className="text-[max(12px,0.6em)] font-normal text-muted">of {contractors}</span></>, 'contractors', 'positives-contractors')}
           {stat((total / audits).toFixed(1), 'per audit', 'positives-per-audit')}
         </div>
       ) : (
