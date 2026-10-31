@@ -1,12 +1,19 @@
 import type { Metadata } from 'next';
+import localFont from 'next/font/local';
 import { MotionProvider } from '@/components/motion/MotionProvider';
 import './globals.css';
 
-/*
- * The data-terminal style (design-taste-frontend app sheet): Public Sans for every word, IBM Plex Mono for every figure so
- * digits stack in columns. Declared under their own family names in globals.css (@font-face, files in public/fonts),
- * served from this app so the build stays offline-safe; the two used weights are preloaded here.
+/**
+ * Inter (variable weight + optical size), bundled from @fontsource-variable so the build stays offline-safe.
+ * On Apple devices the stack in globals.css resolves to SF Pro first; Inter is the SF-like fallback elsewhere.
  */
+const inter = localFont({
+  src: '../node_modules/@fontsource-variable/inter/files/inter-latin-opsz-normal.woff2',
+  variable: '--font-inter',
+  weight: '100 900',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
   title: { default: 'Audits', template: '%s · Audits' },
   description: 'Audit scores across contractors: H&S, Security, Environmental, Welfare and CRC',
@@ -22,10 +29,8 @@ const THEME_SCRIPT = `(function(){var d=document.documentElement,t;d.classList.a
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" className={inter.variable} data-theme="dark" suppressHydrationWarning>
       <head>
-        <link rel="preload" href="/fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossOrigin="" />
-        <link rel="preload" href="/fonts/ibm-plex-mono-latin-500-normal.woff2" as="font" type="font/woff2" crossOrigin="" />
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>

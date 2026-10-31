@@ -1,9 +1,11 @@
 'use client';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { AUDIT_TYPES } from '@/lib/auditTypeIds';
 import { filterToQuery } from '@/lib/filters';
 import type { AuditType, Filter } from '@/lib/types';
+import { EASE, DUR } from '@/lib/motion';
 
 /**
  * Audit-type tabs: the quarter segmented control's look, primary navigation. Switching writes `t`
@@ -23,7 +25,7 @@ export function TypeTabs({ filter }: { filter: Filter }) {
       aria-label="Audit type"
       data-testid="type-tabs"
       aria-busy={pending}
-      className="flex h-8 shrink-0 items-center gap-[clamp(10px,1.2vw,22px)] transition-opacity"
+      className="flex h-8 shrink-0 items-center rounded-full bg-fill p-[2px] transition-opacity"
       style={{ opacity: pending ? 0.7 : 1 }}
     >
       {AUDIT_TYPES.map((t) => {
@@ -36,9 +38,16 @@ export function TypeTabs({ filter }: { filter: Filter }) {
             data-type={t.id}
             title={t.label}
             onClick={() => (on ? undefined : go(t.id))}
-            className="tab h-8 whitespace-nowrap text-[13px]"
+            className={`relative h-7 whitespace-nowrap rounded-full px-2 text-[13px] transition-colors min-[640px]:px-3 min-[1440px]:px-3.5 ${on ? 'font-semibold text-ink' : 'text-muted hover:text-ink'}`}
           >
-            <span className="tab-label">{t.short}</span>
+            {on && (
+              <motion.span
+                layoutId="type-thumb"
+                className="absolute inset-0 rounded-full bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#636366]"
+                transition={{ type: 'tween', ease: EASE, duration: DUR }}
+              />
+            )}
+            <span className="relative">{t.short}</span>
           </button>
         );
       })}

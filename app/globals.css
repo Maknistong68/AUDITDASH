@@ -1,17 +1,5 @@
 @import "tailwindcss";
 
-/* The two faces, under their own names (served from public/fonts). */
-@font-face {
-  font-family: "Public Sans";
-  src: url("/fonts/public-sans-latin-wght-normal.woff2") format("woff2");
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face { font-family: "IBM Plex Mono"; src: url("/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "IBM Plex Mono"; src: url("/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
-@font-face { font-family: "IBM Plex Mono"; src: url("/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
-
 /*
  * Design tokens: Apple-style (see the Apple DESIGN.md in .claude/skills/awesome-design-md).
  *  - light: parchment ground #f5f5f7, white cards, near-black ink #1d1d1f, Action Blue for interaction.
@@ -23,53 +11,53 @@
  * --gap for gap severity. The main-problem tile is the inverted Apple tile (--hero-*), dark in both themes.
  */
 :root {
-  /* Light: Claude's palette (owner, 2026-10-31) in the data-terminal style: cream canvas, cream cards one step darker,
-     warm near-black ink, coral as the one accent line; colour only where something passes or fails. */
   color-scheme: light;
-  --ground: #faf9f5;
-  --surface: #f5f0e8;
-  --surface-2: #efe9de;
-  --glass: #f5f0e8;
-  --glass-bar: #faf9f5;
-  --fill: #e8e0d2;
-  --fill-2: #efe9de;
-  --hairline: #e6dfd8;
-  --text: #141413;
-  --muted: #6c6a64;
-  --faint: #6c6a64;
-  --accent: #cc785c;
+  --ground: #f5f5f7;
+  --surface: #ffffff;
+  --surface-2: #f5f5f7;
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-bar: rgba(245, 245, 247, 0.78);
+  --fill: rgba(118, 118, 128, 0.12);
+  --fill-2: rgba(118, 118, 128, 0.08);
+  --hairline: rgba(0, 0, 0, 0.07);
+  --text: #1d1d1f;
+  --muted: #6e6e73;
+  --faint: #6f6f74; /* >= 4.5:1 for small text on --ground, --surface and --surface-2 */
+  --accent: #0071e3;
   --on-accent: #ffffff;
 
-  --bar: #3d3d3a;
-  --hero-bg: #f5f0e8; --hero-text: #141413; --hero-muted: #6c6a64; --hero-chip: #e8e0d2;
-  --hero-accent: #b4473a; --hero-up: #2f7a43; --hero-down: #b4473a;
+  --bar: #2f6fe0;
+  --hero-bg: #1d1d1f; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.12);
+  --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
 
-  --good: #2f7a43;     --good-bg: #e2eedf;     --good-dot: #3f9a56;
-  --partial: #3d3d3a;  --partial-bg: #e8e0d2;  --partial-dot: #3d3d3a;
-  --minimal: #8a5a14;  --minimal-bg: #f3e3c8;  --minimal-dot: #3d3d3a;
-  /* /repeats heat map: one warm red ramp, light to dark; each step >= 3:1 on the cream card */
-  --heat-1: #b0503f; --heat-2: #a24a3a; --heat-3: #7e3528; --heat-4: #56231a;
-  --heat-on-1: #ffffff; --heat-on-2: #ffffff; --heat-on-3: #ffffff; --heat-on-4: #ffffff;
-  --non: #b4473a;      --non-bg: #f4dcd6;      --non-dot: #c64545;
-  --up: #2f7a43;
-  --down: #b4473a;
-  --gap: #c64545;
+  --good: #1f7a36;     --good-bg: #e3f6e8;     --good-dot: #34c759;
+  --partial: #8f6000;  --partial-bg: #fff3d1;  --partial-dot: #ffb300;
+  /* --minimal-dot fills bars and dots (graphics): #d96c00 is 3.45:1 on white (WCAG 1.4.11 >= 3:1), same orange hue. */
+  --minimal: #b9470b;  --minimal-bg: #ffe9d8;  --minimal-dot: #d96c00;
+  /* /repeats heat map fill by times repeated (1, 2, 3, 4+): one warm hue, light → dark, every step >= 3:1 on the white
+     card (3.45 to 13.9); --heat-on-* is the number's ink on that fill (>= 4.5:1). Ordinal ramp, dataviz-validated. */
+  --heat-1: #d96c00; --heat-2: #a3480a; --heat-3: #7a3407; --heat-4: #4f2003;
+  --heat-on-1: #1d1d1f; --heat-on-2: #ffffff; --heat-on-3: #ffffff; --heat-on-4: #ffffff;
+  --non: #c0141c;      --non-bg: #ffe3e1;      --non-dot: #ff3b30;
+  --up: #1f7a36;
+  --down: #c0141c;
+  --gap: #e2533a;
 
-  --shadow-card: none;
-  --shadow-lift: 0 12px 28px rgba(20, 20, 19, 0.12);
-  --shadow-sheet: 0 -12px 28px rgba(20, 20, 19, 0.16);
-  --ambient-1: transparent;
-  --ambient-2: transparent;
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.035), 0 1px 2px rgba(0, 0, 0, 0.04), 0 3px 10px -2px rgba(0, 0, 0, 0.05), 0 6px 30px -6px rgba(0, 0, 0, 0.08);
+  --shadow-lift: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.05), 0 10px 24px -4px rgba(0, 0, 0, 0.09), 0 28px 56px -16px rgba(0, 0, 0, 0.18);
+  --shadow-sheet: 0 -1px 0 rgba(0, 0, 0, 0.06), 0 -18px 50px -10px rgba(0, 0, 0, 0.2);
+  --ambient-1: rgba(43, 107, 232, 0.07);
+  --ambient-2: rgba(229, 100, 156, 0.06);
 
   /* Secondary tokens: --control (carousel dots, compare toggle ring, N/A marks) and --track (bar tracks) are in use;
      the rest are aliases of the tokens above. */
-  --raised: #efe9de;
-  --active: #faf9f5;
-  --border: #e6dfd8;
-  --rule: #ebe6df;
-  --control: #c9c1b3;
-  --track: #e8e0d2;
-  --zone: #f5f0e8;
+  --raised: #f5f5f7;
+  --active: #ffffff;
+  --border: #e5e5ea;
+  --rule: #e5e5ea;
+  --control: #d1d1d6;
+  --track: #ececf0;
+  --zone: #f5f5f7;
   --positive: var(--up);
   --negative: var(--down);
   --gap-hue: var(--gap);
@@ -86,60 +74,95 @@
   /* Equal outer margins; on wide screens the content keeps a 1760px column centred (the frame grows, never the gaps). */
   --gutter: max(clamp(20px, 2.6vw, 52px), calc((100vw - 1760px) / 2));
   --gap-grid: clamp(12px, 1.1vw, 22px);
-  --radius-card: 6px;
+  --radius-card: 22px;
   --radius-control: 999px;
-  --font-sf: "Public Sans", system-ui, sans-serif;
-  /* The face: every figure in a monospace, digits that stack (data-terminal sheet). */
-  --font-num: "IBM Plex Mono", ui-monospace, monospace;
+  --font-sf: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", var(--font-inter), "Helvetica Neue", system-ui, sans-serif;
 }
 
 /* Dark tokens: applied by the toggle stamp, and by the OS when no light stamp is present (no-JS fallback). */
 :root[data-theme="dark"] {
-  /* Data terminal (design-taste-frontend app sheet, seed 1843105248) in Claude's palette (owner, 2026-10-31): warm near-black
-     grounds, cream text, coral #cc785c as the one accent. cards darker than the ground, colour under 3% of the
-     screen, the accent only ever a 1px line (and the one chart hue on the main data element). Signs, not colour, on numbers;
-     red only where something fails. */
   color-scheme: dark;
-  --ground: #1f1e1b;
-  --surface: #181715;
-  --surface-2: #252320;
-  --glass: #181715;
-  --glass-bar: #1f1e1b;
-  --fill: #2c2a26;
-  --fill-2: #252320;
-  --hairline: #2c2a26;
-  --text: #faf9f5;
-  --muted: #a09d96;
-  --faint: #a09d96;
-  --accent: #cc785c;
-  --on-accent: #ffffff;
-  --bar: #e8e0d2;
-  --hero-bg: #181715; --hero-text: #faf9f5; --hero-muted: #a09d96; --hero-chip: #2c2a26;
-  --hero-accent: #e0705f; --hero-up: #5db872; --hero-down: #e0705f;
-  /* Bands: the bars stay in ink; only a pass (green) and a fail (red) carry a hue, on small marks. */
-  --good: #6fc784;     --good-bg: #1f2a20;    --good-dot: #5db872;
-  --partial: #c9c4ba;  --partial-bg: #2c2a26; --partial-dot: #e8e0d2;
-  --minimal: #e8a55a;  --minimal-bg: #2e261b; --minimal-dot: #e8e0d2;
-  --non: #e0705f;      --non-bg: #2e1d1a;     --non-dot: #d65f4f;
-  /* /repeats heat map: one red ramp, dim to bright; the number's ink on each step passes 4.5:1 */
-  --heat-1: #b0503f; --heat-2: #c9604c; --heat-3: #e07a64; --heat-4: #f2a892;
-  --heat-on-1: #ffffff; --heat-on-2: #141413; --heat-on-3: #141413; --heat-on-4: #141413;
-  --up: #6fc784;
-  --down: #e0705f;
-  --gap: #d65f4f;
-  --shadow-card: 0 12px 28px rgba(0, 0, 0, 0.2);
-  --shadow-lift: 0 12px 28px rgba(0, 0, 0, 0.35);
-  --shadow-sheet: 0 -12px 28px rgba(0, 0, 0, 0.45);
-  --ambient-1: transparent;
-  --ambient-2: transparent;
-  --raised: #252320;
-  --active: #252320;
-  --border: #2c2a26;
-  --rule: #252320;
-  --control: #4a4741;
-  --track: #2c2a26;
-  --zone: #181715;
-  --radius-card: 6px;
+  --ground: #000000;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --glass: rgba(28, 28, 30, 0.7);
+  --glass-bar: rgba(0, 0, 0, 0.72);
+  --fill: rgba(118, 118, 128, 0.24);
+  --fill-2: rgba(118, 118, 128, 0.16);
+  --hairline: rgba(255, 255, 255, 0.09);
+  --text: #f5f5f7;
+  --muted: #a1a1a6;
+  --faint: #98989d; /* >= 4.5:1 on --surface and --surface-2 */
+  --accent: #2997ff;
+  --on-accent: #000000; /* white on Sky Blue is ~3:1; black is ~7:1 */
+  --bar: #5b8cff;
+  --hero-bg: #2c2c2e; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.1);
+  --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
+  --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
+  --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
+  --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
+  /* /repeats heat map on the dark card: more repeats = brighter; the dimmest step is 3.66:1 on --surface */
+  --heat-1: #b85a18; --heat-2: #e2782a; --heat-3: #f59a45; --heat-4: #ffd6ad;
+  --heat-on-1: #ffffff; --heat-on-2: #000000; --heat-on-3: #000000; --heat-on-4: #000000;
+  --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
+  --up: #4fdc78;
+  --down: #ff7b72;
+  --gap: #ff6a4d;
+  --shadow-card: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 28px -6px rgba(0, 0, 0, 0.4);
+  --shadow-lift: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.6), 0 28px 60px -18px rgba(0, 0, 0, 0.9);
+  --shadow-sheet: 0 -1px 0 rgba(255, 255, 255, 0.08), 0 -24px 60px -12px rgba(0, 0, 0, 0.85);
+  --ambient-1: rgba(61, 114, 236, 0.13);
+  --ambient-2: rgba(220, 93, 144, 0.09);
+  --raised: #2c2c2e;
+  --active: #3a3a3c;
+  --border: #2c2c2e;
+  --rule: #2c2c2e;
+  --control: #48484a;
+  --track: #2c2c2e;
+  --zone: #1c1c1e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #000000;
+    --surface: #1c1c1e;
+    --surface-2: #2c2c2e;
+    --glass: rgba(28, 28, 30, 0.7);
+    --glass-bar: rgba(0, 0, 0, 0.72);
+    --fill: rgba(118, 118, 128, 0.24);
+    --fill-2: rgba(118, 118, 128, 0.16);
+    --hairline: rgba(255, 255, 255, 0.09);
+    --text: #f5f5f7;
+    --muted: #a1a1a6;
+    --faint: #98989d;
+    --accent: #2997ff;
+    --on-accent: #000000;
+    --bar: #5b8cff;
+    --hero-bg: #2c2c2e; --hero-text: #f5f5f7; --hero-muted: #a1a1a6; --hero-chip: rgba(255, 255, 255, 0.1);
+    --hero-accent: #ff7a5c; --hero-up: #4fdc78; --hero-down: #ff7b72;
+    --good: #4fdc78;     --good-bg: rgba(48, 209, 88, 0.16);   --good-dot: #30d158;
+    --partial: #ffd54a;  --partial-bg: rgba(255, 214, 10, 0.15); --partial-dot: #ffd60a;
+    --minimal: #ffad4d;  --minimal-bg: rgba(255, 159, 10, 0.17); --minimal-dot: #ff9f0a;
+    /* /repeats dot tint, lifted toward a light warm tone: the darkest step stays >= 3:1 on the dark card */
+    --heat-1: #b85a18; --heat-2: #e2782a; --heat-3: #f59a45; --heat-4: #ffd6ad;
+    --heat-on-1: #ffffff; --heat-on-2: #000000; --heat-on-3: #000000; --heat-on-4: #000000;
+    --non: #ff7b72;      --non-bg: rgba(255, 69, 58, 0.18);    --non-dot: #ff453a;
+    --up: #4fdc78;
+    --down: #ff7b72;
+    --gap: #ff6a4d;
+    --shadow-card: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 28px -6px rgba(0, 0, 0, 0.4);
+    --shadow-lift: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 2px 6px rgba(0, 0, 0, 0.6), 0 28px 60px -18px rgba(0, 0, 0, 0.9);
+    --shadow-sheet: 0 -1px 0 rgba(255, 255, 255, 0.08), 0 -24px 60px -12px rgba(0, 0, 0, 0.85);
+    --ambient-1: rgba(61, 114, 236, 0.13);
+    --ambient-2: rgba(220, 93, 144, 0.09);
+    --raised: #2c2c2e;
+    --active: #3a3a3c;
+    --border: #2c2c2e;
+    --rule: #2c2c2e;
+    --control: #48484a;
+    --track: #2c2c2e;
+    --zone: #1c1c1e;
+  }
 }
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
@@ -178,16 +201,13 @@ body {
 }
 
 .num {
-  font-family: var(--font-num);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0;
 }
 
-/* Display figures: the monospace face, tabular so count-ups do not jitter. */
+/* Display figures: Apple-tight tracking, tabular so count-ups do not jitter. */
 .figure {
-  font-family: var(--font-num);
-  font-weight: 500;
-  letter-spacing: -0.05em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 0.95;
   font-variant-numeric: tabular-nums;
 }
@@ -199,13 +219,16 @@ body {
 }
 
 .glass {
-  background: var(--surface-2);
-  box-shadow: var(--shadow-lift);
+  background: var(--glass);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+  box-shadow: var(--shadow-card);
 }
 
 .glass-bar {
-  background: var(--ground);
-  box-shadow: inset 0 -1px 0 var(--border);
+  background: var(--glass-bar);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
 }
 
 /* Band / status badge: pale tint, dark text of the same hue (never green for a bad state). */
@@ -260,38 +283,6 @@ body {
   .swap > * { transition: none; }
 }
 
-/*
- * The one selection mark (data-terminal): a 1px accent line exactly as wide as the label, on the control's bottom edge.
- * Tabs, filters, toggles and nav all use it; nothing selected is ever a filled pill.
- */
-.tab {
-  position: relative;
-  color: var(--muted);
-  transition: color 450ms var(--ease);
-}
-.tab:hover { color: var(--text); }
-.tab[aria-pressed="true"],
-.tab[aria-selected="true"],
-.tab[aria-current]:not([aria-current="false"]) { color: var(--text); font-weight: 600; }
-.tab > .tab-label { position: relative; display: inline-block; }
-.tab > .tab-label::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -7px;
-  height: 1px;
-  background: var(--accent);
-  transform: scaleX(0);
-  transition: transform 700ms var(--ease);
-}
-.tab[aria-pressed="true"] > .tab-label::after,
-.tab[aria-selected="true"] > .tab-label::after,
-.tab[aria-current]:not([aria-current="false"]) > .tab-label::after { transform: scaleX(1); }
-@media (prefers-reduced-motion: reduce) {
-  .tab, .tab > .tab-label::after { transition: none; }
-}
-
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
@@ -307,9 +298,11 @@ html.js [data-countup]:not([data-ready]) {
 :root[data-theme="dark"] .theme-icon-sun { display: block; }
 :root[data-theme="dark"] .theme-icon-moon { display: none; }
 
-/* The compare sheet floats: an opaque raised surface with the one shadow. */
+/* The compare sheet carries dense data: a more opaque frost so the cards behind read as texture, not blobs. */
 .sheet {
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(40px);
+  backdrop-filter: saturate(160%) blur(40px);
 }
 
 /* The inverted Apple tile: the right side's hero (main problem). */
@@ -328,12 +321,6 @@ html.js [data-countup]:not([data-ready]) {
 [data-testid="category-deck"] {
   /* Four cards fill the content column exactly (the fade ends with the fourth): no empty stretch on the right. */
   --cc-w: max(240px, calc((100vw - 2 * var(--gutter) - 3 * var(--cc-gap)) / 4));
-}
-/* On a phone the active card takes the whole content width, so the next one starts off-screen (never cut at the edge). */
-@media (max-width: 699px) {
-  [data-testid="category-deck"] { --cc-w: calc(100vw - 2 * var(--gutter)); }
-}
-[data-testid="category-deck"] {
   /* capped by the screen height too (22svh), so a short laptop screen (1280×600) keeps room for the slide below */
   --cc-h: clamp(118px, min(max(150px, 10.2vw), 22svh), 196px);
   --cc-gap: clamp(12px, 1vw, 18px);

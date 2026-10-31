@@ -91,7 +91,7 @@ export function ChecklistStep({ draft, items, sections, actions, score }: {
   return (
     <div className="flex flex-col gap-[var(--gap-grid)]">
       <motion.header {...RISE} transition={calm()} className="flex flex-col gap-1 pt-2">
-        <h1 className="text-[clamp(24px,3.6svh,32px)] font-semibold leading-[1.05] tracking-[-0.035em]">Checklist</h1>
+        <h1 className="text-[clamp(26px,3.8svh,36px)] font-semibold leading-[1.05] tracking-[-0.035em]">Checklist</h1>
       </motion.header>
 
       <div className="sticky top-[calc(var(--topbar-h,var(--topbar))+8px)] z-10 min-[1100px]:hidden">

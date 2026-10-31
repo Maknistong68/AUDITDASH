@@ -60,7 +60,7 @@ export function CardChevron({ small = false }: { small?: boolean }) {
     <span
       aria-hidden
       data-testid="card-chevron"
-      className="absolute right-[clamp(12px,1.4svh,20px)] top-[clamp(10px,1.4svh,18px)] grid size-7 place-items-center text-muted transition-transform duration-300 group-hover:translate-x-0.5"
+      className="absolute right-[clamp(12px,1.4svh,20px)] top-[clamp(10px,1.4svh,18px)] grid size-7 place-items-center rounded-full bg-fill-2 text-muted transition-transform duration-300 group-hover:translate-x-0.5"
     >
       <ChevronRight size={16} strokeWidth={2.4} />
     </span>

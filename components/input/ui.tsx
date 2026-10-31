@@ -111,7 +111,7 @@ export function Button({
   children: React.ReactNode; onClick?: () => void; kind?: 'primary' | 'plain' | 'ghost'; disabled?: boolean; testid?: string; type?: 'button' | 'submit'; title?: string;
 }) {
   const cls = {
-    primary: 'bg-ink text-ground hover:brightness-90',
+    primary: 'bg-[var(--accent)] text-[var(--on-accent)] hover:brightness-110',
     plain: 'bg-fill text-ink hover:bg-[var(--control)]',
     ghost: 'text-muted hover:bg-fill-2 hover:text-ink',
   }[kind];

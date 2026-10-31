@@ -8,7 +8,7 @@ import {
   LOG_KINDS, activeFilters, clearedState, filterAuditRows, filterObs, logStateToQuery, obsHaystack, searchTerms,
   type LogData, type LogKind, type LogState, type LogView as View,
 } from '@/lib/log';
-import { RISE, calm } from '@/lib/motion';
+import { QUICK, RISE, calm } from '@/lib/motion';
 import type { CategoryId } from '@/lib/types';
 import { AuditList } from './AuditList';
 import { LogToolbar } from './LogToolbar';
@@ -100,7 +100,7 @@ export function LogView({ data, contractors, initial }: { data: LogData; contrac
         className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3"
       >
         <div className="min-w-0">
-          <h1 className="text-[24px] font-semibold leading-[1.05] tracking-[-0.035em] min-[900px]:text-[clamp(24px,3.6svh,32px)]">Log</h1>
+          <h1 className="text-[28px] font-semibold leading-[1.05] tracking-[-0.035em] min-[900px]:text-[clamp(28px,4svh,36px)]">Log</h1>
         </div>
         <ViewSwitch view={state.view} counts={{ observations: data.observations.length, audits: data.audits.length }} onChange={(v) => update({ view: v })} />
       </motion.header>
@@ -136,7 +136,7 @@ function ViewSwitch({ view, counts, onChange }: { view: View; counts: Record<Vie
     { id: 'audits', label: 'Audits' },
   ];
   return (
-    <div role="tablist" aria-label="Show" className="flex h-10 items-center gap-[clamp(14px,1.4vw,24px)]" data-testid="log-view-switch">
+    <div role="tablist" aria-label="Show" className="flex h-10 items-center rounded-full bg-fill p-[3px]" data-testid="log-view-switch">
       {opts.map((o) => {
         const on = o.id === view;
         return (
@@ -147,12 +147,19 @@ function ViewSwitch({ view, counts, onChange }: { view: View; counts: Record<Vie
             aria-selected={on}
             data-testid={`log-view-${o.id}`}
             onClick={() => onChange(o.id)}
-            className="tab h-10 text-[14px]"
+            className={`relative h-[34px] rounded-full px-4 text-[14px] transition-colors ${on ? 'font-semibold text-ink' : 'text-muted hover:text-ink'}`}
           >
-            <span className="tab-label"><span className="flex items-baseline gap-1.5">
+            {on && (
+              <motion.span
+                layoutId="log-view-thumb"
+                className="absolute inset-0 rounded-full bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#636366]"
+                transition={QUICK}
+              />
+            )}
+            <span className="relative flex items-baseline gap-1.5">
               {o.label}
               <span className={`num text-[12px] ${on ? 'text-muted' : 'text-faint'}`}>{int(counts[o.id])}</span>
-            </span></span>
+            </span>
           </button>
         );
       })}

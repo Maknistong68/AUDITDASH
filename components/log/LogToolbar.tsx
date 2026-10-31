@@ -16,7 +16,7 @@ const toggle = <T,>(xs: T[], x: T): T[] => (xs.includes(x) ? xs.filter((y) => y 
 
 const PILL = 'inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full px-3 text-[13px] transition-[background-color,color,opacity] duration-300';
 const pillCls = (on: boolean, empty = false) =>
-  `${PILL} ${on ? 'bg-fill font-semibold text-ink shadow-[inset_0_0_0_1px_var(--accent)]' : empty ? 'bg-fill-2 text-faint opacity-60 hover:opacity-100' : 'bg-fill-2 text-ink hover:bg-fill'}`;
+  `${PILL} ${on ? 'bg-ink font-semibold text-ground' : empty ? 'bg-fill-2 text-faint opacity-60 hover:opacity-100' : 'bg-fill-2 text-ink hover:bg-fill'}`;
 
 /**
  * Search box and filters. Search: every word must match (text, question, contractor, auditors, item code); `/` focuses it.
@@ -193,7 +193,7 @@ function Select({ label, value, onChange, options, testid, wide = false }: {
         data-testid={testid}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`h-8 cursor-pointer appearance-none truncate rounded-full pl-3 pr-8 text-[13px] outline-none transition-colors ${wide ? 'max-w-[15rem]' : ''} ${on ? 'bg-fill font-semibold text-ink shadow-[inset_0_0_0_1px_var(--accent)]' : 'bg-fill-2 text-ink hover:bg-fill'}`}
+        className={`h-8 cursor-pointer appearance-none truncate rounded-full pl-3 pr-8 text-[13px] outline-none transition-colors ${wide ? 'max-w-[15rem]' : ''} ${on ? 'bg-ink font-semibold text-ground' : 'bg-fill-2 text-ink hover:bg-fill'}`}
       >
         {options.map((o) => (
           <option key={o.value} value={o.value} className="bg-surface text-ink">{o.label}</option>

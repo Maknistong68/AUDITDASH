@@ -56,7 +56,7 @@ export function StartStep({
   return (
     <div className="flex flex-col gap-[clamp(20px,3.4svh,40px)]">
       <motion.header {...RISE} transition={calm()} className="flex flex-col items-center gap-3 pt-[clamp(4px,2svh,24px)] text-center">
-        <h1 className="text-[clamp(24px,3.6svh,32px)] font-semibold leading-[1.05] tracking-[-0.035em]">New audit</h1>
+        <h1 className="text-[clamp(28px,4.4svh,44px)] font-semibold leading-[1.05] tracking-[-0.035em]">New audit</h1>
         <div role="radiogroup" aria-label="Audit type" className="flex max-w-full gap-0.5 overflow-x-auto rounded-full bg-fill-2 p-1" data-testid="type-picker">
           {AUDIT_TYPES.map((t) => {
             const on = t.id === type;

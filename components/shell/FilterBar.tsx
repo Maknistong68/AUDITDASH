@@ -1,8 +1,10 @@
 'use client';
+import { motion } from 'framer-motion';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { QUARTERS, REGIONS, filterToQuery } from '@/lib/filters';
 import type { Filter, Subregion } from '@/lib/types';
+import { EASE, DUR } from '@/lib/motion';
 
 
 /**
@@ -29,7 +31,7 @@ export function FilterBar({ filter }: { filter: Filter }) {
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2 transition-opacity" aria-busy={pending} style={{ opacity: pending ? 0.7 : 1 }}>
-      <div role="group" aria-label="Quarter" className="flex h-8 items-center gap-[clamp(10px,1.1vw,20px)]">
+      <div role="group" aria-label="Quarter" className="flex h-8 items-center rounded-full bg-fill p-[2px]">
         {([...QUARTERS, 'all'] as Filter['quarter'][]).map((q) => {
           const on = filter.quarter === q;
           return (
@@ -38,14 +40,21 @@ export function FilterBar({ filter }: { filter: Filter }) {
               type="button"
               aria-pressed={on}
               onClick={() => go({ ...filter, quarter: q })}
-              className="tab h-8 whitespace-nowrap text-[13px]"
+              className={`relative h-7 rounded-full px-3.5 text-[13px] transition-colors ${on ? 'font-semibold text-ink' : 'text-muted hover:text-ink'}`}
             >
-              <span className="tab-label">{q === 'all' ? 'All' : q.replace('-', ' ')}</span>
+              {on && (
+                <motion.span
+                  layoutId="quarter-thumb"
+                  className="absolute inset-0 rounded-full bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#636366]"
+                  transition={{ type: 'tween', ease: EASE, duration: DUR }}
+                />
+              )}
+              <span className="relative">{q === 'all' ? 'All' : q.replace('-', ' ')}</span>
             </button>
           );
         })}
       </div>
-      <div role="group" aria-label="Sub-region" className="flex h-8 items-center gap-[clamp(10px,1.1vw,20px)] border-l border-[var(--border)] pl-[clamp(10px,1.1vw,20px)]">
+      <div role="group" aria-label="Sub-region" className="flex items-center gap-1.5">
         {REGIONS.map((r) => {
           const on = filter.regions.includes(r);
           return (
@@ -54,9 +63,11 @@ export function FilterBar({ filter }: { filter: Filter }) {
               type="button"
               aria-pressed={on}
               onClick={() => toggleRegion(r)}
-              className="tab h-8 text-[13px]"
+              className={`h-8 rounded-full px-3.5 text-[13px] transition-[background-color,color,transform] active:scale-95 ${
+                on ? 'bg-ink font-semibold text-ground' : 'bg-fill text-muted hover:text-ink'
+              }`}
             >
-              <span className="tab-label">{r}</span>
+              {r}
             </button>
           );
         })}

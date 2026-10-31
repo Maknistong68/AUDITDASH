@@ -1,6 +1,8 @@
 'use client';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { usePathname, useSearchParams } from 'next/navigation';
+import { calm } from '@/lib/motion';
 
 const ITEMS = [
   { href: '/log', label: 'Log', match: (p: string) => p.startsWith('/log') },
@@ -16,7 +18,7 @@ export function MainNav() {
   const sp = useSearchParams();
   const keep = new URLSearchParams([...sp].filter(([k]) => k === 'q' || k === 'r' || k === 't')).toString();
   return (
-    <nav aria-label="Main" data-testid="main-nav" className="flex h-8 items-center gap-[clamp(14px,1.4vw,24px)]">
+    <nav aria-label="Main" data-testid="main-nav" className="flex h-8 items-center gap-1">
       {ITEMS.map((it) => {
         const on = it.match(path);
         return (
@@ -24,9 +26,10 @@ export function MainNav() {
             key={it.href}
             href={keep ? `${it.href}?${keep}` : it.href}
             aria-current={on ? 'page' : undefined}
-            className="tab h-8 text-[14px] leading-8"
+            className={`relative h-8 rounded-full px-3 text-[14px] leading-8 transition-colors duration-500 ${on ? 'font-semibold text-ink' : 'text-muted hover:text-ink'}`}
           >
-            <span className="tab-label">{it.label}</span>
+            {on && <motion.span layoutId="main-nav-dot" className="absolute inset-x-3 -bottom-[3px] h-[2px] rounded-full bg-[var(--accent)]" transition={calm()} />}
+            {it.label}
           </Link>
         );
       })}
