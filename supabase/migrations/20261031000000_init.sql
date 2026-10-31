@@ -2,9 +2,13 @@
 -- Roles: viewer (executives, read only) · auditor (reads, submits audits) · lead (reviews submissions, imports)
 -- · admin (manages invites and roles). A signed-in user with no role sees nothing.
 
--- An earlier, unused draft schema (empty tables): replaced by this one.
-drop table if exists public.audit_questions, public.nc_categories, public.audit_types, public.contractors cascade;
-drop type if exists public.audit_result, public.observation_type, public.audit_status, public.corrective_action_status, public.user_role;
+-- An earlier, unused draft schema (four empty tables and five enum types) is set aside, not dropped, so this file
+-- applies without a destructive-statement confirmation. Delete the _draft_* tables and the old types from the
+-- Supabase dashboard when convenient.
+alter table if exists public.contractors rename to _draft_contractors;
+alter table if exists public.audit_types rename to _draft_audit_types;
+alter table if exists public.nc_categories rename to _draft_nc_categories;
+alter table if exists public.audit_questions rename to _draft_audit_questions;
 
 create type public.app_role as enum ('viewer', 'auditor', 'lead', 'admin');
 
