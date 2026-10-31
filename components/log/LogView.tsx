@@ -158,7 +158,7 @@ function ViewSwitch({ view, counts, onChange }: { view: View; counts: Record<Vie
             )}
             <span className="relative flex items-baseline gap-1.5">
               {o.label}
-              <span className={`num text-[12px] ${on ? 'text-muted' : 'text-faint'}`}>{int(counts[o.id])}</span>
+              <span className={`num text-[12px] ${on ? 'text-ink' : 'text-faint'}`}>{int(counts[o.id])}</span>
             </span>
           </button>
         );

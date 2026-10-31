@@ -177,13 +177,13 @@ export function ReviewStep({ draft, items, score, contractor, actions, onSave, o
           </AnimatePresence>
           <div className="mt-auto flex flex-col gap-2">
             {!submitted && (
-              <Button kind="primary" onClick={onSubmit} disabled={missing.length > 0} testid="submit-audit" title={missing.join(' · ')}> Submit audit
+              <Button kind="primary" onClick={missing.length ? () => onGo(missing[0].includes('question') ? 2 : 1) : onSubmit} testid="submit-audit" title={missing.join(' · ')}> Submit audit
               </Button>
             )}
             <Button kind="plain" onClick={onSave} testid="save-draft">{submitted ? 'Save changes' : 'Save draft'}</Button>
             <Button kind="ghost" onClick={onDownload} disabled={!draft.details.contractorId || !draft.details.date} testid="download-json"> Download JSON
             </Button>
-            {submitted && <Button kind="ghost" onClick={onNew} testid="new-audit-again"><Plus size={15} strokeWidth={2.6} aria-hidden /> Another audit</Button>}
+            {submitted && <Button kind="ghost" onClick={onNew} testid="new-audit-again"><Plus size={15} strokeWidth={2.6} aria-hidden /> Start another audit</Button>}
           </div>
         </motion.section>
       </div>
@@ -220,7 +220,7 @@ function NoteCard({ note, i, question, actions }: { note: DraftNote; i: number; 
           {note.kind !== 'positive' && note.category && (
             <CategorySelect value={note.category} auto={note.auto} label="Category" onChange={(c: CategoryId) => actions.updateNote(note.id, { category: c })} />
           )}
-          <button type="button" onClick={() => actions.removeNote(note.id)} className="grid size-8 place-items-center rounded-full text-faint transition-colors hover:bg-fill-2 hover:text-ink" aria-label="Remove note" data-testid="remove-note">
+          <button type="button" onClick={() => actions.removeNote(note.id)} className="tap grid size-8 place-items-center rounded-full text-faint transition-colors hover:bg-fill-2 hover:text-ink" aria-label="Remove note" data-tip="Remove note" data-testid="remove-note">
             <Trash2 size={15} strokeWidth={2.2} aria-hidden />
           </button>
         </span>

@@ -34,6 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>
+        <a href="#main" className="skip-link">Skip to content</a>
         <MotionProvider>{children}</MotionProvider>
       </body>
     </html>

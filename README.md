@@ -58,6 +58,14 @@ python3 -I scripts/import_excel.py \
 
 The importer prints every data check (Excel total differing from its own points, points over possible, copied blocks).
 
+## Names in observations (privacy)
+
+The import hides people's names in observation text, per audit: "Mr. X" becomes "Person A", "Person B", … (`scripts/privacy.py`).
+Auditors also write names without a title; list those in **`data/source/names.txt`** (one per line, next to the workbooks,
+never committed). The import stores only their SHA-256 in `data/privacy-names.sha256` (committed), so every later import hides
+the same names. After each import read **`data/source/privacy-review.txt`**: the capitalised phrases the import could not clear.
+Add the real names to `names.txt` and import again.
+
 ## Tests
 
 ```bash

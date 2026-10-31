@@ -61,7 +61,7 @@ export default async function PortfolioPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <TopBar filter={filter} />
-      <main>
+      <main id="main">
         {/* ≥1200px: one-viewport bento. Narrower: tiles stack and the page scrolls. */}
         <div
           data-testid="hero"

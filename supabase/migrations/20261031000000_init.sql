@@ -8,7 +8,7 @@ drop type if exists public.audit_result, public.observation_type, public.audit_s
 
 create type public.app_role as enum ('viewer', 'auditor', 'lead', 'admin');
 
--- Invite list: only these emails can create an account (enforced by the trigger on auth.users below).
+-- Invite list: the role each email gets when its account is created (trigger on auth.users below).
 create table public.invites (
   email text primary key check (email = lower(email)),
   role public.app_role not null default 'viewer',
@@ -24,21 +24,23 @@ create table public.profiles (
   created_at timestamptz not null default now()
 );
 
--- The caller's role, for policies (security definer so policies on profiles do not recurse).
+-- The caller's role, for policies (security definer so policies on profiles do not recurse). A role counts only
+-- once the address is confirmed: whoever merely types an invited email at sign-up gets nothing until the owner of
+-- that mailbox confirms it. Keep "Confirm email" on in Supabase Auth, and only enable providers that verify emails.
 create function public.app_role() returns public.app_role
 language sql stable security definer set search_path = '' as $$
-  select role from public.profiles where id = auth.uid()
+  select p.role from public.profiles p join auth.users u on u.id = p.id
+  where p.id = auth.uid() and u.email_confirmed_at is not null
 $$;
 
+-- Every account gets a profile; the role comes from the invite list, else null (no access, and no sign-up error
+-- that would tell an outsider which addresses are invited). Turn public sign-ups off in Supabase Auth and invite
+-- people with auth.admin.inviteUserByEmail; this trigger is the second line.
 create function public.handle_new_user() returns trigger
 language plpgsql security definer set search_path = '' as $$
-declare r public.app_role;
 begin
-  select role into r from public.invites where email = lower(new.email);
-  if not found then
-    raise exception 'This email is not invited to the audit dashboard';
-  end if;
-  insert into public.profiles (id, email, role) values (new.id, lower(new.email), r);
+  insert into public.profiles (id, email, role)
+  values (new.id, lower(new.email), (select role from public.invites where email = lower(new.email)));
   return new;
 end $$;
 
@@ -97,9 +99,23 @@ begin
           coalesce((to_jsonb(new) ->> 'id'), (to_jsonb(old) ->> 'id'), (to_jsonb(new) ->> 'email'), (to_jsonb(old) ->> 'email'), (to_jsonb(new) ->> 'code')),
           lower(tg_op),
           case when tg_table_name in ('profiles', 'invites', 'submissions')
-               then jsonb_build_object('old', to_jsonb(old) - 'doc', 'new', to_jsonb(new) - 'doc') end);
+               then jsonb_build_object('old', to_jsonb(old) - 'doc', 'new', to_jsonb(new) - 'doc',
+                                       'doc_md5_old', md5((to_jsonb(old) -> 'doc')::text),
+                                       'doc_md5_new', md5((to_jsonb(new) -> 'doc')::text)) end);
   return coalesce(new, old);
 end $$;
+
+-- A filed submission's content is immutable: a lead accepts or rejects it (with a note); corrections come as a new one.
+create function public.submission_content_frozen() returns trigger
+language plpgsql set search_path = '' as $$
+begin
+  if new.doc is distinct from old.doc or new.submitted_by <> old.submitted_by
+     or new.contractor_id is distinct from old.contractor_id or new.audit_type <> old.audit_type then
+    raise exception 'A filed submission cannot be edited: reject it with a note and ask for a new one';
+  end if;
+  return new;
+end $$;
+create trigger submissions_frozen before update on public.submissions for each row execute function public.submission_content_frozen();
 
 create trigger log_profiles after insert or update or delete on public.profiles for each row execute function public.log_event();
 create trigger log_invites after insert or update or delete on public.invites for each row execute function public.log_event();
@@ -155,4 +171,4 @@ insert into public.profiles (id, email, role)
   on conflict (id) do nothing;
 
 -- Trigger functions are not callable through the API.
-revoke execute on function public.handle_new_user(), public.log_event() from public, anon, authenticated;
+revoke execute on function public.handle_new_user(), public.log_event(), public.submission_content_frozen() from public, anon, authenticated;

@@ -164,7 +164,7 @@ export default async function AuditReportPage({ params, searchParams }: { params
                   className={`inline-flex h-8 items-center gap-2 rounded-full px-4 text-[14px] transition-colors ${on ? 'bg-surface font-semibold text-ink shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#636366]' : 'text-muted hover:text-ink'}`}
                 >
                   {t.label}
-                  <span className={`num text-[13px] ${on ? 'text-muted' : 'text-faint'}`}>{t.n}</span>
+                  <span className={`num text-[13px] ${on ? 'text-ink' : 'text-faint'}`}>{t.n}</span>
                 </Link>
               );
             })}

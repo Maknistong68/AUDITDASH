@@ -116,7 +116,7 @@ function DataCheck({ audit }: { audit: LogAudit }) {
         role="tooltip"
         className="pointer-events-none absolute bottom-[calc(100%+8px)] right-0 z-20 w-[min(300px,80vw)] translate-y-1 rounded-[12px] bg-surface-2 p-3 text-left text-[12.5px] leading-snug text-ink opacity-0 shadow-[var(--shadow-lift)] transition-[opacity,transform] duration-300 group-hover/flag:translate-y-0 group-hover/flag:opacity-100"
       >
-        <span className="mb-1 block text-[11px] font-semibold uppercase tracking-[0.06em] text-faint">Data check · score shown is recomputed</span>
+        <span className="mb-1 block text-[12px] font-semibold uppercase tracking-[0.06em] text-faint">Data check · score shown is recomputed</span>
         {audit.issues.map((x) => (
           <span key={x} className="block py-0.5">{x}</span>
         ))}

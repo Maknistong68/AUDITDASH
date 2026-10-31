@@ -69,7 +69,7 @@ export function ScoreTrend({ points, active, onSelect }: { points: ScoreTrendPoi
               background: `color-mix(in srgb, ${bandColor(zn.band)} 9%, transparent)`,
             }}
           >
-            <span className="absolute right-[clamp(10px,1vw,16px)] top-1/2 -translate-y-1/2 whitespace-nowrap text-[11px] font-semibold leading-none" style={{ color: 'var(--faint)' }}>
+            <span className="absolute right-[clamp(10px,1vw,16px)] top-1/2 -translate-y-1/2 whitespace-nowrap text-[12px] font-semibold leading-none" style={{ color: 'var(--faint)' }}>
               {bandShort(zn.band)}
             </span>
           </div>

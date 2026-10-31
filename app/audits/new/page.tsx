@@ -21,7 +21,7 @@ export default async function NewAuditPage({ searchParams }: { searchParams: Pro
   return (
     <>
       <TopBar filter={filter} detail />
-      <main data-testid="new-audit-page" className="flex min-h-[calc(100svh-var(--topbar))] flex-col pt-[clamp(8px,1.4svh,18px)]">
+      <main id="main" data-testid="new-audit-page" className="flex min-h-[calc(100svh-var(--topbar))] flex-col pt-[clamp(8px,1.4svh,18px)]">
         <div className="px-[var(--gutter)] pb-[clamp(6px,1svh,12px)]">
           <Breadcrumb items={[{ label: 'Overview', href: `/?${filterToQuery(filter)}` }, { label: 'New audit' }]} />
         </div>

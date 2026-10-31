@@ -148,7 +148,7 @@ export function TrendChart({ points, className = '' }: { points: { label: string
             />
             <span
               data-testid="trend-label"
-              className="num absolute bottom-0 -translate-x-1/2 whitespace-nowrap text-[11px] leading-none text-muted"
+              className="num absolute bottom-0 -translate-x-1/2 whitespace-nowrap text-[12px] leading-none text-muted"
               style={{ left: `${x[i]}%` }}
             >
               {p.label}

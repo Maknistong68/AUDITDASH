@@ -26,7 +26,7 @@ const POWER = 0.25;
  * is dragged or gliding, so the fade reads as one gradient anchored on the active card.
  */
 const FADE_AT = [-1, 0, 1, 2, 3, 4];
-const FADE_TO = [0, 1, 0.75, 0.45, 0.2, 0];
+const FADE_TO = [0, 1, 0.92, 0.5, 0.2, 0]; // the next card stays readable (its coral figure keeps 4.5:1), then the row fades
 export function fadeAt(d: number): number {
   if (d <= FADE_AT[0]) return FADE_TO[0];
   for (let k = 1; k < FADE_AT.length; k++)

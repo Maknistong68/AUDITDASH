@@ -127,11 +127,11 @@ function HeatMap({ groups, cols, total }: { groups: HeatGroup[]; cols: HeatCol[]
                     href={c.href}
                     data-testid="heat-col"
                     title={c.name}
-                    aria-label={`${c.name}: ${c.total} ${c.total === 1 ? 'repeat' : 'repeats'}. Open contractor`}
                     className="heat-col-link flex min-w-0 flex-col items-center rounded-[6px] px-1 pb-1.5 pt-1 text-center leading-tight transition-colors hover:bg-fill-2"
                   >
                     <span className="block max-w-full truncate text-[clamp(12px,1.5svh,14px)] font-semibold tracking-[-0.01em] text-ink">{c.base}</span>
-                    <span className="block max-w-full truncate text-[11px] text-muted">{c.qual || ' '}</span>
+                    <span className="block max-w-full truncate text-[12px] text-muted">{c.qual || ' '}</span>
+                    <span className="sr-only">: {c.total} {c.total === 1 ? 'repeat' : 'repeats'}. Open contractor</span>
                   </Link>
                 </th>
               ))}

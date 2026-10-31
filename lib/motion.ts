@@ -13,11 +13,15 @@ export const DUR = 1.5;
 /** Delay between siblings arriving, in seconds. */
 export const STAGGER = 0.08;
 
+/** The OS asks for less motion: every house tween is instant (MotionProvider already drops the transforms). */
+const REDUCE = typeof window !== 'undefined' && typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /** A tween on the house curve: `{ ...calm(delay) }` in any framer `transition`. */
-export const calm = (delay = 0, duration = DUR) => ({ type: 'tween' as const, ease: EASE, duration, delay });
+export const calm = (delay = 0, duration = DUR) =>
+  REDUCE ? { type: 'tween' as const, duration: 0, delay: 0 } : { type: 'tween' as const, ease: EASE, duration, delay };
 
 /** Short hover/press feedback on the same curve (hover must answer quickly, so not 1.5 s). */
-export const QUICK = { type: 'tween' as const, ease: EASE, duration: 0.45 };
+export const QUICK = REDUCE ? { type: 'tween' as const, duration: 0 } : { type: 'tween' as const, ease: EASE, duration: 0.45 };
 
 /** A card's rise: soft fade, small lift, a touch of blur clearing. */
 export const RISE = {

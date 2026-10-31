@@ -35,9 +35,9 @@ export function Stepper({ step, enabled, onGo }: { step: number; enabled: boolea
                 disabled={!can}
                 onClick={() => onGo(i)}
                 aria-current={on ? 'step' : undefined}
-                aria-label={`Step ${i + 1}: ${s.label}`}
                 className="group flex flex-col items-center gap-2 disabled:cursor-default"
               >
+                <span className="sr-only">Step </span>
                 <motion.span
                   className="grid size-8 place-items-center rounded-full text-[13px] font-semibold"
                   initial={false}

@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))  # `python -I` drops th
 import openpyxl  # noqa: E402
 
 from contractors import contractor_for, register  # noqa: E402
-from privacy import hidden_text, pseudonymise  # noqa: E402
+from privacy import HASHES_FILE, REVIEW_FILE, name_hashes, pseudonymise, review_candidates, save_hashes, skeleton, write_review  # noqa: E402
 from site_keywords import CODE_CATEGORY, category_for  # noqa: E402
 
 BLOCK_WIDTH = 10
@@ -604,11 +604,12 @@ def keep_codes(observations, previous):
     Audit 4800001112-Q4-2025-20251015's codes were recovered from that audit's own checklist workbook, which is
     no longer in data/source; its earlier import keeps them.
     """
+    previous = [dict(o) for o in previous]
+    pseudonymise(previous)  # an older seed may have hidden fewer names; compare both as this import hides them
     prev = {o["id"]: o for o in previous}
     for o in observations:
         p = prev.get(o["id"])
-        # the previous seed has names hidden (privacy.py); compare like with like
-        if o["itemCode"] is None and p and p.get("itemCode") and p["text"] in (o["text"], hidden_text(o)):
+        if o["itemCode"] is None and p and p.get("itemCode") and skeleton(p["text"]) == skeleton(o["text"]):
             o["itemCode"] = p["itemCode"]
             o["category"] = p["category"]
 
@@ -641,9 +642,14 @@ def main(argv=None):
     audits.sort(key=lambda a: (a["date"], a["id"]))
     contractors = contractor_rows(audits)
     flag_duplicates(audits)
+    hashes = name_hashes()
+    save_hashes(hashes)  # the local names.txt, if any, joins the committed hash list
+    titled, listed = pseudonymise(observations, hashes)  # before keep_codes: the previous seed has names hidden too
     if args.previous and Path(args.previous).exists():
         keep_codes(observations, json.loads(Path(args.previous).read_text(encoding="utf-8")))
-    hidden = pseudonymise(observations)
+    review = review_candidates(observations, [w for c in checklist for w in re.findall(r"[A-Za-z]+", c["question"])]
+                               + [w for c in contractors for w in re.findall(r"[A-Za-z]+", c["name"])])
+    write_review(review)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     for name, data in (("checklist", checklist), ("contractors", contractors),
@@ -666,7 +672,8 @@ def main(argv=None):
     for a in audits:
         for issue in a["issues"]:
             print(f"  ! {a['id']}: {issue}")
-    print(f"  {hidden} names in observations replaced by Person A, B, …")
+    print(f"  privacy: {titled} titled names and {listed} listed names replaced by Person A, B, …; "
+          f"{len(review)} phrases to review in {REVIEW_FILE.relative_to(Path.cwd()) if REVIEW_FILE.is_relative_to(Path.cwd()) else REVIEW_FILE}")
     print(f"{len(contractors)} contractors, {len(audits)} audits, "
           f"{len(observations)} observations, {len(checklist)} checklist items")
 

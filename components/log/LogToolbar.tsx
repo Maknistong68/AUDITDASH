@@ -47,7 +47,7 @@ export function LogToolbar({ state, update, clear, contractors, kindCounts, catC
     >
       <div className="flex flex-wrap items-center gap-2.5">
         <label className="group/search relative flex h-11 min-w-0 flex-[1_1_320px] items-center rounded-full bg-fill-2 pl-4 pr-2 transition-shadow focus-within:shadow-[0_0_0_2px_var(--accent)]">
-          <span className="sr-only">Search</span>
+          <span className="sr-only min-[700px]:not-sr-only min-[700px]:mr-2 min-[700px]:text-[13px] min-[700px]:font-semibold min-[700px]:text-muted">Search</span>
           <input
             ref={searchRef}
             type="search"
@@ -71,7 +71,8 @@ export function LogToolbar({ state, update, clear, contractors, kindCounts, catC
               type="button"
               onClick={() => { update({ search: '' }); searchRef.current?.focus(); }}
               aria-label="Clear search"
-              className="grid size-7 shrink-0 place-items-center rounded-full bg-fill text-muted transition-colors hover:text-ink"
+              data-tip="Clear search"
+              className="tap grid size-7 shrink-0 place-items-center rounded-full bg-fill text-muted transition-colors hover:text-ink"
             >
               <X size={14} strokeWidth={2.6} />
             </button>

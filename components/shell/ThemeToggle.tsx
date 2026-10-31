@@ -14,8 +14,8 @@ export function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label="Toggle colour theme"
-      title="Toggle theme"
-      className="grid size-8 place-items-center text-muted transition-[color,transform] hover:text-ink active:scale-90"
+      data-tip="Switch theme"
+      className="tap grid size-8 place-items-center text-muted transition-[color,transform] hover:text-ink active:scale-90"
     >
       <Moon size={16} className="theme-icon-moon" aria-hidden />
       <Sun size={16} className="theme-icon-sun" aria-hidden />

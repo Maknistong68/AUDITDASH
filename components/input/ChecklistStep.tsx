@@ -131,7 +131,7 @@ export function ChecklistStep({ draft, items, sections, actions, score }: {
                 className="h-10 w-full rounded-full bg-fill-2 pl-4 pr-9 text-[14px] outline-none transition-shadow placeholder:text-faint focus:shadow-[0_0_0_2px_var(--accent)]"
               />
               {query && (
-                <button type="button" onClick={() => setQuery('')} className="absolute right-2 grid size-6 place-items-center rounded-full text-muted hover:bg-fill" aria-label="Clear search">
+                <button type="button" onClick={() => setQuery('')} className="tap absolute right-2 grid size-6 place-items-center rounded-full text-muted hover:bg-fill" aria-label="Clear search" data-tip="Clear search">
                   <X size={14} aria-hidden />
                 </button>
               )}

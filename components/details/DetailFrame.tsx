@@ -18,6 +18,7 @@ export function DetailFrame({ filter, crumbs, parent, fit = false, children }: {
       <TopBar filter={filter} detail />
       <EscToParent href={parent} />
       <main
+        id="main"
         data-testid="details"
         className={
           fit

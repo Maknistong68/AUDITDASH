@@ -96,7 +96,7 @@ export function StartStep({
             onDragOver={(e) => { if (!hs) return; e.preventDefault(); setOver(true); }}
             onDragLeave={() => setOver(false)}
             onDrop={(e) => { e.preventDefault(); setOver(false); if (hs) void read(e.dataTransfer.files[0]); }}
-            className={`card lift group relative flex h-full min-h-[clamp(220px,34svh,340px)] flex-col justify-between gap-6 overflow-hidden p-[clamp(20px,2.4vw,36px)] outline-none ${hs ? 'cursor-pointer' : 'opacity-55'}`}
+            className={`card lift group relative flex h-full min-h-[clamp(220px,34svh,340px)] flex-col justify-between gap-6 overflow-hidden p-[clamp(20px,2.4vw,36px)] ${hs ? 'cursor-pointer' : 'opacity-55'}`}
             style={over ? { boxShadow: 'inset 0 0 0 2px var(--accent), var(--shadow-lift)' } : undefined}
           >
             <span aria-hidden className="pointer-events-none absolute inset-3 rounded-[16px] border-2 border-dashed transition-colors duration-500" style={{ borderColor: over ? 'var(--accent)' : 'var(--hairline)' }} />
@@ -107,17 +107,18 @@ export function StartStep({
                 {hs ? <>Drop the completed <span className="font-semibold text-ink">.xlsx</span> here or click to choose.</> : 'Excel import is for Health & Safety checklists.'}
               </p>
             </div>
-            <input
-              ref={input}
-              type="file"
-              accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              className="sr-only"
-              tabIndex={-1}
-              data-testid="xlsx-input"
-              disabled={!hs}
-              onChange={(e) => void read(e.target.files?.[0])}
-            />
           </div>
+          <input
+            ref={input}
+            type="file"
+            aria-label="Upload the Excel checklist"
+            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            className="sr-only"
+            tabIndex={-1}
+            data-testid="xlsx-input"
+            disabled={!hs}
+            onChange={(e) => void read(e.target.files?.[0])}
+          />
         </motion.div>
 
         <motion.div {...RISE} transition={calm(STAGGER * 3)}>
@@ -195,7 +196,7 @@ function SavedList({ saved, contractors, onResume, onDelete }: {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <button type="button" onClick={() => onResume(d)} className="grid size-9 place-items-center rounded-full bg-fill-2 text-ink transition-colors hover:bg-fill" aria-label="Resume" title="Resume" data-testid="saved-resume">
+                  <button type="button" onClick={() => onResume(d)} className="tap grid size-9 place-items-center rounded-full bg-fill-2 text-ink transition-colors hover:bg-fill" aria-label="Resume audit" data-tip="Resume audit" data-testid="saved-resume">
                     <RotateCcw size={16} strokeWidth={2.2} aria-hidden />
                   </button>
                   <button

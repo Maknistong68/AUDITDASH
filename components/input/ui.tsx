@@ -74,7 +74,7 @@ export function CategorySelect({ value, onChange, auto, label }: { value: Catego
     <label className="relative inline-flex max-w-full items-center gap-1.5 rounded-full bg-fill-2 py-1 pl-2 pr-7 text-[13px] font-semibold transition-colors hover:bg-fill">
       {Icon && <Icon size={14} strokeWidth={2.4} style={{ color: c.color }} aria-hidden />}
       <span className="truncate">{c.short}</span>
-      {changed && <span className="text-[11px] font-medium text-faint">· edited</span>}
+      {changed && <span className="text-[12px] font-medium text-faint">· edited</span>}
       <ChevronDown size={14} strokeWidth={2.4} className="pointer-events-none absolute right-2 text-faint" aria-hidden />
       <select
         aria-label={label}

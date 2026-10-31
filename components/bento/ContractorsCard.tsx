@@ -11,7 +11,7 @@ import { Sparkline, trendLabel } from '@/components/charts/Trend';
 import { CONTRACTOR_NAME, CONTRACTOR_SCORE } from '@/lib/handoff';
 import { bandShort, bandTone, deltaPoints, pct, prevQuarterShort } from '@/lib/format';
 import type { ContractorCard as Card } from '@/lib/analytics';
-import { SPRING, TileLabel } from './BentoGrid';
+import { SPRING } from './BentoGrid';
 import { Signed } from './parts';
 import { calm, DUR, EASE, QUICK, RISE } from '@/lib/motion';
 
@@ -137,7 +137,7 @@ function Row({
         <span className="truncate text-[clamp(13px,1.6svh,16px)] font-semibold leading-tight tracking-[-0.015em]">
           <span data-handoff={CONTRACTOR_NAME}>{contractor.name}</span>
         </span>
-        <span className="hidden shrink-0 text-[11px] text-faint min-[1500px]:inline">{contractor.subregion}</span>
+        <span className="hidden shrink-0 text-[12px] text-faint min-[1500px]:inline">{contractor.subregion}</span>
       </span>
       <span className="relative h-[clamp(8px,1.15svh,13px)] rounded-full bg-fill-2" aria-hidden>
         {BAND_TICKS.map((t) => (
@@ -171,8 +171,8 @@ function Row({
         aria-label={`Compare ${contractor.name}`}
         disabled={disabled}
         onClick={onToggle}
-        title={disabled ? 'Up to 3 contractors' : selected ? 'Remove from compare' : 'Add to compare'}
-        className={`relative z-[2] grid size-[clamp(18px,2.7svh,24px)] place-items-center rounded-full transition-[background-color,transform,opacity] duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 ${
+        data-tip={disabled ? 'Up to 3 contractors' : selected ? 'Remove from compare' : 'Add to compare'}
+        className={`tap relative z-[2] grid size-[clamp(18px,2.7svh,24px)] place-items-center rounded-full transition-[background-color,transform,opacity] duration-200 active:scale-90 disabled:cursor-not-allowed disabled:opacity-30 ${
           selected
             ? 'bg-[var(--accent)] text-[var(--on-accent)]'
             : 'bg-fill-2 text-muted shadow-[inset_0_0_0_1.5px_var(--control)] hover:text-ink enabled:hover:bg-fill'
@@ -233,11 +233,11 @@ export function ContractorsCard({ cards, compare }: { cards: Card[]; compare: Re
           </h2>
           <span className="num text-[clamp(15px,2svh,20px)] font-semibold text-faint">{cards.length}</span>
         </div>
-        <TileLabel className="!font-normal">
+        <p className="flex items-center gap-1.5 text-[clamp(13px,1.5svh,16px)] tracking-[-0.01em] text-muted">
           <span aria-live="polite">
             {selected.length === 0 ? '' : `${selected.length} of ${MAX_COMPARE} to compare`}
           </span>
-        </TileLabel>
+        </p>
       </div>
       <ul className="grid min-h-0 flex-1 auto-rows-[minmax(44px,1fr)] min-[1200px]:auto-rows-[minmax(0,1fr)]">
         <AnimatePresence mode="popLayout" initial={!reduce}>

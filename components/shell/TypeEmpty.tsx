@@ -14,6 +14,7 @@ export function TypeEmpty({ type }: { type: AuditType }) {
       <div className="flex flex-col gap-2">
         <p className="text-[15px] font-semibold text-muted">{info.label}</p>
         <h2 id="type-empty-title" className="text-[clamp(28px,4.4svh,44px)] font-semibold leading-[1.05] tracking-[-0.035em]">No audits yet</h2>
+        <p className="max-w-[40ch] text-[15px] text-muted">The first {info.label} audit filed here starts its scores, ranking and log.</p>
       </div>
       <NewAuditButton type={type} size="lg" />
     </section>
