@@ -8,7 +8,7 @@ The compliance section is not legal advice: a Saudi-qualified lawyer must confir
 
 **Good enough to show inside the team. Not ready to launch.** The dashboard is correct, fast and tested (244 unit tests and 168 browser tests pass). Three things block a launch:
 
-1. **The GitHub repository is public, and it holds real client data.** This is the most urgent problem.
+1. **The GitHub repository is public and holds real client data.** This is the most urgent problem.
 2. **There is no login, and there are no roles.** Anyone with the link sees everything.
 3. **"Submit" in the new-audit wizard saves nothing.** It keeps a local copy and downloads a JSON file that the importer cannot read.
 
@@ -75,7 +75,30 @@ The compliance section is not legal advice: a Saudi-qualified lawyer must confir
 
 ## 4. UI/UX and accessibility
 
-_See the section added below once the browser review completes._
+**Browser pass.**
+- All 13 routes return 200 at 1440, 1366 and 390 px, in both themes, with no horizontal scroll.
+- Landmarks, `aria-current`, the tab roles and reduced-motion handling are all done properly.
+- Print gives a clean 10-page A4 report.
+
+**axe-core violation nodes:**
+- **Dark:** 0–2 per page, except `/category/subcontractor`, which has 10.
+- **Light:** 6–19 per page. Almost all are colour-contrast failures.
+
+| Sev | Finding | Evidence | Do |
+|---|---|---|---|
+| High | Light theme fails contrast on every page. | Unselected header tabs: #6e6e73 on #e6e6e8, ratio 4.06. Dark muted count chip: #a1a1a6 on #636366, ratio 2.32 (`/log`, `/audit`). Coral gap text on `/category`: 4.12. | Darken `--muted`/`--faint` in light, and darken the chip background in dark. This one token fix clears most of axe's list. |
+| High | No "Skip to content" link. | Keyboard users press Tab 14 times before reaching content, on every page. | Add a skip link that targets `<main id>`. |
+| High | The upload drop zone has no visible focus, and its file input has no label. | `components/input/StartStep.tsx:99` (`outline-none`) and `:112`. axe rates the missing label critical. | Add a `focus-visible` ring and `aria-label="Upload Excel checklist"`. Fix the nested-interactive warning on `/audits/new`. |
+| High | Four type tabs (Security, Environmental, Welfare, CRC) lead to empty pages. | `/?t=security` shows "No audits yet". | Show counts ("H&S 20 · Security 0"), or mark them "Coming soon", until data exists. |
+| High | No Arabic or RTL support. | `<html lang="en">` is fixed in `app/layout.tsx:32`. `'en-US'` and a hand-written month list in `lib/format.ts`. Inter has no Arabic glyphs. A forced RTL test truncates and flips arrows on the wrong side. | Start now: logical CSS properties (`ms-`/`pe-`), `Intl` formatters, `dir`, and an Arabic-capable font. |
+| Medium | **A section shows 102%.** | The Excel records Planning as 21.5 / 21 in one audit (`audits.json`, audit #16). The headline score is capped, but the section row is not. | Cap the section display at 100%, and report the over-score as an Excel data issue. Ask the auditor to correct the workbook. |
+| Medium | Scores read ambiguously. | "74% score lost" sits beside a contractor scoring "74%". On `/category`, "Worst 100% / Best 43%" read backwards. "Excel 85%" under a 74% headline has no explanation. | Name the polarity ("74% of points lost"), and add one line on computed vs Excel. |
+| Medium | The mobile header is about 165 px of a 390 px-wide screen (3 sticky rows), and the CRC tab is clipped. On `/log`, list cards show blank for about 0.8 s after a fast scroll. | Mobile screenshots. | Collapse the filters into one "Filters" button and sheet on mobile. |
+| Medium | Global filters show on single-record pages. | The type, quarter and SR filters appear on `/audit/…`, where they don't apply. | Hide or scope them there. |
+| Medium | Key numbers count up for 1.5 s, so a quick glance reads a wrong value (73% vs 74%). | `lib/motion.ts:11` | Keep the calm motion for layout, but let numbers settle in about 0.6 s. |
+| Low | The overview's `<h2>` is empty, and the logo is the only `<h1>`. There is no `theme-color` meta tag. | axe `empty-heading` | Give the overview a real heading, screen-reader-only if you prefer. |
+| Low | In print, raw `*` and `•` bullets from Excel stay as text, and section labels are cut off. | Print PDF | Turn bullets into list items, and let labels wrap in print. |
+| Low | The light-theme "Main problem" card stays dark. | Light screenshots | Use the theme tokens there too. |
 
 ## 5. Saudi law compliance
 
@@ -127,7 +150,7 @@ _See the section added below once the browser review completes._
 3. Decide hosting and data classification with the client (KSA hosting, or SCCs plus a transfer risk assessment).
 4. Paperwork: privacy notice (AR/EN), legitimate-interest assessment, record of processing, DPAs, DPO decision, retention policy, breach runbook.
 5. Error tracking, backups, MFA, and a quarter-close runbook.
-6. Fix the accessibility issues in §4.
+6. Fix the accessibility issues in §4: contrast tokens, skip link, upload focus and label, empty type tabs, the 102% cap, score wording, and the mobile filter sheet.
 
 **After launch**
 - Review and corrective-action workflow.
