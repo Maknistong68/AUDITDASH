@@ -16,6 +16,7 @@ import { ReviewStep } from './ReviewStep';
 import { StartStep } from './StartStep';
 import { Stepper, STEPS } from './Stepper';
 import { Button } from './ui';
+import { setItemNoteText } from '@/lib/input/notes';
 import { submitAudit } from '@/app/audits/new/actions';
 
 const CONTRACTORS = contractorsSeed as Contractor[];
@@ -86,16 +87,7 @@ export function AuditWizard({ initialType, online = false }: { initialType: Audi
       if (v) answers[code] = v; else delete answers[code];
       return { ...d, answers };
     }),
-    setItemNote: (code, text) => edit((d) => {
-      const i = d.notes.findIndex((n) => n.code === code && n.kind === 'finding');
-      if (i < 0) {
-        if (!text.trim()) return d;
-        const auto = autoCategoryFor(d.type, code, 'finding', text);
-        return { ...d, notes: [...d.notes, { id: uid('n'), code, kind: 'finding', text, category: auto, auto }] };
-      }
-      if (!text.trim()) return { ...d, notes: d.notes.filter((_, j) => j !== i) };
-      return { ...d, notes: d.notes.map((n, j) => (j === i ? { ...n, text } : n)) };
-    }),
+    setItemNote: (code, text) => edit((d) => setItemNoteText(d, code, text)),
     updateNote: (id, patch) => edit((d) => ({
       ...d,
       notes: d.notes.map((n) => {

@@ -42,3 +42,29 @@ test('upload a checklist workbook and walk the four steps', async ({ page }) => 
   await page.goto('/audits/new?type=hs');
   await expect(page.getByTestId('saved-item')).toHaveCount(1);
 });
+
+test('a question note keeps every character as typed (leading, double and trailing spaces, new lines): dictation on phones repeats words when the field is rewritten', async ({ page }) => {
+  await page.goto('/audits/new?type=hs');
+  await page.getByTestId('manual-card').getByText('Start', { exact: true }).click();
+  await page.getByTestId('wizard-next').click();
+  await expect(page.getByTestId('question')).toHaveCount(81);
+  const first = page.getByTestId('question').first();
+  await first.getByTestId('add-note').click();
+  const note = first.getByTestId('question-note');
+  await expect(note).toBeFocused();
+  const handle = await note.elementHandle();
+  await page.keyboard.type(' two  words ');
+  await expect(note).toHaveValue(' two  words ');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('next line ');
+  await expect(note).toHaveValue(' two  words \nnext line ');
+  expect(await handle!.evaluate((el) => el.isConnected)).toBe(true);  // the same field all along: never remounted
+  await page.keyboard.press('ControlOrMeta+A');
+  await page.keyboard.press('Backspace');
+  await expect(note).toHaveValue('');
+  await page.keyboard.type('again');
+  await expect(note).toHaveValue('again');
+  await page.getByTestId('wizard-next').click();
+  await expect(page.getByTestId('note-card')).toHaveCount(1);
+  await expect(page.getByTestId('note-card').locator('textarea')).toHaveValue('again');
+});
