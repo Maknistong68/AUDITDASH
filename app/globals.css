@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+/* The two faces, under their own names (served from public/fonts). */
+@font-face {
+  font-family: "Public Sans";
+  src: url("/fonts/public-sans-latin-wght-normal.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face { font-family: "IBM Plex Mono"; src: url("/fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("/fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url("/fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+
 /*
  * Design tokens: Apple-style (see the Apple DESIGN.md in .claude/skills/awesome-design-md).
  *  - light: parchment ground #f5f5f7, white cards, near-black ink #1d1d1f, Action Blue for interaction.
@@ -76,9 +88,9 @@
   --gap-grid: clamp(12px, 1.1vw, 22px);
   --radius-card: 6px;
   --radius-control: 999px;
-  --font-sf: var(--font-text), "Public Sans", system-ui, sans-serif;
+  --font-sf: "Public Sans", system-ui, sans-serif;
   /* The face: every figure in a monospace, digits that stack (data-terminal sheet). */
-  --font-num: var(--font-figure), "IBM Plex Mono", ui-monospace, monospace;
+  --font-num: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 /* Dark tokens: applied by the toggle stamp, and by the OS when no light stamp is present (no-JS fallback). */
@@ -316,6 +328,12 @@ html.js [data-countup]:not([data-ready]) {
 [data-testid="category-deck"] {
   /* Four cards fill the content column exactly (the fade ends with the fourth): no empty stretch on the right. */
   --cc-w: max(240px, calc((100vw - 2 * var(--gutter) - 3 * var(--cc-gap)) / 4));
+}
+/* On a phone the active card takes the whole content width, so the next one starts off-screen (never cut at the edge). */
+@media (max-width: 699px) {
+  [data-testid="category-deck"] { --cc-w: calc(100vw - 2 * var(--gutter)); }
+}
+[data-testid="category-deck"] {
   /* capped by the screen height too (22svh), so a short laptop screen (1280×600) keeps room for the slide below */
   --cc-h: clamp(118px, min(max(150px, 10.2vw), 22svh), 196px);
   --cc-gap: clamp(12px, 1vw, 18px);

@@ -19,7 +19,7 @@ export function DetailsStep({ draft, contractors, actions, score }: { draft: Aud
     <div className="mx-auto flex w-full max-w-[880px] flex-col gap-[var(--gap-grid)]">
       <motion.header {...RISE} transition={calm()} className="flex flex-col gap-1 pt-2">
         <p className="text-[14px] font-semibold text-muted">{typeLabel}</p>
-        <h1 className="text-[clamp(26px,3.8svh,36px)] font-semibold leading-[1.05] tracking-[-0.035em]">Audit details</h1>
+        <h1 className="text-[clamp(24px,3.6svh,32px)] font-semibold leading-[1.05] tracking-[-0.035em]">Audit details</h1>
       </motion.header>
 
       {draft.source === 'excel' && (

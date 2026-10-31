@@ -50,7 +50,7 @@ export function ReviewStep({ draft, items, score, contractor, actions, onSave, o
   return (
     <div className="flex flex-col gap-[clamp(20px,3svh,36px)]">
       <motion.header {...RISE} transition={calm()} className="flex items-end justify-between gap-3 pt-2">
-        <h1 className="text-[clamp(26px,3.8svh,36px)] font-semibold leading-[1.05] tracking-[-0.035em]">Observations</h1>
+        <h1 className="text-[clamp(24px,3.6svh,32px)] font-semibold leading-[1.05] tracking-[-0.035em]">Observations</h1>
         <a href="#review" className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-[14px] font-semibold text-[var(--accent)] hover:underline" data-testid="jump-review">
           Review <ArrowDown size={15} strokeWidth={2.4} aria-hidden />
         </a>
@@ -91,7 +91,7 @@ export function ReviewStep({ draft, items, score, contractor, actions, onSave, o
         </ul>
       )}
 
-      <motion.h2 {...RISE} transition={calm(STAGGER * 2)} id="review" className="scroll-mt-[calc(var(--topbar-h,var(--topbar))+16px)] pt-4 text-[clamp(26px,3.8svh,36px)] font-semibold leading-[1.05] tracking-[-0.035em]">Review</motion.h2>
+      <motion.h2 {...RISE} transition={calm(STAGGER * 2)} id="review" className="scroll-mt-[calc(var(--topbar-h,var(--topbar))+16px)] pt-4 text-[clamp(24px,3.6svh,32px)] font-semibold leading-[1.05] tracking-[-0.035em]">Review</motion.h2>
 
       <div className="grid grid-cols-1 gap-[var(--gap-grid)] min-[1100px]:grid-cols-12" data-testid="review-summary">
         <motion.section {...RISE} transition={calm(STAGGER * 3)} className={`card flex flex-col gap-4 p-[clamp(18px,2vw,28px)] min-[1100px]:col-span-5 ${score.band ? `tone-${bandTone(score.band)}` : ''}`} aria-label="Score">

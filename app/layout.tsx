@@ -1,28 +1,12 @@
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
 import { MotionProvider } from '@/components/motion/MotionProvider';
 import './globals.css';
 
-/**
- * The data-terminal style (design-taste-frontend, app sheet): Public Sans for every word, IBM Plex Mono for every figure so
- * digits stack in columns. Both bundled from @fontsource so the build stays offline-safe.
+/*
+ * The data-terminal style (design-taste-frontend app sheet): Public Sans for every word, IBM Plex Mono for every figure so
+ * digits stack in columns. Declared under their own family names in globals.css (@font-face, files in public/fonts),
+ * served from this app so the build stays offline-safe; the two used weights are preloaded here.
  */
-const publicSans = localFont({
-  src: '../node_modules/@fontsource-variable/public-sans/files/public-sans-latin-wght-normal.woff2',
-  variable: '--font-text',
-  weight: '100 900',
-  display: 'swap',
-});
-const plexMono = localFont({
-  src: [
-    { path: '../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2', weight: '400' },
-    { path: '../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2', weight: '500' },
-    { path: '../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2', weight: '600' },
-  ],
-  variable: '--font-figure',
-  display: 'swap',
-});
-
 export const metadata: Metadata = {
   title: { default: 'Audits', template: '%s · Audits' },
   description: 'Audit scores across contractors: H&S, Security, Environmental, Welfare and CRC',
@@ -38,8 +22,10 @@ const THEME_SCRIPT = `(function(){var d=document.documentElement,t;d.classList.a
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${publicSans.variable} ${plexMono.variable}`} data-theme="dark" suppressHydrationWarning>
+    <html lang="en" data-theme="dark" suppressHydrationWarning>
       <head>
+        <link rel="preload" href="/fonts/public-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossOrigin="" />
+        <link rel="preload" href="/fonts/ibm-plex-mono-latin-500-normal.woff2" as="font" type="font/woff2" crossOrigin="" />
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body>

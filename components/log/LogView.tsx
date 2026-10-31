@@ -100,7 +100,7 @@ export function LogView({ data, contractors, initial }: { data: LogData; contrac
         className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3"
       >
         <div className="min-w-0">
-          <h1 className="text-[28px] font-semibold leading-[1.05] tracking-[-0.035em] min-[900px]:text-[clamp(28px,4svh,36px)]">Log</h1>
+          <h1 className="text-[24px] font-semibold leading-[1.05] tracking-[-0.035em] min-[900px]:text-[clamp(24px,3.6svh,32px)]">Log</h1>
         </div>
         <ViewSwitch view={state.view} counts={{ observations: data.observations.length, audits: data.audits.length }} onChange={(v) => update({ view: v })} />
       </motion.header>
